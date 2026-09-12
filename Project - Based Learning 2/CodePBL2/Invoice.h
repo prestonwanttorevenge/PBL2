@@ -1,6 +1,8 @@
 #include <iostream>
 #include <string>
 #include <windows.h>
+#ifndef INVOICE_H
+#define INVOICE_H
 class Invoice {
 private:
     std::string invoiceId;
@@ -32,3 +34,4 @@ public:
         std::cout << "---------------" << std::endl;
     }
 };
+#endif

@@ -1,6 +1,7 @@
 #include <iostream>
 #include <string>
-#include <windows.h>
+#ifndef MEDICINE_H
+#define MEDICINE_H
 class Medicine {
 private:
     std::string medicineId;
@@ -16,3 +17,4 @@ public:
         dosage = dose;
     }
 };
+#endif
