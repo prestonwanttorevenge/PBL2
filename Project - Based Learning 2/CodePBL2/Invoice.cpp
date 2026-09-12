@@ -23,12 +23,12 @@ public:
     }
 
     void printInvoice() {
-        std::cout << "--- HOA DON ---" << std::endl;
-        std::cout << "Ma hoa don: " << invoiceId << std::endl;
-        std::cout << "Ma benh nhan: " << patientId << std::endl;
-        std::cout << "Phi kham: " << consultationFee << std::endl;
-        std::cout << "Phi thuoc: " << medicineFee << std::endl;
-        std::cout << "Tong tien: " << totalAmount << std::endl;
+        std::cout << "--- HÓA ĐƠN ---" << std::endl;
+        std::cout << "Mã hóa đơn: " << invoiceId << std::endl;
+        std::cout << "Mã bệnh nhân: " << patientId << std::endl;
+        std::cout << "Phí khám: " << consultationFee << std::endl;
+        std::cout << "Phí thuốc: " << medicineFee << std::endl;
+        std::cout << "Tổng tiền: " << totalAmount << std::endl;
         std::cout << "---------------" << std::endl;
     }
 };
