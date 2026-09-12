@@ -32,5 +32,6 @@ public:
         std::cout << "Tổng tiền: " << totalAmount << std::endl;
         std::cout << "---------------" << std::endl;
     }
+    virtual ~Invoice(){}
 };
 #endif
