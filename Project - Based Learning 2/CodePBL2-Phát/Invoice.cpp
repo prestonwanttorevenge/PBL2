@@ -1,6 +1,5 @@
 #include <iostream>
 #include <string>
-#include <windows.h>
 class Invoice {
 private:
     std::string invoiceId;
