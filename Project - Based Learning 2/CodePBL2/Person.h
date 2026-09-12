@@ -16,7 +16,8 @@ class Person{
        std::string p_gender = "ERROR",
        std::string p_phoneNumber = "ERROR") 
     : id(p_id), fullName(p_fullName), dateOfBirth(p_dateOfBirth), gender(p_gender), phoneNumber(p_phoneNumber){}
-    virtual void inputData(){}
+    Person(const Person &);
+    virtual void inputData();
     virtual void displayData() const{
         std::cout << "Mã ID: " << id << std::endl;
         std::cout << "Họ và tên: " << fullName << std::endl;

@@ -12,9 +12,11 @@ private:
     std::string dosage;
 
 public:
-    Medicine(std::string id = "-1", std::string name = "ERROR", double price = 0.0, std::string dose = "ERROR")
-        : medicineId(id), medicineName(name), unitPrice(price), dosage(dose) {}
-
+    Medicine(std::string m_id = "-1", std::string m_name = "ERROR", double m_price = 0.0, std::string m_dose = "ERROR")
+        : medicineId(m_id), medicineName(m_name), unitPrice(m_price), dosage(m_dose) {}
+    Medicine(const Medicine &);
+    ~Medicine(){}
+    ~Medicine(){}
     std::string getMedicineId() const { return medicineId; }
     std::string getMedicineName() const { return medicineName; }
 

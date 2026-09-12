@@ -7,6 +7,10 @@ class Doctor : public Person{
     int yearOfExperience;
     std::string workSchedule;
     public:
+    Doctor(std::string d_speacialty ="ERROR", int d_yearOfExperience = 0, std::string d_workSchedule = "ERROR" )
+    : specialty(d_speacialty), yearOfExperience(d_yearOfExperience),workSchedule(d_workSchedule){}
+    Doctor(const Doctor &);
+    virtual ~Doctor(){};
     void inputData(){
         Person::inputData();
 

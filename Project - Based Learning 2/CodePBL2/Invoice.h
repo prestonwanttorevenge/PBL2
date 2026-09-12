@@ -11,15 +11,15 @@ private:
     double totalAmount;
 
 public:
-    Invoice(std::string invId, std::string patId, double consultFee, double medFee) {
+    Invoice(std::string invId = "ERROR", std::string patId = "ERROR", double consultFee = 0.0, double medFee = 0.0) {
         invoiceId = invId;
         patientId = patId;
         consultationFee = consultFee;
         medicineFee = medFee;
         totalAmount = 0.0; 
     }
-
-    void calculateTotal() {
+    Invoice(const Invoice &);
+    void calculateTotal(){
         totalAmount = consultationFee + medicineFee;
     }
 
@@ -32,6 +32,6 @@ public:
         std::cout << "Tổng tiền: " << totalAmount << std::endl;
         std::cout << "---------------" << std::endl;
     }
-    virtual ~Invoice(){}
+    ~Invoice(){}
 };
 #endif
