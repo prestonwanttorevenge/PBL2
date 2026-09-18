@@ -1,0 +1,12 @@
+# File thực thi và thư mục biên dịch
+bin/
+*.exe
+*.out
+*.o
+*.obj
+
+# Thư mục cấu hình của IDE
+.vscode/
+.vs/
+*.user
+build/
