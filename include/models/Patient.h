@@ -6,13 +6,11 @@ class Patient : public Person {
 protected: 
     string medicalRecordId;   
     double insuranceDiscount;
-
 public:
     Patient();
-    Patient(string id, string fullName, string dob, string gender, string phone, 
-            string recordId, double discount);
-    
-    virtual ~Patient() override;
+    Patient(string recordId="ERROR", double discount= -1.0) : medicalRecordId(recordId),insuranceDiscount(discount){}
+    Patient(Patient &);
+    virtual ~Patient() override{}
 
     string getMedicalRecordId() const;
     double getInsuranceDiscount() const;

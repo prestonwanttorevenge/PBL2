@@ -1,5 +1,6 @@
 #include <iostream>
 #include <string>
+#include <InvoiceDetail.h>
 #ifndef INVOICE_H
 #define INVOICE_H
 class Invoice {
@@ -9,7 +10,7 @@ private:
     double consultationFee;
     double medicineFee;
     double totalAmount;
-
+    std::vector<InvoiceDetail> details;
 public:
     Invoice(std::string invId = "ERROR", std::string patId = "ERROR", double consultFee = 0.0, double medFee = 0.0) {
         invoiceId = invId;

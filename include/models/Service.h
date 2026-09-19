@@ -1,0 +1,20 @@
+#ifndef SERVICE_H
+#define SERVICE_H
+#include <string>
+
+using namespace std;
+
+class Service {
+private:
+    string serviceId;
+    string serviceName;
+    double price;
+public:
+    Service(string id = "-1", string name = "", double p = 0.0)
+        : serviceId(id), serviceName(name), price(p){}
+    Service(Service&);
+    ~Service(){}
+    string getId() const { return serviceId; }
+    double getPrice() const { return price; }
+};
+#endif
