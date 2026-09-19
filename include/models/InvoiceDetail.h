@@ -17,7 +17,7 @@ public:
         : detailId(dId), serviceId(sId), quantity(qty), unitPrice(price) {
         subTotal = quantity * unitPrice;
     }
-    InvoiceDetail(InvoiceDetail&);
+    //Bỏ được thì bỏ InvoiceDetail(InvoiceDetail&);
     ~InvoiceDetail(){}
     double getSubTotal() const { return subTotal; }
 };

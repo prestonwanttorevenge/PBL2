@@ -1,16 +1,17 @@
 #ifndef OUTPATIENT_H
 #define OUTPATIENT_H
 #include "Patient.h"
+#include <string>
 
 class Outpatient : public Patient {
     private:
-        string appointmentDate;
-        string clinicRoom;
+        std::string appointmentDate;
+        std::string clinicRoom;
     public:
         Outpatient();
         ~Outpatient() override;
 
-        void inputData();
+        void inputData() override;
         void displayData() const override;
 
         void bookAppointment();

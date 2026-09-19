@@ -19,11 +19,19 @@ class MedicalRecord{
     public:
     MedicalRecord(std::string recordId="-1",std::string appointmentId="-1")
     : recordId(recordId),appointmentId(appointmentId),symptoms(""),diagnosis(""),notes(""){}
-    MedicalRecord(MedicalRecord&);
+    // MedicalRecord(MedicalRecord&);
     ~MedicalRecord(){}
+
+    std::string getRecordId() const;
+    std::string getAppointmentId() const;
+    std::string getSymptoms() const;
+    std::string getDiagnosis() const;
+    std::string getNotes() const;
+    std::vector<PrescriptionDetail> getPrescriptions() const;
+
     void inputData();
-    void displayData();
-    void addMedicine();
+    void displayData() const;
+    void addMedicine(std::string mId, std::string dose, int qty);
 };
 
 #endif

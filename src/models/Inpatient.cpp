@@ -1,8 +1,8 @@
 #include "../../include/models/Inpatient.h"
 #include <iostream>
 #include <iomanip>
-
-Inpatient::Inpatient() : Patient() {
+using namespace std; 
+Inpatient::Inpatient() : Patient("") {
     this->admissionDate = "";
     this->dischargeDate = "";
     this->roomNumber = "";

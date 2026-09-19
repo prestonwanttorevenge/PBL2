@@ -12,7 +12,7 @@ private:
 public:
     Service(string id = "-1", string name = "", double p = 0.0)
         : serviceId(id), serviceName(name), price(p){}
-    Service(Service&);
+    //Bỏ được thì bỏ Service(Service&);
     ~Service(){}
     string getId() const { return serviceId; }
     double getPrice() const { return price; }

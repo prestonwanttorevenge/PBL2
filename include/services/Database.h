@@ -17,7 +17,7 @@ private:
     const std::string doctorFile = "data_doctors.csv";
     const std::string patientFile = "data_patients.csv";
     const std::string invoiceFile = "data_invoice.csv";
-    const std::string medicinFile = "data_medicine.csv";
+    const std::string medicineFile = "data_medicine.csv";
 public:
     Database(); 
     ~Database();
