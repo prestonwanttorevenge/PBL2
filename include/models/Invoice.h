@@ -2,7 +2,8 @@
 #define INVOICE_H
 #include <iostream>
 #include <string>
-
+#include <vector>
+#include <InvoiceDetail.h>
 class Invoice {
 private:
     std::string invoiceId;
@@ -10,7 +11,7 @@ private:
     double consultationFee;
     double medicineFee;
     double totalAmount;
-
+    std::vector<InvoiceDetail> details;
 public:
     Invoice(std::string invId = "ERROR", std::string patId = "ERROR", double consultFee = 0.0, double medFee = 0.0);
     ~Invoice();

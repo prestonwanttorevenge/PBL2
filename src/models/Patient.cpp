@@ -2,19 +2,10 @@
 #include <iostream>
 #include <iomanip>
 
-Patient::Patient() : Person() {
+Patient::Patient() : Person(){
     this->medicalRecordId = "";
     this->insuranceDiscount = 0.0;
 }
-
-Patient::Patient(string id, string fullName, string dob, string gender, string phone, string recordId, double discount)
-    : Person(id, fullName, dob, gender, phone) {
-        this->medicalRecordId = recordId;
-        this->insuranceDiscount = discount;
-    }
-
-Patient::~Patient() {}
-
 string Patient::getMedicalRecordId() const {return medicalRecordId; }
 double Patient::getInsuranceDiscount() const {return insuranceDiscount; }
 
