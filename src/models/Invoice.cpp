@@ -11,10 +11,11 @@ Invoice::Invoice(std::string invId, std::string patId, double consultFee, double
 
 Invoice::~Invoice() {}
 
-std::string Invoice::getInvoiceId() const {return invoiceId; }
-std::string Invoice::getPatientId() const {return patientId; }
-double Invoice::getConsultationFee() const {return consultationFee; }
-double Invoice::getMedicineFee() const {return medicineFee; }
+std::string Invoice::getInvoiceId() const { return invoiceId; }
+std::string Invoice::getPatientId() const { return patientId; }
+double Invoice::getConsultationFee() const { return consultationFee; }
+double Invoice::getMedicineFee() const { return medicineFee; }
+double Invoice::getTotalAmount() const { return totalAmount; } 
 
 void Invoice::calculateTotal(){
     totalAmount = consultationFee + medicineFee;
