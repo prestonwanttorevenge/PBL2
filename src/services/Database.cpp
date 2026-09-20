@@ -189,6 +189,118 @@ void Database::loadAllData() {
         cout << "- Chua co file " << userFile << " (Se tao moi khi luu)\n";
     }
 
+    ifstream fMed(medicinFile);
+    if (fMed.is_open()) {
+        string line;
+        medicines.clear();
+        while (getline(fMed, line)) {
+            if (line.empty()) continue;
+            stringstream ss(line);
+            string id, name, priceStr, dosage;
+
+            getline(ss, id, ';');
+            getline(ss, name, ';');
+            getline(ss, priceStr, ';');
+            getline(ss, dosage, ';');
+
+            double price = 0.0;
+            try { price = stod(priceStr); } catch (...) {}
+
+            medicines.push_back(Medicine(id, name, price, dosage));
+        }
+        fMed.close();
+    }
+    ifstream fSrv(serviceFile);
+    if (fSrv.is_open()) {
+        string line;
+        services.clear();
+        while (getline(fSrv, line)) {
+            if (line.empty()) continue;
+            stringstream ss(line);
+            string id, name, priceStr;
+
+            getline(ss, id, ';');
+            getline(ss, name, ';');
+            getline(ss, priceStr, ';');
+
+            double price = 0.0;
+            try { price = stod(priceStr); } catch (...) {}
+
+            services.push_back(Service(id, name, price));
+        }
+        fSrv.close();
+    }
+    ifstream fAppt(appointmentFile);
+    if (fAppt.is_open()) {
+        string line;
+        appointments.clear();
+        while (getline(fAppt, line)) {
+            if (line.empty()) continue;
+            stringstream ss(line);
+            string aId, pId, dId, rId, date, status;
+
+            getline(ss, aId, ';');
+            getline(ss, pId, ';');
+            getline(ss, dId, ';');
+            getline(ss, rId, ';');
+            getline(ss, date, ';');
+            getline(ss, status, ';');
+
+            appointments.push_back(Appointment(aId, pId, dId, rId, date, status));
+        }
+        fAppt.close();
+    }
+    // ==========================================
+    // ĐỌC FILE MEDICAL RECORD (Bệnh án)
+    // ==========================================
+    ifstream fMedRec(medicalRecordFile);
+    if (fMedRec.is_open()) {
+        string line;
+        medicalRecords.clear();
+        while (getline(fMedRec, line)) {
+            if (line.empty()) continue;
+            stringstream ss(line);
+            string rId, aId, symp, diag, notes;
+
+            getline(ss, rId, ';');
+            getline(ss, aId, ';');
+            getline(ss, symp, ';');
+            getline(ss, diag, ';');
+            getline(ss, notes, ';');
+            medicalRecords.push_back(MedicalRecord(rId, aId, symp, diag, notes));
+        }
+        fMedRec.close();
+    }
+    ifstream fPresc("data_prescription_details.csv");
+    if (fPresc.is_open()) {
+        string line;
+        while (getline(fPresc, line)) {
+            if (line.empty()) continue;
+            stringstream ss(line);
+            string rId, mId, dosage, qtyStr;
+            // Cột 1: Mã bệnh án (Dùng để dò tìm xem thuốc này của ai)
+            getline(ss, rId, ';');       
+            // Các cột còn lại: Thông tin thuốc
+            getline(ss, mId, ';');       
+            getline(ss, dosage, ';');    
+            getline(ss, qtyStr, ';');    
+
+            int qty = 0;
+            try { qty = stoi(qtyStr); } catch (...) {}
+
+            PrescriptionDetail detail = {mId, dosage, qty};
+
+            for (auto& record : medicalRecords){
+                if (record.getRecordId() == rId){
+                    record.addMedicine(detail.medicineId, detail.dosage, detail.quantity);
+                    break;
+                }
+            }
+        }
+        fPresc.close();
+    } else {
+        std::cout << "- Chua co file data_prescription_details.csv" << endl;
+    }
 
 
     cout << "-> Tai du lieu hoan tat!" << endl;

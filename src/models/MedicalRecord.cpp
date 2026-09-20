@@ -1,13 +1,5 @@
 #include "../../include/models/MedicalRecord.h"
 
-MedicalRecord::MedicalRecord(std::string rId, std:: string aId){
-    this->recordId = rId;
-    this->appointmentId = aId;
-    this->symptoms = "";
-    this->diagnosis = "";
-    this->notes = "";
-}
-
 MedicalRecord::~MedicalRecord() {}
 
 std::string MedicalRecord::getRecordId() const {return recordId; }
@@ -15,8 +7,9 @@ std::string MedicalRecord::getAppointmentId() const {return appointmentId; }
 std::string MedicalRecord::getSymptoms() const {return symptoms; }
 std::string MedicalRecord::getDiagnosis() const {return diagnosis; }
 std::string MedicalRecord::getNotes() const {return notes; }
-std::vector<PrescriptionDetail> MedicalRecord::getPrescriptions() const {return prescriptions; }
-
+std::string MedicalRecord::getRecordId()const{
+    return recordId;
+}
 void MedicalRecord::inputData(){
     std::cout << "Nhap Ma benh an: " ;
     std::getline(std::cin, recordId);

@@ -29,6 +29,7 @@ private:
     const std::string doctorFile = "data_doctors.csv";
     const std::string patientFile = "data_patients.csv";
     const std::string invoiceFile = "data_invoice.csv";
+    const std::string invoiceDetailsFile = "data_invoice_details.csv";
     const std::string medicinFile = "data_medicine.csv";
     const std::string userFile = "data_users.csv";
     const std::string appointmentFile = "data_appointments.csv";
