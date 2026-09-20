@@ -2,13 +2,6 @@
 #include <iostream>
 #include <iomanip>
 
-Outpatient::Outpatient() : Patient(){
-    this->appointmentDate = "";
-    this->clinicRoom = "";
-}
-
-Outpatient::~Outpatient() {}
-
 void Outpatient::inputData() {
     cout << "--- NHAP THONG TIN BENH NHAN NGOAI TRU ---" << endl;
     Patient::inputData();

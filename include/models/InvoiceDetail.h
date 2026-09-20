@@ -14,8 +14,8 @@ private:
     double subTotal;
 
 public:
-    InvoiceDetail(string dId, string sId, int qty, double price)
-        : detailId(dId), serviceId(sId), quantity(qty), unitPrice(price) {
+    InvoiceDetail(string dId = "", string sId ="",string iId="", int qty, double price)
+        : detailId(dId), serviceId(sId), invoiceId(iId) , quantity(qty), unitPrice(price) {
         subTotal = quantity * unitPrice;
     }
     InvoiceDetail(InvoiceDetail&);

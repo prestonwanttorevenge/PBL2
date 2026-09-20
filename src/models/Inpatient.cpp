@@ -2,15 +2,6 @@
 #include <iostream>
 #include <iomanip>
 
-Inpatient::Inpatient() : Patient() {
-    this->admissionDate = "";
-    this->dischargeDate = "";
-    this->roomNumber = "";
-    this->bedNumber = "";
-}
-
-Inpatient::~Inpatient() {}
-
 void Inpatient::inputData() {
     cout << "--- NHAP THONG TIN BENH NHAN NOI TRU ---" << endl;
     Patient::inputData(); 

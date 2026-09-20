@@ -1,11 +1,12 @@
 #ifndef INVOICE_H
 #define INVOICE_H
-#include <iostream>
 #include <string>
 #include <vector>
-#include <InvoiceDetail.h>
-#ifndef INVOICE_H
-#define INVOICE_H
+#include <iostream>
+#include "InvoiceDetail.h"
+
+using namespace std;
+
 class Invoice {
 private:
     string invoiceId;
@@ -16,27 +17,17 @@ private:
     vector<InvoiceDetail> details;
 
 public:
-    Invoice(std::string invId = "ERROR", std::string patId = "ERROR", double consultFee = 0.0, double medFee = 0.0) {
-        invoiceId = invId;
-        patientId = patId;
-        consultationFee = consultFee;
-        medicineFee = medFee;
-        totalAmount = 0.0; 
-    }
-    Invoice(const Invoice &);
-    void calculateTotal(){
+    Invoice(string iId = "", string pId = "", double mFee = 0.0)
+        : invoiceId(iId), patientId(pId), consultationFee(0.0), medicineFee(mFee), totalAmount(mFee) {}
+    void addDetail(const InvoiceDetail& detail) {
+        details.push_back(detail);
+        consultationFee += detail.getSubTotal();
         totalAmount = consultationFee + medicineFee;
     }
 
-    void printInvoice() {
-        std::cout << "--- HÓA ĐƠN ---" << std::endl;
-        std::cout << "Mã hóa đơn: " << invoiceId << std::endl;
-        std::cout << "Mã bệnh nhân: " << patientId << std::endl;
-        std::cout << "Phí khám: " << consultationFee << std::endl;
-        std::cout << "Phí thuốc: " << medicineFee << std::endl;
-        std::cout << "Tổng tiền: " << totalAmount << std::endl;
-        std::cout << "---------------" << std::endl;
-    }
+    void setMedicineFee(double fee);
+    void printInvoice() const ;
+    string getId(){return invoiceId;}
     ~Invoice(){}
 };
 #endif

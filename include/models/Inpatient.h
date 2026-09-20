@@ -16,8 +16,10 @@ class Inpatient : public Patient {
         : Patient(id, name, dob, gender, phone, recordId, discount),
           admissionDate(admDate), dischargeDate(disDate), 
           roomNumber(room), bedNumber(bed) {}
-        ~Inpatient() override;
-
+        ~Inpatient() override{}
+        string getType() const override {
+        return "NoiTru";
+    }
         void inputData();
         void displayData() const override;
 
