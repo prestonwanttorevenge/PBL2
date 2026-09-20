@@ -17,7 +17,6 @@ public:
                 string rId = "-1", string date = "", string stat = "Pending")
         : appointmentId(aId), patientId(pId), doctorId(dId),
           receptionistId(rId), appointmentDate(date), status(stat) {}
-    // bỏ được thì bỏ: Appointment(Appointment&);
     ~Appointment(){}
     string getDoctorId() const{return doctorId; }
     string getStatus() const{return status; }

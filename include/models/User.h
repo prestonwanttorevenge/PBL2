@@ -19,7 +19,6 @@ public:
          string fName = "", string role = "Receptionist", bool active = true)
         : userId(id), username(uName), passwordHash(pass), 
           fullName(fName), roleName(role), isActive(active){}
-    //User(User&);
     ~User(){};
     string getUsername() const{return username; }
     string getPassword() const{return passwordHash; }

@@ -19,7 +19,6 @@ class MedicalRecord{
     public:
     MedicalRecord(std::string recordId="-1",std::string appointmentId="-1")
     : recordId(recordId),appointmentId(appointmentId),symptoms(""),diagnosis(""),notes(""){}
-    // MedicalRecord(MedicalRecord&);
     ~MedicalRecord(){}
 
     std::string getRecordId() const;
