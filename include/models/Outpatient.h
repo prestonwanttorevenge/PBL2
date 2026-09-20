@@ -7,9 +7,14 @@ class Outpatient : public Patient {
         string appointmentDate;
         string clinicRoom;
     public:
-        Outpatient();
+    Outpatient(string id, string name, string dob, string gender, string phone, 
+              string recordId, double discount , string appDate , string clinicroom)
+        : Patient(id, name, dob, gender, phone, recordId, discount),
+          appointmentDate(appDate) , clinicRoom(clinicroom){}
         ~Outpatient() override;
-
+    string getType() const override {
+        return "NgoaiTru";
+    }
         void inputData();
         void displayData() const override;
 

@@ -24,10 +24,12 @@ public:
     string getUsername() const{return username; }
     string getPassword() const{return passwordHash; }
     string getRole() const{return roleName; }
+    void inputData();
     void displayData() const{
         cout << "ID: " << userId << " | User: " << username 
              << " | Quyen: " << roleName << " | Trang thai: " 
              << (isActive ? "Hoat dong" : "Bi khoa") << endl;
     }
+    bool authenticate();
 };
 #endif

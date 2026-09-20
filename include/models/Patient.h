@@ -8,10 +8,13 @@ protected:
     double insuranceDiscount;
 public:
     Patient();
-    Patient(string recordId="ERROR", double discount= -1.0) : medicalRecordId(recordId),insuranceDiscount(discount){}
+    Patient(string id, string name, string dob, string gender, string phone, 
+            string recordId, double discount)
+        : Person(id, name, dob, gender, phone), 
+          medicalRecordId(recordId), insuranceDiscount(discount){}
     Patient(Patient &);
     virtual ~Patient() override{}
-
+    virtual string getType() const = 0;
     string getMedicalRecordId() const;
     double getInsuranceDiscount() const;
 
