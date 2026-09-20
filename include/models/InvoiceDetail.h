@@ -20,7 +20,11 @@ public:
     }
     InvoiceDetail(InvoiceDetail&);
     ~InvoiceDetail(){}
+    string getDetailId()const{return detailId;}
+    string getServiceId()const{return serviceId;}
+    int getQuantity()const{return quantity;}
+    double getUnitPrice()const{return unitPrice;}
     double getSubTotal() const { return subTotal; }
-    string getServiceId() const { return serviceId; }
+
 };
 #endif

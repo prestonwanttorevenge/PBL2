@@ -13,9 +13,11 @@ class Outpatient : public Patient {
         : Patient(id, name, dob, gender, phone, recordId, discount),
           appointmentDate(appDate) , clinicRoom(clinicroom){}
         ~Outpatient() override{}
-        string getType() const override {
+        std::string getType() const override {
         return "NgoaiTru";
     }
+        std::string getAppointmentDate()const{return appointmentDate;}
+        std::string getClinicRoom()const{return clinicRoom;}
         void inputData();
         void displayData() const override;
 

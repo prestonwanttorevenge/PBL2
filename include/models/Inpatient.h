@@ -20,6 +20,10 @@ class Inpatient : public Patient {
         string getType() const override {
         return "NoiTru";
     }
+        std::string getAdmissionDate() const{return admissionDate;}
+        std::string getDischargeDate() const{return dischargeDate;}
+        std::string getRoomNumber() const{return roomNumber;}
+        std::string getBedNumber() const{return bedNumber;}
         void inputData();
         void displayData() const override;
 

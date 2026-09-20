@@ -9,6 +9,10 @@ Database::~Database() {
     patients.clear();
 }
 
+
+//LOAD DATA
+
+
 void Database::loadAllData() {
     cout << "Dang tai co so du lieu..." << endl;
     ifstream fDoc(doctorFile);
@@ -189,7 +193,7 @@ void Database::loadAllData() {
         cout << "- Chua co file " << userFile << " (Se tao moi khi luu)\n";
     }
 
-    ifstream fMed(medicinFile);
+    ifstream fMed(medicineFile);
     if (fMed.is_open()) {
         string line;
         medicines.clear();
@@ -250,9 +254,7 @@ void Database::loadAllData() {
         }
         fAppt.close();
     }
-    // ==========================================
-    // ĐỌC FILE MEDICAL RECORD (Bệnh án)
-    // ==========================================
+ 
     ifstream fMedRec(medicalRecordFile);
     if (fMedRec.is_open()) {
         string line;
@@ -278,9 +280,9 @@ void Database::loadAllData() {
             if (line.empty()) continue;
             stringstream ss(line);
             string rId, mId, dosage, qtyStr;
-            // Cột 1: Mã bệnh án (Dùng để dò tìm xem thuốc này của ai)
+
             getline(ss, rId, ';');       
-            // Các cột còn lại: Thông tin thuốc
+
             getline(ss, mId, ';');       
             getline(ss, dosage, ';');    
             getline(ss, qtyStr, ';');    
@@ -301,7 +303,155 @@ void Database::loadAllData() {
     } else {
         std::cout << "- Chua co file data_prescription_details.csv" << endl;
     }
+    
 
 
     cout << "-> Tai du lieu hoan tat!" << endl;
+}
+
+
+//SAVE DATA
+
+
+void Database::saveAllData() {
+
+    cout << "Dang luu co so du lieu..." << endl;
+    
+    ofstream fsrv(serviceFile);
+    if (fsrv.is_open()) {
+        for (const auto& srv : services) {
+            fsrv << srv.getId()
+                    << srv.getServiceName()
+                    << srv.getPrice();
+        }
+        fsrv.close();
+    }
+    ofstream fappt(appointmentFile);
+    if (fappt.is_open()) {
+        for (const auto& appt : appointments) {
+            fsrv << appt.getAppointmentId()
+                    << appt.getPatientId()
+                    << appt.getDoctorId()
+                    << appt.getReceptionistId()
+                    << appt.getAppointmentDate()
+                    << appt.getStatus();
+        fsrv.close();
+    }
+}
+    ofstream fmed(medicineFile);
+    if (fmed.is_open()) {
+        for (const auto& med : medicines) {
+            fmed << med.getMedicineId()
+                    << med.getMedicineName()
+                    << med.getUnitPrice()
+                    << med.getDosage();
+        fmed.close();
+    }
+}
+    ofstream fMedRec(medicalRecordFile);
+    ofstream fPresc("data_prescription_details.csv"); 
+
+    if (fMedRec.is_open() && fPresc.is_open()) {
+        for (const auto& record : medicalRecords) {
+            
+            fMedRec << record.getRecordId() << ";"
+                    << record.getAppointmentId() << ";"
+                    << record.getSymptoms() << ";"
+                    << record.getDiagnosis() << ";"
+                    << record.getNotes() << "\n";
+            for (const auto& rx : record.getPrescriptions()) {
+                fPresc << record.getRecordId() << ";"
+                       << rx.medicineId << ";"
+                       << rx.dosage << ";"
+                       << rx.quantity << "\n"; 
+            }
+        }
+        fMedRec.close();
+        fPresc.close();
+    }
+    ofstream fDoc(doctorFile);
+     if (fDoc.is_open()) {
+        for (const auto& doc : doctors) {
+            fDoc  << doc.getId() << ";"
+                    << doc.getFullName() << ";"
+                    << doc.getDateOfBirth() << ";"
+                    << doc.getGender() << ";"
+                    << doc.getPhoneNumber() << ";"
+                    << doc.getSpecialty() << ";"
+                    << doc.getYearsOfExperience() << ";"
+                    << doc.getWorkSchedule() << ";";
+        }
+        fDoc.close();
+    }
+    ofstream fUser(userFile);
+    if (fUser.is_open()) {
+        for (const auto& u : users) {
+            fUser << u.getId() << ";"
+                  << u.getUsername() << ";"
+                  << u.getPassword() << ";"
+                  << u.getFullName() << ";"
+                  << u.getRole() << ";"
+                  // Ép kiểu bool (true/false) thành chuỗi ("1"/"0")
+                  << (u.getIsActive() ? "1" : "0") << "\n";
+        }
+        fUser.close();
+    }
+ofstream fPat(patientFile);
+    if (fPat.is_open()) {
+        for (const auto& pat : patients) {
+            if (Inpatient* inpat = dynamic_cast<Inpatient*>(pat)) {
+                fPat << "NoiTru;"
+                     << inpat->getId() << ";"
+                     << inpat->getFullName() << ";"
+                     << inpat->getDateOfBirth() << ";"
+                     << inpat->getGender() << ";"
+                     << inpat->getPhoneNumber() << ";"
+                     << inpat->getMedicalRecordId() << ";"
+                     << inpat->getInsuranceDiscount() << ";"
+                     
+                     << inpat->getAdmissionDate() << ";"
+                     << inpat->getDischargeDate() << ";"
+                     << inpat->getRoomNumber() << ";"
+                     << inpat->getBedNumber() << "\n";
+            } 
+            // Ép kiểu xuống Ngoại trú để lấy các biến riêng (Ngày hẹn, Phòng khám)
+            else if (Outpatient* outpat = dynamic_cast<Outpatient*>(pat)) {
+                fPat << "NgoaiTru;"
+                     << outpat->getId() << ";"
+                     << outpat->getFullName() << ";"
+                     << outpat->getDateOfBirth() << ";"
+                     << outpat->getGender() << ";"
+                     << outpat->getPhoneNumber() << ";"
+                     << outpat->getMedicalRecordId() << ";"
+                     << outpat->getInsuranceDiscount() << ";"
+
+                     << outpat->getAppointmentDate() << ";"
+                     << outpat->getClinicRoom() << "\n";
+            }
+        }
+        fPat.close();
+    }
+    ofstream fInv(invoiceFile);
+    ofstream fInvDetail(invoiceDetailsFile);
+
+    if (fInv.is_open() && fInvDetail.is_open()) {
+        for (const auto& inv : invoices) {
+
+            fInv << inv.getId() << ";"
+                 << inv.getPatientId() << ";"
+                 << inv.getMedicineFee() << "\n";
+
+            for (const auto& detail : inv.getDetails()) {
+                
+                fInvDetail << detail.getDetailId() << ";"
+                           << inv.getId() << ";"
+                           << detail.getServiceId() << ";"
+                           << detail.getQuantity() << ";"
+                           << detail.getUnitPrice() << "\n";
+            }
+        }
+        fInv.close();
+        fInvDetail.close();
+    }
+
 }

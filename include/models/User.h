@@ -20,9 +20,12 @@ public:
         : userId(id), username(uName), passwordHash(pass), 
           fullName(fName), roleName(role), isActive(active){}
     ~User(){};
+    string getId() const{return userId; }
     string getUsername() const{return username; }
     string getPassword() const{return passwordHash; }
+    string getFullName() const{return fullName; }
     string getRole() const{return roleName; }
+    bool getIsActive() const{return isActive; }
     void inputData();
     void displayData() const{
         cout << "ID: " << userId << " | User: " << username 

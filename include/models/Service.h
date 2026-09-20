@@ -15,6 +15,7 @@ public:
     //Bỏ được thì bỏ Service(Service&);
     ~Service(){}
     string getId() const { return serviceId; }
+    string getServiceName() const {return serviceName;}
     double getPrice() const { return price; }
 };
 #endif
