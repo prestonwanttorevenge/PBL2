@@ -2,6 +2,13 @@
 #include <iostream>
 #include <iomanip>
 
+Inpatient::Inpatient() : Patient() {
+    this->admissionDate = "";
+    this->dischargeDate = "";
+    this->roomNumber = "";
+    this->bedNumber = "";
+}
+
 Inpatient::~Inpatient() {}
 
 void Inpatient::inputData() {

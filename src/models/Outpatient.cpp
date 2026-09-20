@@ -2,6 +2,11 @@
 #include <iostream>
 #include <iomanip>
 
+Outpatient::Outpatient() : Patient(){
+    this->appointmentDate = "";
+    this->clinicRoom = "";
+}
+
 Outpatient::~Outpatient() {}
 
 void Outpatient::inputData() {
@@ -9,7 +14,7 @@ void Outpatient::inputData() {
     Patient::inputData();
     cout << "Nhap Ngay hen kham: ";
     getline(cin, this->appointmentDate);
-    cout << "Nhap Phong kham chi dinh ";
+    cout << "Nhap Phong kham chi dinh: ";
     getline(cin, this->clinicRoom);
 }
 
@@ -20,5 +25,5 @@ void Outpatient::displayData() const {
 }
 
 void Outpatient::bookAppointment(){
-    cout << "Da dat lich kham vao " << appointmentDate << "tai" << " clinicRoom" << endl;
+    cout << "Da dat lich kham vao " << appointmentDate << " tai " << clinicRoom << endl; 
 }

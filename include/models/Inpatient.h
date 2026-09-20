@@ -1,13 +1,14 @@
 #ifndef INPATIENT_H
 #define INPATIENT_H
 #include "Patient.h"
+#include <string>
 
 class Inpatient : public Patient {
     private:
-        string admissionDate;
-        string dischargeDate;
-        string roomNumber;
-        string bedNumber;
+        std::string admissionDate;
+        std::string dischargeDate;
+        std::string roomNumber;
+        std::string bedNumber;
     public:
     Inpatient(string id, string name, string dob, string gender, string phone, 
               string recordId, double discount, string admDate, string disDate, 
@@ -16,9 +17,7 @@ class Inpatient : public Patient {
           admissionDate(admDate), dischargeDate(disDate), 
           roomNumber(room), bedNumber(bed) {}
         ~Inpatient() override;
-        string getType() const override {
-        return "NoiTru";
-    }
+
         void inputData();
         void displayData() const override;
 
