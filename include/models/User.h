@@ -2,6 +2,7 @@
 #define USER_H
 #include <string>
 #include <iostream>
+#include "bcrypt.h"
 
 using namespace std;
 
@@ -15,10 +16,8 @@ private:
     bool isActive; 
 
 public:
-    User(string id = "-1", string uName = "", string pass = "", 
-         string fName = "", string role = "Receptionist", bool active = true)
-        : userId(id), username(uName), passwordHash(pass), 
-          fullName(fName), roleName(role), isActive(active){}
+    User(string id = "", string user = "", string pass = "", string fname = "", string r = "", bool active = false)
+        : userId(id), username(user), passwordHash(pass), fullName(fname), roleName(r), isActive(active) {}
     ~User(){};
     string getId() const{return userId; }
     string getUsername() const{return username; }
@@ -26,6 +25,12 @@ public:
     string getFullName() const{return fullName; }
     string getRole() const{return roleName; }
     bool getIsActive() const{return isActive; }
+    bool authenticate(const string& inputPassword) const {
+        return bcrypt::validatePassword(inputPassword, this->passwordHash);
+    }
+    void setPassword(const string& newPlainPassword) {
+        this->passwordHash = bcrypt::generateHash(newPlainPassword);
+    }
     void inputData();
     void displayData() const{
         cout << "ID: " << userId << " | User: " << username 
