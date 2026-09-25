@@ -1,36 +1,3 @@
-/*	$OpenBSD: bcrypt.c,v 1.31 2014/03/22 23:02:03 tedu Exp $	*/
-
-/*
- * Copyright (c) 1997 Niels Provos <provos@umich.edu>
- *
- * Permission to use, copy, modify, and distribute this software for any
- * purpose with or without fee is hereby granted, provided that the above
- * copyright notice and this permission notice appear in all copies.
- *
- * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
- * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
- * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
- * ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
- * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
- * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
- * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
- */
-
-/* This password hashing algorithm was designed by David Mazieres
- * <dm@lcs.mit.edu> and works as follows:
- *
- * 1. state := InitState ()
- * 2. state := ExpandKey (state, salt, password)
- * 3. REPEAT rounds:
- *    	state := ExpandKey (state, 0, password)
- *    state := ExpandKey (state, 0, salt)
- * 4. ctext := "OrpheanBeholderScryDoubt"
- * 5. REPEAT 64:
- *    	ctext := Encrypt_ECB (state, ctext);
- * 6. RETURN Concatenate (salt, ctext);
- *
- */
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
@@ -45,15 +12,6 @@
 #ifdef _WIN32
 #define snprintf _snprintf
 #endif
-
-//#if !defined(__APPLE__) && !defined(__MACH__)
-//#include "bsd/stdlib.h"
-//#endif
-
-/* This implementation is adaptable to current computing power.
- * You can have up to 2^31 rounds which should be enough for some
- * time to come.
- */
 
 static void encode_base64(u_int8_t *, u_int8_t *, u_int16_t);
 static void decode_base64(u_int8_t *, u_int16_t, u_int8_t *);
@@ -90,7 +48,6 @@ decode_base64(u_int8_t *buffer, u_int16_t len, u_int8_t *data)
 		c1 = CHAR64(*p);
 		c2 = CHAR64(*(p + 1));
 
-		/* Invalid data */
 		if (c1 == 255 || c2 == 255)
 			break;
 
@@ -123,18 +80,11 @@ encode_salt(char *salt, u_int8_t *csalt, char minor, u_int16_t clen, u_int8_t lo
 	salt[2] = minor;
 	salt[3] = '$';
 
-    // Max rounds are 31
 	snprintf(salt + 4, 4, "%2.2u$", logr & 0x001F);
 
 	encode_base64((u_int8_t *) salt + 7, csalt, clen);
 }
 
-
-/* Generates a salt for this version of crypt.
-   Since versions may change. Keeping this here
-   seems sensible.
-   from: http://mail-index.netbsd.org/tech-crypto/2002/05/24/msg000204.html
-*/
 void
 bcrypt_gensalt(char minor, u_int8_t log_rounds, u_int8_t *seed, char *gsalt)
 {
@@ -145,9 +95,6 @@ bcrypt_gensalt(char minor, u_int8_t log_rounds, u_int8_t *seed, char *gsalt)
 
 	encode_salt(gsalt, seed, minor, BCRYPT_MAXSALT, log_rounds);
 }
-
-/* We handle $Vers$log2(NumRounds)$salt+passwd$
-   i.e. $2$04$iwouldntknowwhattosayetKdJ6iFtacBqJdKe6aW7ou */
 
 void
 node_bcrypt(const char *key, size_t key_len, const char *salt, char *encrypted)
@@ -161,20 +108,17 @@ node_bcrypt(const char *key, size_t key_len, const char *salt, char *encrypted)
 	u_int32_t cdata[BCRYPT_BLOCKS];
 	int n;
 
-	/* Discard "$" identifier */
 	salt++;
 
 	if (*salt > BCRYPT_VERSION) {
-		/* How do I handle errors ? Return ':' */
 		strcpy(encrypted, error);
 		return;
 	}
 
-	/* Check for minor versions */
 	if (salt[1] != '$') {
 		 switch (salt[1]) {
-		 case 'a': /* 'ab' should not yield the same as 'abab' */
-		 case 'b': /* cap input length at 72 bytes */
+		 case 'a':
+		 case 'b':
 			 minor = salt[1];
 			 salt++;
 			 break;
@@ -185,16 +129,13 @@ node_bcrypt(const char *key, size_t key_len, const char *salt, char *encrypted)
 	} else
 		 minor = 0;
 
-	/* Discard version + "$" identifier */
 	salt += 2;
 
 	if (salt[2] != '$') {
-		/* Out of sync with passwd entry */
 		strcpy(encrypted, error);
 		return;
 	}
 
-	/* Computer power doesn't increase linear, 2^x should be fine */
 	n = atoi(salt);
 	if (n > 31 || n < 0) {
 		strcpy(encrypted, error);
@@ -206,7 +147,6 @@ node_bcrypt(const char *key, size_t key_len, const char *salt, char *encrypted)
 		return;
 	}
 
-	/* Discard num rounds + "$" identifier */
 	salt += 3;
 
 	if (strlen(salt) * 3 / 4 < BCRYPT_MAXSALT) {
@@ -214,22 +154,17 @@ node_bcrypt(const char *key, size_t key_len, const char *salt, char *encrypted)
 		return;
 	}
 
-	/* We dont want the base64 salt but the raw data */
 	decode_base64(csalt, BCRYPT_MAXSALT, (u_int8_t *) salt);
 	salt_len = BCRYPT_MAXSALT;
 	if (minor <= 'a')
 		key_len = (u_int8_t)(key_len + (minor >= 'a' ? 1 : 0));
 	else
 	{
-		/* cap key_len at the actual maximum supported
-		* length here to avoid integer wraparound */
 		if (key_len > 72)
 			key_len = 72;
-		key_len++; /* include the NUL */
+		key_len++;
 	}
 
-
-	/* Setting up S-Boxes and Subkeys */
 	Blowfish_initstate(&state);
 	Blowfish_expandstate(&state, csalt, salt_len,
 		(u_int8_t *) key, key_len);
@@ -238,12 +173,10 @@ node_bcrypt(const char *key, size_t key_len, const char *salt, char *encrypted)
 		Blowfish_expand0state(&state, csalt, salt_len);
 	}
 
- 	/* This can be precomputed later */
 	j = 0;
 	for (i = 0; i < BCRYPT_BLOCKS; i++)
 		cdata[i] = Blowfish_stream2word(ciphertext, 4 * BCRYPT_BLOCKS, &j);
 
-	/* Now do the encryption */
 	for (k = 0; k < 64; k++)
 		blf_enc(&state, cdata, BCRYPT_BLOCKS / 2);
 
@@ -277,10 +210,8 @@ node_bcrypt(const char *key, size_t key_len, const char *salt, char *encrypted)
 
 u_int32_t bcrypt_get_rounds(const char * hash)
 {
-  /* skip past the leading "$" */
   if (!hash || *(hash++) != '$') return 0;
 
-  /* skip past version */
   if (0 == (*hash++)) return 0;
   if (*hash && *hash != '$') hash++;
   if (*hash++ != '$') return 0;
