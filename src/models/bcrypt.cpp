@@ -3,11 +3,9 @@
 #include <stdint.h>
 #include <sys/types.h>
 #include <string.h>
-
-#include "node_blf.h"
-
-#include "bcrypt.h"
-#include "openbsd.h"
+#include "../../include/models/node_blf.h"
+#include "../../include/models/bcrypt.h"
+#include "../../include/models/openbsd.h"
 
 #ifdef _WIN32
 #define snprintf _snprintf
