@@ -429,3 +429,31 @@ ofstream fPat(patientFile);
     }
 
 }
+Doctor* Database::findDoctorById(string id) {
+    for (size_t i = 0; i < doctors.size(); i++) {
+        if (doctors[i].getId() == id) {
+            return &doctors[i];
+        }
+    }
+    return nullptr;
+}
+
+// 2. Tìm Bệnh nhân
+Patient* Database::findPatientById(string id) {
+    for (size_t i = 0; i < patients.size(); i++) {
+        if (patients[i]->getId() == id) {
+            return patients[i];
+        }
+    }
+    return nullptr;
+}
+
+// 3. Tìm Thuốc
+Medicine* Database::findMedicineById(string id) {
+    for (size_t i = 0; i < medicines.size(); i++) {
+        if (medicines[i].getMedicineId() == id){
+            return &medicines[i];
+        }
+    }
+    return nullptr;
+}

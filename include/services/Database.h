@@ -39,6 +39,10 @@ public:
     Database();
     Database(Database&);
     ~Database();
+    
+    Doctor* findDoctorById(string id);
+    Patient* findPatientById(string id);
+    Medicine* findMedicineById(string id);
 
     void loadAllData();
     void saveAllData();
