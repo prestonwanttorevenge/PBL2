@@ -85,33 +85,7 @@ void Database::loadAllData() {
         }
         fPat.close();
     }
-     ifstream fInv(invoiceFile);
-    if (fInv.is_open()) {
-        string line;
-        invoices.clear();
-        while (getline(fInv, line)) {
-            if (line.empty()) continue;
-            
-            stringstream ss(line);
-            string id, name, dob, gender, phone, spec, tempExp, schedule;
 
-            getline(ss, id, ';');
-            getline(ss, name, ';');
-            getline(ss, dob, ';');
-            getline(ss, gender, ';');
-            getline(ss, phone, ';');
-            getline(ss, spec, ';');
-            getline(ss, tempExp, ';');
-            getline(ss, schedule, ';');
-
-            int exp = 0;
-            try { exp = stoi(tempExp); } catch (...) {}
-            doctors.push_back(Doctor(id, name, dob, gender, phone, spec, exp, schedule));
-        }
-        fDoc.close();
-    } else {
-        cout << "- Chua co file " << doctorFile << " (Se tao moi khi luu)\n";
-    }
     ifstream fInv(invoiceFile);
     if (fInv.is_open()) {
         string line;
@@ -167,7 +141,7 @@ void Database::loadAllData() {
         fDetail.close();
     }
     else {
-        cout << "- Chua co file " << invoiceFile << " (Se tao moi khi luu)\n";
+        cout << "- Chua co file " << invoiceDetailsFile << " (Se tao moi khi luu)\n";
     }
     ifstream fUser(userFile);
     if (fUser.is_open()) {
