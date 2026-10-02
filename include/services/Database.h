@@ -35,6 +35,8 @@ private:
     const std::string appointmentFile = "data_appointments.csv";
     const std::string medicalRecordFile = "data_medical_records.csv";
     const std::string serviceFile = "data_services.csv";
+
+    void sanitizeInput(string& input);
 public:
     Database();
     Database(Database&);
@@ -43,6 +45,13 @@ public:
     Doctor* findDoctorById(string id);
     Patient* findPatientById(string id);
     Medicine* findMedicineById(string id);
+
+    void deleteDoctor(string id);
+    void deleteMedicine(string id);
+    void deletePatient(string id);
+    void updateDoctor(string id);
+    void updateMedicine(string id);
+    void updatePatient(string id);
 
     void loadAllData();
     void saveAllData();

@@ -26,9 +26,10 @@ class Inpatient : public Patient {
         std::string getBedNumber() const{return bedNumber;}
         void inputData();
         void displayData() const override;
-
         void assignRoom();
         void processDischarge();
+        void setRoomNumber(string room) { this->roomNumber = room; }
+        void setBedNumber(string bed) { this->bedNumber = bed; }
 };
 
 #endif

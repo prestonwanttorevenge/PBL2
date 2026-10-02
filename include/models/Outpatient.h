@@ -20,9 +20,9 @@ class Outpatient : public Patient {
         std::string getClinicRoom()const{return clinicRoom;}
         void inputData();
         void displayData() const override;
-
         void bookAppointment();
-
+        void setClinicRoom(string clinic){ this->clinicRoom = clinic;}
+        void setAppointmentDate(string appointment){ this->appointmentDate = appointment;}
 };
 
 #endif
