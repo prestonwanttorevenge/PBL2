@@ -46,7 +46,15 @@ public:
     Doctor* findDoctorById(string id);
     Patient* findPatientById(string id);
     Medicine* findMedicineById(string id);
+
     std::vector<User>& getUsers() { return users; }
+    std::vector<Doctor>& getDoctors() { return doctors; }
+    std::vector<Patient*>& getPatients() { return patients; }
+    std::vector<Medicine>& getMedicines() { return medicines; }
+    std::vector<Appointment>& getAppointments() { return appointments; }
+    std::vector<Invoice>& getInvoices() { return invoices; }
+    std::vector<MedicalRecord>& getMedicalRecords() { return medicalRecords; }
+    std::vector<Service>& getServices() { return services; }
 
     void deleteDoctor(string id);
     void deleteMedicine(string id);

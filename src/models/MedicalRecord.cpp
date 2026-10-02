@@ -1,16 +1,14 @@
-#include "../../include/models/MedicalRecord.h"
+#include "MedicalRecord.h"
 
 MedicalRecord::~MedicalRecord() {}
 
-std::string MedicalRecord::getRecordId() const {return recordId; }
-std::string MedicalRecord::getAppointmentId() const {return appointmentId; }
-std::string MedicalRecord::getSymptoms() const {return symptoms; }
-std::string MedicalRecord::getDiagnosis() const {return diagnosis; }
-std::string MedicalRecord::getNotes() const {return notes; }
-std::string MedicalRecord::getRecordId()const{
-    return recordId;
-}
-void MedicalRecord::inputData(){
+std::string MedicalRecord::getRecordId() const { return recordId; }
+std::string MedicalRecord::getAppointmentId() const { return appointmentId; }
+std::string MedicalRecord::getSymptoms() const { return symptoms; }
+std::string MedicalRecord::getDiagnosis() const { return diagnosis; }
+std::string MedicalRecord::getNotes() const { return notes; }
+
+void MedicalRecord::inputData() {
     std::cout << "Nhap Ma benh an: " ;
     std::getline(std::cin, recordId);
     std::cout << "Nhap Trieu chung: ";
@@ -29,7 +27,7 @@ void MedicalRecord::displayData() const {
     std::cout << "So loai thuoc da ke: " << prescriptions.size() << std::endl;
 }
 
-void MedicalRecord::addMedicine(std::string mId, std::string dose, int qty){
+void MedicalRecord::addMedicine(std::string mId, std::string dose, int qty) {
     PrescriptionDetail pd = {mId, dose, qty};
     prescriptions.push_back(pd);
 }

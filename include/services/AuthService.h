@@ -1,5 +1,6 @@
 #ifndef AUTH_SERVICE_H
 #define AUTH_SERVICE_H
+
 #include <string>
 #include "../models/User.h"
 #include "Database.h"
