@@ -38,6 +38,7 @@ private:
 
     void sanitizeInput(string& input);
 public:
+
     Database();
     Database(Database&);
     ~Database();
@@ -45,6 +46,7 @@ public:
     Doctor* findDoctorById(string id);
     Patient* findPatientById(string id);
     Medicine* findMedicineById(string id);
+    std::vector<User>& getUsers() { return users; }
 
     void deleteDoctor(string id);
     void deleteMedicine(string id);
