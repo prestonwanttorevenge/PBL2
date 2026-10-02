@@ -13,6 +13,7 @@ bool AuthService::login(const string& inputUsername, const string& inputPassword
                 return false;
             }
             if (u.authenticate(inputPassword)){
+                currentUser = &u; 
                 cout << "=> Dang nhap thanh cong! Chao mung, " << u.getFullName() << "\n";
                 return true;
             } else {
