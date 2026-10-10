@@ -2,6 +2,7 @@
 #include <fstream>
 #include <sstream>
 #include <iostream>
+#include <string>
 Database::~Database() {
     for (int i = 0; i < patients.size(); i++) {
         delete patients[i];
@@ -38,16 +39,32 @@ void Database::loadAllData() {
             getline(ss, phone, ';');
             getline(ss, spec, ';');
             getline(ss, tempExp, ';');
-            getline(ss, schedule, ';');
-
             int exp = 0;
             try { exp = stoi(tempExp); } catch (...) {}
-            doctors.push_back(Doctor(id, name, dob, gender, phone, spec, exp, schedule));
+            doctors.push_back(Doctor(id, name, dob, gender, phone, spec, exp));
         }
         fDoc.close();
     } else {
         cout << "- Chua co file " << doctorFile << " (Se tao moi khi luu)\n";
     }
+    std::ifstream fSched("data_doctor_schedules.csv");
+    if (fSched.is_open()) {
+        std::string line;
+        while (std::getline(fSched, line)) {
+            if (line.empty()) continue;
+            std::stringstream ss(line);
+            std::string docId, day, time;
+            std::getline(ss, docId, ';');
+            std::getline(ss, day, ';');
+            std::getline(ss, time, ';');
+            Doctor* doc = findDoctorById(docId);
+            if (doc != nullptr) {
+                doc->setWorkSchedule(day, time);
+            }
+        }
+        fSched.close();
+    }
+    
     ifstream fPat(patientFile);
     if (fPat.is_open()) {
         string line;
@@ -168,7 +185,7 @@ void Database::loadAllData() {
             if (activestr == "1" || activestr == "true") { isActive = true; }
             users.push_back(User(id, Username, pass, fullName, role, isActive));
         }
-        fDoc.close();
+        fUser.close();
     } else {
         cout << "- Chua co file " << userFile << " (Se tao moi khi luu)\n";
     }
@@ -297,37 +314,40 @@ void Database::saveAllData() {
 
     cout << "Dang luu co so du lieu..." << endl;
     
-    ofstream fsrv(serviceFile);
+   ofstream fsrv(serviceFile);
     if (fsrv.is_open()) {
         for (const auto& srv : services) {
-            fsrv << srv.getId()
-                    << srv.getServiceName()
-                    << srv.getPrice();
+            fsrv << srv.getId() << ";"
+                 << srv.getServiceName() << ";"
+                 << srv.getPrice() << "\n";
         }
         fsrv.close();
     }
+
     ofstream fappt(appointmentFile);
     if (fappt.is_open()) {
-        for (const auto& appt : appointments) {
-            fsrv << appt.getAppointmentId()
-                    << appt.getPatientId()
-                    << appt.getDoctorId()
-                    << appt.getReceptionistId()
-                    << appt.getAppointmentDate()
-                    << appt.getStatus();
-        fsrv.close();
+        for (const auto& appt : appointments){
+            fappt << appt.getAppointmentId() << ";"
+                  << appt.getPatientId() << ";"
+                  << appt.getDoctorId() << ";"
+                  << appt.getReceptionistId() << ";"
+                  << appt.getDayOfWeek() << ";"
+                  << appt.getTimeSlot() << ";"
+                  << appt.getStatus() << "\n";
+        }
+        fappt.close();
     }
-}
+
     ofstream fmed(medicineFile);
     if (fmed.is_open()) {
         for (const auto& med : medicines) {
-            fmed << med.getMedicineId()
-                    << med.getMedicineName()
-                    << med.getUnitPrice()
-                    << med.getDosage();
+            fmed << med.getMedicineId() << ";"
+                 << med.getMedicineName() << ";"
+                 << med.getUnitPrice() << ";"
+                 << med.getDosage() << "\n";
+        }
         fmed.close();
     }
-}
     ofstream fMedRec(medicalRecordFile);
     ofstream fPresc("data_prescription_details.csv"); 
 
@@ -349,19 +369,31 @@ void Database::saveAllData() {
         fMedRec.close();
         fPresc.close();
     }
-    ofstream fDoc(doctorFile);
-     if (fDoc.is_open()) {
+  std::ofstream fDoc(doctorFile);
+    if (fDoc.is_open()) {
         for (const auto& doc : doctors) {
-            fDoc  << doc.getId() << ";"
-                    << doc.getFullName() << ";"
-                    << doc.getDateOfBirth() << ";"
-                    << doc.getGender() << ";"
-                    << doc.getPhoneNumber() << ";"
-                    << doc.getSpecialty() << ";"
-                    << doc.getYearsOfExperience() << ";"
-                    << doc.getWorkSchedule() << ";";
-        }
+            fDoc << doc.getId() << ";"
+                 << doc.getFullName() << ";"
+                 << doc.getDateOfBirth() << ";"
+                 << doc.getGender() << ";"
+                 << doc.getPhoneNumber() << ";"
+                 << doc.getSpecialty() << ";"
+                 << doc.getYearsOfExperience() << "\n";
         fDoc.close();
+    }
+    std::ofstream fSched(doctorScheduleFile); 
+    if (fSched.is_open()) {
+        for (const auto& doc : doctors) {
+            const std::vector<WorkShift>& sched = doc.getSchedule();
+
+            for (size_t j = 0; j < sched.size(); j++) {
+                // Ghi theo cấu trúc: Mã BS ; Thứ ; Ca
+                fSched << doc.getId() << ";"
+                       << sched[j].dayOfWeek << ";"
+                       << sched[j].timeSlot << "\n";
+            }
+        }
+        fSched.close();
     }
     ofstream fUser(userFile);
     if (fUser.is_open()) {
@@ -433,7 +465,7 @@ ofstream fPat(patientFile);
         fInv.close();
         fInvDetail.close();
     }
-
+    }
 }
 Doctor* Database::findDoctorById(string id) {
     for (size_t i = 0; i < doctors.size(); i++) {
@@ -515,14 +547,26 @@ void Database::updateDoctor(string id) {
     if (!input.empty()) {
         doc->setPhoneNumber(input);
     }
-
-    cout << "Lich lam viec moi (Hien tai: " << doc->getWorkSchedule() << "): ";
+cout << "Ban co muon xep lai lich truc khong? (y/n): ";
     getline(cin, input);
-    sanitizeInput(input);
-    if (!input.empty()) {
-        doc->setWorkSchedule(input);
-    }
+    if (input == "y" || input == "Y") {
+        doc->clearSchedule();
+        
+        string soCaStr;
+        cout << "Nhap so luong ca truc moi: ";
+        getline(cin, soCaStr);
+        int soCa = 0;
+        try { soCa = stoi(soCaStr); } catch (...) {}
 
+        for (int i = 0; i < soCa; i++) {
+            string day, time;
+            cout << "- Ca " << i + 1 << ":\n";
+            cout << "  + Thu: "; getline(cin, day); sanitizeInput(day);
+            cout << "  + Buoi: "; getline(cin, time); sanitizeInput(time);
+            
+            doc->setWorkSchedule(day, time);
+        }
+    }
     cout << "=> Cap nhat thong tin thanh cong!\n";
 }
 void Database::updateMedicine(string id) {
@@ -643,11 +687,26 @@ void Database::addDoctor() {
     getline(cin, expStr); sanitizeInput(expStr);
     int exp = 0;
     try { exp = stoi(expStr); } catch (...) { exp = 0; }
+    Doctor newDoctor(id, name, dob, gender, phone, spec, exp);
+    string soCaStr;
+    cout << "Bac si nay lam may ca 1 tuan? : ";
+    getline(cin, soCaStr);
+    int soCa = 0;
+    try { soCa = stoi(soCaStr); } catch (...) { soCa = 0; }
 
-    cout << "Nhap Lich lam viec: ";
-    getline(cin, schedule); sanitizeInput(schedule);
+    for (int i = 0; i < soCa; i++) {
+        string day, shift;
+        cout << "- Ca thu " << i + 1 << ":\n";
+        
+        cout << "  + Thu (VD: Thu 2, Thu 3): ";
+        getline(cin, day); sanitizeInput(day);
+        
+        cout << "  + Buoi (VD: Sang, Chieu, Toi): ";
+        getline(cin, shift); sanitizeInput(shift);
 
-    doctors.push_back(Doctor(id, name, dob, gender, phone, spec, exp, schedule));
+        newDoctor.setWorkSchedule(day, shift);
+    }
+    doctors.push_back(newDoctor);
     cout << "=> Da them Bac si thanh cong!\n";
 }
 
@@ -796,12 +855,20 @@ bool Database::addOutpatientFromQT(string id, string name, string dob, string ge
     patients.push_back(new Outpatient(id, name, dob, gender, phone, recordId, discount, apptDate, clinic));
     return true;
 }
-bool Database::addDoctorFromQT(string id, string fullName, string dob, string gender, string phone, string specialty, int expYears, string schedule){
+bool Database::addDoctorFromQT(string id, string fullName, string dob, string gender, string phone, string specialty, int expYears){
     if(findDoctorById(id) !=nullptr) return false;
-    doctors.push_back(Doctor(id, fullName, dob ,gender ,phone , specialty,expYears , schedule));
+    doctors.push_back(Doctor(id, fullName, dob ,gender ,phone , specialty,expYears));
     return true; 
 }
- bool Database::addMedicineFromQT(string medicineId,string medicineName,double unitPrice,string dosage ,int addQty){
+bool Database::addShiftToDoctorFromQT(string doctorId, string day, string time) {
+    Doctor* doc = findDoctorById(doctorId);
+    if (doc != nullptr) {
+        doc->setWorkSchedule(day, time);
+        return true;
+    }
+    return false;
+}
+ int Database::addMedicineFromQT(string medicineId,string medicineName,double unitPrice,string dosage ,int addQty){
     Medicine* existingMed = findMedicineById(medicineId);
     
     if (existingMed != nullptr){
@@ -815,3 +882,15 @@ bool Database::addDoctorFromQT(string id, string fullName, string dob, string ge
         return 1;
     }
  }
+ vector<Doctor*> Database::getAvailableDoctors(string day, string shift){
+    vector<Doctor*> availableDocs;
+    for (size_t i = 0; i < doctors.size(); i++) {
+        for (const auto& w : doctors[i].getSchedule()) {
+            if (w.dayOfWeek == day && w.timeSlot == shift) {
+                availableDocs.push_back(&doctors[i]);
+                break;
+            }
+        }
+    }
+    return availableDocs;
+}

@@ -35,7 +35,7 @@ private:
     const std::string appointmentFile = "data_appointments.csv";
     const std::string medicalRecordFile = "data_medical_records.csv";
     const std::string serviceFile = "data_services.csv";
-
+    const std::string doctorScheduleFile = "data_doctor_schedules.csv";
     void sanitizeInput(string& input);
 public:
 
@@ -92,8 +92,10 @@ public:
 
     bool addInpatientFromQT(string id, string name, string dob, string gender, string phone,string recordId, double discount, string admDate, string disDate, string room, string bed);
     bool addOutpatientFromQT(string id, string name, string dob, string gender, string phone, string recordId, double discount, string apptDate, string clinic);
-    bool addDoctorFromQT(string id, string fullName, string dob, string gender, string phone, string specialty, int expYears, string schedule);
-    bool addMedicineFromQT(string medicineId,string medicineName,double unitPrice,string dosage,int addQty);
+    bool addDoctorFromQT(string id, string fullName, string dob, string gender, string phone, string specialty, int expYears);
+    bool addShiftToDoctorFromQT(string doctorId, string day, string time);
+    int addMedicineFromQT(string medicineId,string medicineName,double unitPrice,string dosage,int addQty);
+    vector<Doctor*> getAvailableDoctors(string day, string shift);
 };
 
 #endif
