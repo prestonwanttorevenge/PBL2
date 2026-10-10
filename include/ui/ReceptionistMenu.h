@@ -16,6 +16,7 @@ public:
     ~ReceptionistMenu();
 
 private slots:
+    void updateAvailableDoctors();
     void on_btnLogout_clicked();
     void on_btnRegisterPatient_clicked();   
     void on_btnBookAppointment_clicked();  

@@ -485,7 +485,18 @@ Patient* Database::findPatientById(string id) {
     }
     return nullptr;
 }
-
+vector<Patient*> Database::searchPatients(string keyword) {
+    vector<Patient*> results;
+    for (size_t i = 0; i < patients.size(); i++) {
+        string id = patients[i]->getId();
+        string name = patients[i]->getFullName();
+        if (id == keyword || name.find(keyword) != string::npos) {
+            results.push_back(patients[i]);
+        }
+    }
+    
+    return results;
+}
 // 3. Tìm Thuốc
 Medicine* Database::findMedicineById(string id) {
     for (size_t i = 0; i < medicines.size(); i++) {
@@ -893,4 +904,36 @@ bool Database::addShiftToDoctorFromQT(string doctorId, string day, string time) 
         }
     }
     return availableDocs;
+}
+int Database::bookAppointmentFromQT(string patientId, string doctorId, string receptionistId, string day, string time) {
+    if (findPatientById(patientId) == nullptr) {
+        return -1; // Lỗi: Không tìm thấy Bệnh nhân
+    }
+    Doctor* doc = findDoctorById(doctorId);
+    if (doc == nullptr) {
+        return -2; // Lỗi: Không tìm thấy Bác sĩ
+    }
+    bool isAvailable = false;
+    for (const auto& shift : doc->getSchedule()) {
+        if (shift.dayOfWeek == day && shift.timeSlot == time) {
+            isAvailable = true;
+            break;
+        }
+    }
+    if (!isAvailable) {
+        return -3;
+    }
+    string newAppId = "APP" + to_string(appointments.size() + 1);
+    appointments.push_back(Appointment(newAppId, patientId, doctorId, receptionistId, day, time, "Cho Kham"));
+    return 1; // Thành công
+}
+int Database::createInvoiceFromQT(string patientId, double medFee) {
+    Patient* pat = findPatientById(patientId);
+    if (pat == nullptr) {
+        return -1;
+    }
+    string newInvId = "INV" + to_string(invoices.size() + 1);
+    double finalFee = medFee * (1.0 - pat->getInsuranceDiscount()); 
+    invoices.push_back(Invoice(newInvId, patientId, finalFee));
+    return 1;
 }

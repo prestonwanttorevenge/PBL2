@@ -46,6 +46,7 @@ public:
     Doctor* findDoctorById(string id);
     Patient* findPatientById(string id);
     Medicine* findMedicineById(string id);
+    std::vector<Patient*> searchPatients(std::string keyword);
 
     std::vector<User>& getUsers() { return users; }
     std::vector<Doctor>& getDoctors() { return doctors; }
@@ -96,6 +97,8 @@ public:
     bool addShiftToDoctorFromQT(string doctorId, string day, string time);
     int addMedicineFromQT(string medicineId,string medicineName,double unitPrice,string dosage,int addQty);
     vector<Doctor*> getAvailableDoctors(string day, string shift);
+    int bookAppointmentFromQT(string patientId, string doctorId, string receptionistId, string day, string time);
+    int createInvoiceFromQT(std::string patientId, double medFee);
 };
 
 #endif
