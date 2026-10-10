@@ -1,6 +1,7 @@
 #include "../../include/ui/AdminMenu.h"
 #include "ui_AdminMenu.h"
 #include <QMessageBox>
+#include "../../include/services/Database.h"
 
 AdminMenu::AdminMenu(Database& database, AuthService& authService, QWidget *parent)
     : QMainWindow(parent), ui(new Ui::AdminMenu), db(database), auth(authService) {

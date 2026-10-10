@@ -66,16 +66,16 @@ public:
     void loadAllData();
     void saveAllData();
 
-    void addDoctor(const Doctor& doc);
+    void addDoctor();
     void showAllDoctors() const;
 
-    void addPatient(Patient* pat); 
+    void addPatient(); 
     void showAllPatients() const;
 
     void addInvoice(const Invoice& inv);
     void showAllInvoices() const;
 
-    void addMedicine(const Medicine& med);
+    void addMedicine();
     void showAllMedicine() const;
 
     void addUser(const User& user);
@@ -89,6 +89,11 @@ public:
 
     void addService(const Service& srv);
     void showAllServices() const;
+
+    bool addInpatientFromQT(string id, string name, string dob, string gender, string phone,string recordId, double discount, string admDate, string disDate, string room, string bed);
+    bool addOutpatientFromQT(string id, string name, string dob, string gender, string phone, string recordId, double discount, string apptDate, string clinic);
+    bool addDoctorFromQT(string id, string fullName, string dob, string gender, string phone, string specialty, int expYears, string schedule);
+    bool addMedicineFromQT(string medicineId,string medicineName,double unitPrice,string dosage,int addQty);
 };
 
 #endif

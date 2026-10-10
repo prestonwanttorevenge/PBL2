@@ -611,3 +611,207 @@ void Database::updatePatient(string id) {
 
     cout << "=> Cap nhat thong tin Benh nhan thanh cong!\n";
 }
+void Database::addDoctor() {
+    string id, name, dob, gender, phone, spec, schedule, expStr;
+    
+    cout << "\n--- THEM BAC SI MOI ---\n";
+    cout << "Nhap ID: ";
+    getline(cin, id);
+    sanitizeInput(id);
+
+    if (findDoctorById(id) != nullptr) {
+        cout << "Loi: ID Bac si nay da ton tai trong he thong!\n";
+        return; 
+    }
+
+    cout << "Nhap Ho Ten: ";
+    getline(cin, name); sanitizeInput(name);
+
+    cout << "Nhap Ngay sinh (DD/MM/YYYY): ";
+    getline(cin, dob); sanitizeInput(dob);
+
+    cout << "Nhap Gioi tinh: ";
+    getline(cin, gender); sanitizeInput(gender);
+
+    cout << "Nhap So dien thoai: ";
+    getline(cin, phone); sanitizeInput(phone);
+
+    cout << "Nhap Chuyen khoa: ";
+    getline(cin, spec); sanitizeInput(spec);
+
+    cout << "Nhap So nam kinh nghiem: ";
+    getline(cin, expStr); sanitizeInput(expStr);
+    int exp = 0;
+    try { exp = stoi(expStr); } catch (...) { exp = 0; }
+
+    cout << "Nhap Lich lam viec: ";
+    getline(cin, schedule); sanitizeInput(schedule);
+
+    doctors.push_back(Doctor(id, name, dob, gender, phone, spec, exp, schedule));
+    cout << "=> Da them Bac si thanh cong!\n";
+}
+
+void Database::showAllDoctors() const {
+    cout << "\n--- DANH SACH BAC SI ---\n";
+    if (doctors.empty()) {
+        cout << "Chua co du lieu!\n";
+        return;
+    }
+    for (size_t i = 0; i < doctors.size(); i++) {
+        cout << i + 1 << ". ";
+        doctors[i].displayData();
+    }
+}
+void Database::addMedicine() {
+    string id, name, priceStr, dosage;
+
+    cout << "\n--- THEM THUOC MOI ---\n";
+    cout << "Nhap ID Thuoc: ";
+    getline(cin, id);
+    sanitizeInput(id);
+
+   Medicine* existingMed = findMedicineById(id);
+
+    if (existingMed != nullptr) {
+        cout << "Thuoc [" << existingMed->getMedicineName() << "] dang co " 
+             << existingMed->getStock() << " vien trong kho.\n";
+        
+        string addQtyStr;
+        cout << "Nhap so luong muon nhap them: ";
+        getline(cin, addQtyStr);
+        int addQty = 0;
+        try { addQty = stoi(addQtyStr); } catch (...) {}
+
+        existingMed->setStock(existingMed->getStock() + addQty);
+        cout << "=> Da cap nhat so luong ton kho thanh cong!\n";
+        return;
+    }
+
+    cout << "Nhap Ten thuoc: ";
+    getline(cin, name); sanitizeInput(name);
+
+    cout << "Nhap Don gia: ";
+    getline(cin, priceStr); sanitizeInput(priceStr);
+    double price = 0.0;
+    try { price = stod(priceStr); } catch (...) { price = 0.0; }
+
+    cout << "Nhap Lieu dung / Cach dung: ";
+    getline(cin, dosage); sanitizeInput(dosage);
+
+    medicines.push_back(Medicine(id, name, price, dosage));
+    cout << "=> Da them Thuoc thanh cong!\n";
+}
+
+void Database::showAllMedicine() const {
+    cout << "\n--- DANH SACH THUOC ---\n";
+    if (medicines.empty()) {
+        cout << "Chua co du lieu!\n";
+        return;
+    }
+    for (size_t i = 0; i < medicines.size(); i++) {
+        cout << i + 1 << ". ";
+        medicines[i].displayData(); 
+    }
+}
+void Database::addPatient() {
+    string id, name, dob, gender, phone, recordId, discountStr;
+    
+    cout << "\n--- THEM BENH NHAN MOI ---\n";
+    cout << "Nhap ID: ";
+    getline(cin, id); sanitizeInput(id);
+
+    if (findPatientById(id) != nullptr) {
+        cout << "Loi: ID Benh nhan nay da ton tai!\n";
+        return;
+    }
+
+    cout << "Nhap Ho Ten: ";
+    getline(cin, name); sanitizeInput(name);
+
+    cout << "Nhap Ngay sinh: ";
+    getline(cin, dob); sanitizeInput(dob);
+
+    cout << "Nhap Gioi tinh: ";
+    getline(cin, gender); sanitizeInput(gender);
+
+    cout << "Nhap So dien thoai: ";
+    getline(cin, phone); sanitizeInput(phone);
+
+    cout << "Nhap Ma BHYT (Neu khong co thi de trong): ";
+    getline(cin, recordId); sanitizeInput(recordId);
+
+    cout << "Nhap Phan tram giam gia BHYT (VD: 0.8 cho 80%): ";
+    getline(cin, discountStr); sanitizeInput(discountStr);
+    double discount = 0.0;
+    try { discount = stod(discountStr); } catch (...) { discount = 0.0; }
+
+
+    cout << "\nChon loai Benh nhan:\n1. Noi Tru (Nhap vien)\n2. Ngoai Tru (Kham xong ve)\nLua chon: ";
+    string choice;
+    getline(cin, choice);
+
+    if (choice == "1") {
+        string admDate, disDate, room, bed;
+        cout << "Nhap Ngay nhap vien: "; getline(cin, admDate); sanitizeInput(admDate);
+        cout << "Nhap Ngay xuat vien (De trong neu chua xuat): "; getline(cin, disDate); sanitizeInput(disDate);
+        cout << "Nhap So phong: "; getline(cin, room); sanitizeInput(room);
+        cout << "Nhap So giuong: "; getline(cin, bed); sanitizeInput(bed);
+
+        // Tạo đối tượng Nội trú và đẩy con trỏ vào mảng
+        patients.push_back(new Inpatient(id, name, dob, gender, phone, recordId, discount, admDate, disDate, room, bed));
+        cout << "=> Da them Benh nhan Noi tru thanh cong!\n";
+
+    } else if (choice == "2") {
+        string apptDate, clinic;
+        cout << "Nhap Ngay hen kham: "; getline(cin, apptDate); sanitizeInput(apptDate);
+        cout << "Nhap Phong kham (VD: Khoa Noi, Phong 102): "; getline(cin, clinic); sanitizeInput(clinic);
+        patients.push_back(new Outpatient(id, name, dob, gender, phone, recordId, discount, apptDate, clinic));
+        cout << "=> Da them Benh nhan Ngoai tru thanh cong!\n";
+        
+    } else {
+        cout << "Loi: Lua chon khong hop le. Da huy qua trinh them Benh nhan!\n";
+    }
+}
+
+void Database::showAllPatients() const {
+    cout << "\n--- DANH SACH BENH NHAN ---\n";
+    if (patients.empty()) {
+        cout << "Chua co du lieu!\n";
+        return;
+    }
+    for (size_t i = 0; i < patients.size(); i++) {
+        cout << i + 1 << ". ";
+        patients[i]->displayData(); 
+    }
+}
+
+bool Database::addInpatientFromQT(string id, string name, string dob, string gender, string phone, string recordId, double discount, string admDate, string disDate, string room, string bed) {
+    if (findPatientById(id) != nullptr) return false;
+    patients.push_back(new Inpatient(id, name, dob, gender, phone, recordId, discount, admDate, disDate, room, bed));
+    return true;
+}
+
+bool Database::addOutpatientFromQT(string id, string name, string dob, string gender, string phone, string recordId, double discount, string apptDate, string clinic) {
+    if (findPatientById(id) != nullptr) return false;
+    patients.push_back(new Outpatient(id, name, dob, gender, phone, recordId, discount, apptDate, clinic));
+    return true;
+}
+bool Database::addDoctorFromQT(string id, string fullName, string dob, string gender, string phone, string specialty, int expYears, string schedule){
+    if(findDoctorById(id) !=nullptr) return false;
+    doctors.push_back(Doctor(id, fullName, dob ,gender ,phone , specialty,expYears , schedule));
+    return true; 
+}
+ bool Database::addMedicineFromQT(string medicineId,string medicineName,double unitPrice,string dosage ,int addQty){
+    Medicine* existingMed = findMedicineById(medicineId);
+    
+    if (existingMed != nullptr){
+        int newStock = existingMed->getStock() + addQty;
+        existingMed->setStock(newStock);
+        return 2;
+    } 
+    else {
+        medicines.push_back(Medicine(medicineId, medicineName, unitPrice, dosage, addQty));
+        
+        return 1;
+    }
+ }

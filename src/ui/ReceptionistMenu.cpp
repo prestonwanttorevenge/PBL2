@@ -1,6 +1,7 @@
 #include "../../include/ui/ReceptionistMenu.h"
 #include "ui_ReceptionistMenu.h"
 #include <QMessageBox>
+#include "../../include/services/Database.h"
 
 ReceptionistMenu::ReceptionistMenu(Database& database, AuthService& authService, QWidget *parent)
     : QMainWindow(parent), ui(new Ui::ReceptionistMenu), db(database), auth(authService) {
@@ -21,10 +22,35 @@ void ReceptionistMenu::on_btnLogout_clicked() {
 
 void ReceptionistMenu::on_btnRegisterPatient_clicked() {
     QMessageBox::information(this, "Đăng Ký", "Mở form nhập thông tin bệnh nhân mới.");
+    QString qId = ui->txtPatientId->text();
+    QString qName = ui->txtPatientName->text();
+    QString qPhone = ui->txtPatientPhone->text();
+    if(qId.isEmpty() || qName.isEmpty()) {
+        QMessageBox::warning(this, "Lỗi", "Vui lòng nhập đầy đủ thông tin!");
+        return;
+    }
+    // Chuyển đổi QString sang std::string 
+    string id = qId.toStdString();
+    string name = qName.toStdString();
+    string phone = qPhone.toStdString();
+    // làm cho t 1 cái RadioButton để chọn Nội trú/Ngoại trú để còn chia nhánh bệnh nhân
+    bool isNoiTru = ui->radioNoiTru->isChecked(); 
+    bool success = db.addPatientFromGUI(id, name, phone, isNoiTru);
+    if (success) {
+        QMessageBox::information(this, "Thành công", "Đã thêm bệnh nhân mới!");
+        ui->txtPatientId->clear();
+        ui->txtPatientName->clear();
+        ui->txtPatientPhone->clear();
+        refreshPatientTable();
+        db.saveAllData();
+    } else {
+        QMessageBox::critical(this, "Lỗi", "ID Bệnh nhân đã tồn tại!");
+    }
 }
 
 void ReceptionistMenu::on_btnBookAppointment_clicked() {
     QMessageBox::information(this, "Đặt Lịch", "Xếp lịch hẹn với bác sĩ cho bệnh nhân.");
+    
 }
 
 void ReceptionistMenu::on_btnCreateInvoice_clicked() {

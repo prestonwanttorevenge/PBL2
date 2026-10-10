@@ -2,11 +2,12 @@
 #include <iostream>
 using namespace std;
 
-Medicine::Medicine(string m_id, string m_name, double m_price, string m_dose){
+Medicine::Medicine(string m_id, string m_name, double m_price, string m_dose,int stock){
     this->medicineId = m_id;
     this->medicineName = m_name;
     this->unitPrice = m_price;
     this->dosage = m_dose;
+    this->stock = stock;
 }
 
 Medicine::~Medicine(){}
@@ -28,7 +29,8 @@ void Medicine::displayData() const{
     cout << "Thuoc ID: " << medicineId
          << " | Ten " << medicineName
          << " | Gia " << unitPrice
-         << " | Lieu dung " << dosage << endl;
+         << " | Lieu dung " << dosage 
+         << " | So luong " << endl;
 }
 
 void Medicine::inputData(){
@@ -42,4 +44,7 @@ void Medicine::inputData(){
     cin.ignore();
     cout << "Nhap Lieu dung: ";
     getline(cin, dosage);
+    cin.ignore();
+    cout << "Nhap so luong: ";
+    cin >> stock;
 }
