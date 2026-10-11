@@ -105,6 +105,9 @@ public:
     int prescribeMedicineFromQT(string recordId, string medId, string dosage, int qty);
     int createInvoiceFromQT(std::string patientId, double& outTotalFee);
     std::vector<MedicalRecord*> getPatientHistory(std::string patientId);
+    
+    //login
+    User* loginFromQT(std::string username, std::string password);
 };
 
 #endif

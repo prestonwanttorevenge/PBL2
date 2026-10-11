@@ -1050,3 +1050,19 @@ vector<MedicalRecord*> Database::getPatientHistory(string patientId) {
     // Trả về danh sách tất cả các bệnh án đã gom được
     return history;
 }
+//login 
+User* Database::loginFromQT(string username, string password) {
+    // 1. Quét toàn bộ mảng users để tìm tài khoản
+    for (size_t i = 0; i < users.size(); i++) {
+        if (users[i].getUsername() == username) {
+            
+            // 2. Tìm thấy tài khoản -> Gọi hàm authenticate (bcrypt)
+            if (users[i].authenticate(password)) {
+                return &users[i];
+            } else {
+                return nullptr; 
+            }
+        }
+    }
+    return nullptr; // Không tìm thấy Username trên hệ thống
+}
