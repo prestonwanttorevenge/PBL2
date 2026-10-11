@@ -110,29 +110,34 @@ void ReceptionistMenu::on_btnBookAppointment_clicked() {
 
 void ReceptionistMenu::on_btnCreateInvoice_clicked() {
     QMessageBox::information(this, "Thanh Toán", "Lập hóa đơn và thanh toán chi phí khám chữa bệnh.");
-    string patientId = ui->txtPatientId_Invoice->text().toStdString();
-    string feeStr = ui->txtMedFee->text().toStdString();
+   string patientId = ui->txtPatientId_Invoice->text().toStdString();
 
-    if (patientId.empty() || feeStr.empty()) {
-        QMessageBox::warning(this, "Cảnh báo", "Vui lòng nhập Mã Bệnh Nhân và Số tiền cần thanh toán!");
+    if (patientId.empty()) {
+        QMessageBox::warning(this, "Cảnh báo", "Vui lòng nhập Mã Bệnh Nhân để thanh toán!");
         return;
     }
-    double medFee = 0.0;
-    try {
-        medFee = stod(feeStr);
-        if (medFee < 0) throw invalid_argument("Tiền âm");
-    } catch (...) {
-        QMessageBox::warning(this, "Lỗi nhập liệu", "Số tiền không hợp lệ! Vui lòng nhập số.");
-        return;
-    }
-    int result = db.createInvoiceFromQT(patientId, medFee);
+
+    // 2. Khai báo biến hứng tiền
+    double finalFeeToPay = 0.0;
+
+    // 3. Đẩy xuống Backend xử lý
+    int result = db.createInvoiceFromQT(patientId, finalFeeToPay);
+
+    // 4. Báo cáo kết quả theo từng chốt chặn
     if (result == 1) {
-        QMessageBox::information(this, "Thành công", "Đã lập Hóa đơn thành công!\nDữ liệu đã được ghi nhận vào hệ thống.");
+        QString msg = "Lập Hóa đơn thành công!\n\nSố tiền Bệnh nhân cần thanh toán (Đã trừ BHYT): " 
+                      + QString::number(finalFeeToPay, 'f', 0) + " VNĐ";
+        QMessageBox::information(this, "Thanh Toán Thành Công", msg);
         ui->txtPatientId_Invoice->clear();
-        ui->txtMedFee->clear();
     } 
     else if (result == -1) {
-        QMessageBox::critical(this, "Lỗi", "Mã Bệnh Nhân không tồn tại!\nVui lòng kiểm tra lại ID.");
+        QMessageBox::critical(this, "Lỗi", "Mã Bệnh Nhân không tồn tại!");
+    }
+    else if (result == -2) {
+        QMessageBox::critical(this, "Lỗi", "Bệnh nhân này chưa có Lịch hẹn khám nào!");
+    }
+    else if (result == -3) {
+        QMessageBox::critical(this, "Cảnh báo", "Bác sĩ chưa tạo Hồ sơ Bệnh án cho bệnh nhân này.\nChưa thể tính tiền!");
     }
 }
 

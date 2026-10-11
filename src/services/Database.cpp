@@ -506,6 +506,24 @@ Medicine* Database::findMedicineById(string id) {
     }
     return nullptr;
 }
+// 4.tim cuoc hen
+Appointment* Database::findAppointmentById(string id) {
+    for (size_t i = 0; i < appointments.size(); i++) {
+        if (appointments[i].getAppointmentId() == id) {
+            return &appointments[i];
+        }
+    }
+    return nullptr;
+}
+// 5.tim benh an
+MedicalRecord* Database::findMedicalRecordById(string id){
+    for (size_t i = 0;i < medicalRecords.size();i++) {
+        if (medicalRecords[i].getRecordId() == id) {
+            return &medicalRecords[i];
+        }
+    }
+    return nullptr;
+}
 void Database::deleteDoctor(string id) {
     for (size_t i = 0; i < doctors.size(); i++) {
         if (doctors[i].getId() == id) {
@@ -936,4 +954,99 @@ int Database::createInvoiceFromQT(string patientId, double medFee) {
     double finalFee = medFee * (1.0 - pat->getInsuranceDiscount()); 
     invoices.push_back(Invoice(newInvId, patientId, finalFee));
     return 1;
+}
+int Database::createMedicalRecordFromQT(string apptId, string symp, string diag, string notes) {
+    if(findAppointmentById(apptId) == nullptr) return -1;
+    // Tự động sinh mã Bệnh án mới (VD: MR1, MR2)
+    string newRecordId = "MR" + to_string(medicalRecords.size() + 1);
+    medicalRecords.push_back(MedicalRecord(newRecordId, apptId, symp, diag, notes));
+
+    return 1;
+}
+int Database::prescribeMedicineFromQT(string recordId, string medId, string dosage, int qty) {
+    MedicalRecord* record = findMedicalRecordById(recordId);
+    if (record == nullptr) return -1;
+
+    // 2. Kiểm tra Thuốc có trong kho không
+    Medicine* med = findMedicineById(medId);
+    if (med == nullptr) return -2;
+
+    // 3. Kiểm tra số lượng tồn kho (stock) có đủ để kê không
+    if (med->getStock() < qty) return -3;
+
+    // 4. Mọi thứ OK -> Trừ tồn kho
+    med->setStock(med->getStock() - qty);
+
+    // 5. Thêm thuốc vào mảng prescriptions của đối tượng MedicalRecord
+    record->addMedicine(medId, dosage, qty);
+
+    return 1;
+}
+int Database::createInvoiceFromQT(string patientId, double& outTotalFee) {
+    // 1. Kiểm tra Bệnh nhân có thật không
+    Patient* pat = findPatientById(patientId);
+    if (pat == nullptr) return -1;
+
+    // 2. TRUY VẾT 1: Tìm Lịch hẹn mới nhất của Bệnh nhân này
+    string targetApptId = "";
+    for (int i = appointments.size() - 1; i >= 0; i--) {
+        if (appointments[i].getPatientId() == patientId) {
+            targetApptId = appointments[i].getAppointmentId();
+            break;
+        }
+    }
+    if (targetApptId == "") return -2;
+
+    MedicalRecord* record = nullptr;
+    for (size_t i = 0; i < medicalRecords.size(); i++) {
+        if (medicalRecords[i].getAppointmentId() == targetApptId) {
+            record = &medicalRecords[i];
+            break;
+        }
+    }
+    if (record == nullptr) return -3;
+
+    // 3. BẮT ĐẦU TÍNH TIỀN TỰ ĐỘNG (Phí khám 100k + Tiền thuốc)
+    double totalFee = 100000; 
+    for (const auto& rx : record->getPrescriptions()) {
+        Medicine* med = findMedicineById(rx.medicineId);
+        if (med != nullptr) {
+            totalFee += (med->getUnitPrice() * rx.quantity);
+        }
+    }
+
+    // 5. Khấu trừ Bảo Hiểm Y Tế
+    double discount = pat->getInsuranceDiscount();
+    double finalFee = totalFee * (1.0 - discount); 
+    
+    outTotalFee = finalFee; // Ném tiền ra cho giao diện
+
+    // 6. Tạo Hóa đơn và lưu lại
+    string newInvId = "INV" + to_string(invoices.size() + 1);
+    invoices.push_back(Invoice(newInvId, patientId, finalFee));
+
+    return 1;
+}
+vector<MedicalRecord*> Database::getPatientHistory(string patientId) {
+    vector<MedicalRecord*> history;
+
+    // 1. Quét toàn bộ mảng Cuộc hẹn
+    for (size_t i = 0; i < appointments.size(); i++) {
+        // Nếu tìm thấy lịch hẹn của bệnh nhân này
+        if (appointments[i].getPatientId() == patientId) {
+            string apptId = appointments[i].getAppointmentId();
+
+            // 2. Chui vào mảng Bệnh án tìm cái tờ Bệnh án gắn với lịch hẹn đó
+            for (size_t j = 0; j < medicalRecords.size(); j++) {
+                if (medicalRecords[j].getAppointmentId() == apptId) {
+                    // Tìm thấy thì nhét vào danh sách kết quả
+                    history.push_back(&medicalRecords[j]);
+                    break;
+                }
+            }
+        }
+    }
+    
+    // Trả về danh sách tất cả các bệnh án đã gom được
+    return history;
 }
