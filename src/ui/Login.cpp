@@ -40,8 +40,8 @@ void Login::on_btnLogin_clicked() {
 
     if (role == "Admin" || role == "QuanTri") {
     // Mở màn hình Admin (Quản lý nhân sự, thống kê doanh thu...)
-    // AdminMenu *adminMenu = new AdminMenu();
-    // adminMenu->show();
+        AdminMenu *adminMenu = new AdminMenu();
+        adminMenu->show();
     QMessageBox::information(this, "Hệ thống", "Đăng nhập thành công với quyền Admin!");
     this->close(); 
 }
@@ -64,7 +64,7 @@ else if (role == "QuanLyKho" || role == "DuocSi") {
 // 5.3. CHỐT CHẶN AN TOÀN (Vô hiệu hóa mọi quyền lạ)
 else {
     QMessageBox::critical(this, "Lỗi Phân Quyền", "Mã quyền [" + QString::fromStdString(role) + "] không hợp lệ!\nVui lòng liên hệ Quản trị viên để kiểm tra lại cơ sở dữ liệu.");
-    // Không this->close(), bắt người dùng kẹt lại ở form Login
+    Không this->close()
 }
 
 }

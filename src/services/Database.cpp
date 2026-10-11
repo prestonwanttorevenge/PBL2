@@ -1066,3 +1066,37 @@ User* Database::loginFromQT(string username, string password) {
     }
     return nullptr; // Không tìm thấy Username trên hệ thống
 }
+// Hàm này nằm trong Database.cpp
+int Database::addUserFromQT(string id, string username, string plainPassword, string fullName, string role) {
+    // 1. Quét mảng users để kiểm tra trùng lặp ID hoặc Username
+    for (const auto& u : users) {
+        if (u.getId() == id || u.getUsername() == username) {
+            return -1; // Báo lỗi trùng lặp
+        }
+    }
+    // 2. Khởi tạo đối tượng User mới. Tạm thời để trống phần passwordHash
+    User newUser(id, username, "", fullName, role, true);
+    newUser.setPassword(plainPassword);
+    users.push_back(newUser);
+    return 1;
+}
+int Database::addDoctorWithAccount(string id, string name, string dob, string gender, string phone, string specialty, int expYears, string username, string plainPassword) {
+    
+    // 1. Kiểm tra trùng lặp ID và Username
+    for (const auto& doc : doctors) {
+        if (doc.getId() == id) return -1;
+    }
+    for (const auto& u : users) {
+        if (u.getUsername() == username) return -2;
+    }
+
+    // 2. LỆNH PUSH_BACK ĐÃ ĐƯỢC SỬA LỖI (Truyền đủ 7 tham số)
+    doctors.push_back(Doctor(id, name, dob, gender, phone, specialty, expYears));
+
+    // 3. TẠO TÀI KHOẢN KÈM BĂM MẬT KHẨU
+    User newAccount(id, username, "", name, "Doctor", true); 
+    newAccount.setPassword(plainPassword); 
+    users.push_back(newAccount);
+
+    return 1;
+}
