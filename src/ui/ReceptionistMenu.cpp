@@ -175,15 +175,26 @@ void ReceptionistMenu::on_btnSearchPatient_clicked() {
 
 void ReceptionistMenu::refreshPatientTable() {
     ui->tablePatients->setRowCount(0);
-    auto& patients = db.getPatients();
+    
+    // 1. Rút danh bạ con trỏ từ Cây ra (trả về con trỏ cấp 2: Patient**)
+    vector<Patient**> patList = db.getPatients().getAllPointers();
     
     int row = 0;
-    for (auto pat : patients) {
+    // 2. Duyệt qua mảng con trỏ cấp 2
+    for (auto p : patList) {
+        // 3. Giải tham chiếu (phá vỏ) để lấy con trỏ Bệnh nhân thực sự (Patient*)
+        Patient* pat = *p;
+
         ui->tablePatients->insertRow(row);
+        
+        // Dữ liệu đã là Patient* nên dùng mũi tên (->) như bạn viết là hoàn toàn chính xác
         ui->tablePatients->setItem(row, 0, new QTableWidgetItem(QString::fromStdString(pat->getId())));
         ui->tablePatients->setItem(row, 1, new QTableWidgetItem(QString::fromStdString(pat->getFullName())));
         ui->tablePatients->setItem(row, 2, new QTableWidgetItem(QString::fromStdString(pat->getPhoneNumber())));
-        ui->tablePatients->setItem(row, 3, new QTableWidgetItem(QString::fromStdString(pat->getType()))); // NoiTru hoặc NgoaiTru
+        
+        // (Lưu ý: Đảm bảo lớp Patient của bạn có hàm ảo ảo getType() trả về "NoiTru" / "NgoaiTru")
+        ui->tablePatients->setItem(row, 3, new QTableWidgetItem(QString::fromStdString(pat->getType()))); 
+        
         row++;
     }
 }

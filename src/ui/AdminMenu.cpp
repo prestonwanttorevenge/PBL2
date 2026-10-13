@@ -211,30 +211,42 @@ void AdminMenu::on_btnLogout_clicked() {
         this->close(); // Đóng Dashboard Admin
     }
 }
-
 void AdminMenu::refreshDoctorTable() {
     ui->tableDoctors->setRowCount(0);
-    auto& doctors = db.getDoctors(); 
+    
+    // 1. Rút danh bạ con trỏ từ Cây ra thành một mảng Vector
+    vector<Doctor*> doctorsList = db.getDoctors().getAllPointers(); 
+    
     int row = 0;
-    for(const auto& doc : doctors) {
+    // 2. Chạy vòng lặp trên mảng con trỏ (dùng auto cho gọn)
+    for(auto doc : doctorsList) {
         ui->tableDoctors->insertRow(row);
-        ui->tableDoctors->setItem(row, 0, new QTableWidgetItem(QString::fromStdString(doc.getId())));
-        ui->tableDoctors->setItem(row, 1, new QTableWidgetItem(QString::fromStdString(doc.getFullName())));
-        ui->tableDoctors->setItem(row, 2, new QTableWidgetItem(QString::fromStdString(doc.getSpecialty())));
-        ui->tableDoctors->setItem(row, 3, new QTableWidgetItem(QString::fromStdString(doc.getPhoneNumber())));
+        
+        // 3. Đổi dấu chấm (.) thành mũi tên (->)
+        ui->tableDoctors->setItem(row, 0, new QTableWidgetItem(QString::fromStdString(doc->getId())));
+        ui->tableDoctors->setItem(row, 1, new QTableWidgetItem(QString::fromStdString(doc->getFullName())));
+        ui->tableDoctors->setItem(row, 2, new QTableWidgetItem(QString::fromStdString(doc->getSpecialty())));
+        ui->tableDoctors->setItem(row, 3, new QTableWidgetItem(QString::fromStdString(doc->getPhoneNumber())));
         row++;
     }
 }
+
 void AdminMenu::refreshUserTable() {
     ui->tableUsers->setRowCount(0);
-    auto& users = db.getUsers();
+    
+    // 1. Rút danh bạ con trỏ User từ Cây ra
+    vector<User*> usersList = db.getUsers().getAllPointers();
+    
     int row = 0;
-    for(const auto& u : users) {
+    // 2. Duyệt qua mảng con trỏ User*
+    for(auto u : usersList) {
         ui->tableUsers->insertRow(row);
-        ui->tableUsers->setItem(row, 0, new QTableWidgetItem(QString::fromStdString(u.getId())));
-        ui->tableUsers->setItem(row, 1, new QTableWidgetItem(QString::fromStdString(u.getUsername())));
-        ui->tableUsers->setItem(row, 2, new QTableWidgetItem(QString::fromStdString(u.getRole())));
-        ui->tableUsers->setItem(row, 3, new QTableWidgetItem(u.getIsActive() ? "Hoat dong" : "Bi khoa"));
+        
+        // 3. Đổi dấu chấm (.) thành mũi tên (->)
+        ui->tableUsers->setItem(row, 0, new QTableWidgetItem(QString::fromStdString(u->getId())));
+        ui->tableUsers->setItem(row, 1, new QTableWidgetItem(QString::fromStdString(u->getUsername())));
+        ui->tableUsers->setItem(row, 2, new QTableWidgetItem(QString::fromStdString(u->getRole())));
+        ui->tableUsers->setItem(row, 3, new QTableWidgetItem(u->getIsActive() ? "Hoat dong" : "Bi khoa"));
         row++;
     }
 }
