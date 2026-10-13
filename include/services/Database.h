@@ -2,6 +2,7 @@
 #define DATABASE_H
 
 #include <vector>
+#include "BST.h"
 #include <string>
 #include "Doctor.h"
 #include "Patient.h"
@@ -16,15 +17,15 @@
 
 class Database {
 private:
-    std::vector<Doctor> doctors;
-    std::vector<Patient*> patients; 
+    BST<Doctor> doctors;
+    BST<Patient*> patients; 
     std::vector<Invoice> invoices;
-    std::vector<Medicine> medicines;
+    BST<Medicine> medicines;
  
-    std::vector<User> users;
+    BST<User> users;
     std::vector<Appointment> appointments;
     std::vector<MedicalRecord> medicalRecords;
-    std::vector<Service> services;
+    BST<Service> services;
 
     const std::string doctorFile = "data_doctors.csv";
     const std::string patientFile = "data_patients.csv";
@@ -50,14 +51,15 @@ public:
     MedicalRecord* findMedicalRecordById(string id); 
     std::vector<Patient*> searchPatients(std::string keyword);
 
-    std::vector<User>& getUsers() { return users; }
-    std::vector<Doctor>& getDoctors() { return doctors; }
-    std::vector<Patient*>& getPatients() { return patients; }
-    std::vector<Medicine>& getMedicines() { return medicines; }
+    BST<User>& getUsers() { return users; }
+    BST<Doctor>& getDoctors() { return doctors; }
+    BST<Patient*>& getPatients() { return patients; }
+    BST<Medicine>& getMedicines() { return medicines; }
+    BST<Service>& getServices() { return services; }
+
     std::vector<Appointment>& getAppointments() { return appointments; }
     std::vector<Invoice>& getInvoices() { return invoices; }
     std::vector<MedicalRecord>& getMedicalRecords() { return medicalRecords; }
-    std::vector<Service>& getServices() { return services; }
 
     void deleteDoctor(string id);
     void deleteMedicine(string id);

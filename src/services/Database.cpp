@@ -4,10 +4,11 @@
 #include <iostream>
 #include <string>
 Database::~Database() {
-    for (int i = 0; i < patients.size(); i++) {
-        delete patients[i];
+    vector<Patient**> allPatients = patients.getAllPointers();
+    // Duyệt qua mảng và tiêu hủy các vùng nhớ con (Inpatient / Outpatient)
+    for (size_t i = 0; i < allPatients.size(); i++) {
+        delete *(allPatients[i]); // Giải tham chiếu để gọi delete lên Patient*
     }
-    patients.clear();
 }
 void Database::sanitizeInput(string& input) {
     for (size_t i = 0; i < input.length(); i++) {
@@ -22,15 +23,19 @@ void Database::sanitizeInput(string& input) {
 
 void Database::loadAllData() {
     cout << "Dang tai co so du lieu..." << endl;
+
+    // ==========================================
+    // 1. DOCTORS (BST)
+    // ==========================================
     ifstream fDoc(doctorFile);
     if (fDoc.is_open()) {
         string line;
-        doctors.clear();
+        doctors.clear(); // Xóa sạch cây cũ
         while (getline(fDoc, line)) {
             if (line.empty()) continue;
             
             stringstream ss(line);
-            string id, name, dob, gender, phone, spec, tempExp, schedule;
+            string id, name, dob, gender, phone, spec, tempExp;
 
             getline(ss, id, ';');
             getline(ss, name, ';');
@@ -41,12 +46,16 @@ void Database::loadAllData() {
             getline(ss, tempExp, ';');
             int exp = 0;
             try { exp = stoi(tempExp); } catch (...) {}
-            doctors.push_back(Doctor(id, name, dob, gender, phone, spec, exp));
+            
+            // Thay push_back bằng insert
+            doctors.insert(id, Doctor(id, name, dob, gender, phone, spec, exp));
         }
         fDoc.close();
     } else {
         cout << "- Chua co file " << doctorFile << " (Se tao moi khi luu)\n";
     }
+
+    // Lịch trực Bác sĩ
     std::ifstream fSched("data_doctor_schedules.csv");
     if (fSched.is_open()) {
         std::string line;
@@ -57,7 +66,8 @@ void Database::loadAllData() {
             std::getline(ss, docId, ';');
             std::getline(ss, day, ';');
             std::getline(ss, time, ';');
-            Doctor* doc = findDoctorById(docId);
+            
+            Doctor* doc = findDoctorById(docId); // Đã dùng cây bên trong hàm này
             if (doc != nullptr) {
                 doc->setWorkSchedule(day, time);
             }
@@ -65,12 +75,19 @@ void Database::loadAllData() {
         fSched.close();
     }
     
+    // ==========================================
+    // 2. PATIENTS (BST CON TRỎ)
+    // ==========================================
     ifstream fPat(patientFile);
     if (fPat.is_open()) {
         string line;
 
-        for(auto p : patients) delete p; 
-        patients.clear();
+        // Xóa dữ liệu cũ một cách an toàn để chống tràn RAM
+        vector<Patient**> oldPats = patients.getAllPointers();
+        for (size_t i = 0; i < oldPats.size(); i++) {
+            delete *(oldPats[i]); // Giải phóng vùng nhớ con trỏ
+        }
+        patients.clear(); // Chặt cây
 
         while (getline(fPat, line)) {
             if (line.empty()) continue;
@@ -95,20 +112,21 @@ void Database::loadAllData() {
                 getline(ss, disDate, ';');
                 getline(ss, room, ';');
                 getline(ss, bed, ';');
-    
-                patients.push_back(new Inpatient(id, name, dob, gender, phone, recordId, discount, admDate, disDate, room, bed));
+                patients.insert(id, new Inpatient(id, name, dob, gender, phone, recordId, discount, admDate, disDate, room, bed));
             } 
             else if (type == "NgoaiTru") {
                 string appDate, clinicRoom;
                 getline(ss, appDate, ';');
                 getline(ss, clinicRoom, ';');
-                
-                patients.push_back(new Outpatient(id, name, dob, gender, phone, recordId, discount, appDate, clinicRoom));
+                patients.insert(id, new Outpatient(id, name, dob, gender, phone, recordId, discount, appDate, clinicRoom));
             }
         }
         fPat.close();
     }
 
+    // ==========================================
+    // 3. INVOICES & DETAILS (GIỮ NGUYÊN VECTOR)
+    // ==========================================
     ifstream fInv(invoiceFile);
     if (fInv.is_open()) {
         string line;
@@ -128,8 +146,7 @@ void Database::loadAllData() {
             invoices.push_back(Invoice(id, patientId, medFee));
         }
         fInv.close();
-    }
-    else {
+    } else {
         cout << "- Chua co file " << invoiceFile << " (Se tao moi khi luu)\n";
     }
 
@@ -153,6 +170,7 @@ void Database::loadAllData() {
                 qty = stoi(qtyStr); 
                 price = stod(priceStr); 
             } catch (...) {}
+            
             InvoiceDetail detail(dId, iId , sId, qty, price);
             for (auto& inv : invoices) { 
                 if (inv.getId() == iId) {
@@ -162,10 +180,13 @@ void Database::loadAllData() {
             }
         }
         fDetail.close();
-    }
-    else {
+    } else {
         cout << "- Chua co file " << invoiceDetailsFile << " (Se tao moi khi luu)\n";
     }
+
+    // ==========================================
+    // 4. USERS (BST)
+    // ==========================================
     ifstream fUser(userFile);
     if (fUser.is_open()) {
         string line;
@@ -181,15 +202,20 @@ void Database::loadAllData() {
             getline(ss, fullName, ';');
             getline(ss, role, ';');
             getline(ss, activestr, ';');
+            
             bool isActive = false;
             if (activestr == "1" || activestr == "true") { isActive = true; }
-            users.push_back(User(id, Username, pass, fullName, role, isActive));
+            
+            users.insert(id, User(id, Username, pass, fullName, role, isActive));
         }
         fUser.close();
     } else {
         cout << "- Chua co file " << userFile << " (Se tao moi khi luu)\n";
     }
 
+    // ==========================================
+    // 5. MEDICINES (BST)
+    // ==========================================
     ifstream fMed(medicineFile);
     if (fMed.is_open()) {
         string line;
@@ -207,10 +233,14 @@ void Database::loadAllData() {
             double price = 0.0;
             try { price = stod(priceStr); } catch (...) {}
 
-            medicines.push_back(Medicine(id, name, price, dosage));
+            medicines.insert(id, Medicine(id, name, price, dosage));
         }
         fMed.close();
     }
+
+    // ==========================================
+    // 6. SERVICES (BST)
+    // ==========================================
     ifstream fSrv(serviceFile);
     if (fSrv.is_open()) {
         string line;
@@ -227,10 +257,14 @@ void Database::loadAllData() {
             double price = 0.0;
             try { price = stod(priceStr); } catch (...) {}
 
-            services.push_back(Service(id, name, price));
+            services.insert(id, Service(id, name, price));
         }
         fSrv.close();
     }
+
+    // ==========================================
+    // 7. APPOINTMENTS (GIỮ NGUYÊN VECTOR)
+    // ==========================================
     ifstream fAppt(appointmentFile);
     if (fAppt.is_open()) {
         string line;
@@ -252,6 +286,9 @@ void Database::loadAllData() {
         fAppt.close();
     }
  
+    // ==========================================
+    // 8. MEDICAL RECORDS & PRESCRIPTIONS (VECTOR)
+    // ==========================================
     ifstream fMedRec(medicalRecordFile);
     if (fMedRec.is_open()) {
         string line;
@@ -270,6 +307,7 @@ void Database::loadAllData() {
         }
         fMedRec.close();
     }
+
     ifstream fPresc("data_prescription_details.csv");
     if (fPresc.is_open()) {
         string line;
@@ -279,7 +317,6 @@ void Database::loadAllData() {
             string rId, mId, dosage, qtyStr;
 
             getline(ss, rId, ';');       
-
             getline(ss, mId, ';');       
             getline(ss, dosage, ';');    
             getline(ss, qtyStr, ';');    
@@ -287,11 +324,10 @@ void Database::loadAllData() {
             int qty = 0;
             try { qty = stoi(qtyStr); } catch (...) {}
 
-            PrescriptionDetail detail = {mId, dosage, qty};
-
             for (auto& record : medicalRecords){
                 if (record.getRecordId() == rId){
-                    record.addMedicine(detail.medicineId, detail.dosage, detail.quantity);
+                    // Sửa lại cách truyền hàm addMedicine dựa trên cấu trúc cũ
+                    record.addMedicine(mId, dosage, qty);
                     break;
                 }
             }
@@ -300,8 +336,6 @@ void Database::loadAllData() {
     } else {
         std::cout << "- Chua co file data_prescription_details.csv" << endl;
     }
-    
-
 
     cout << "-> Tai du lieu hoan tat!" << endl;
 }
@@ -311,15 +345,18 @@ void Database::loadAllData() {
 
 
 void Database::saveAllData() {
-
     cout << "Dang luu co so du lieu..." << endl;
     
-   ofstream fsrv(serviceFile);
+    // ==========================================
+    // 1. SERVICES (ĐÃ CHUYỂN SANG BST)
+    // ==========================================
+    ofstream fsrv(serviceFile);
     if (fsrv.is_open()) {
-        for (const auto& srv : services) {
-            fsrv << srv.getId() << ";"
-                 << srv.getServiceName() << ";"
-                 << srv.getPrice() << "\n";
+        vector<Service*> allSrv = services.getAllPointers();
+        for (size_t i = 0; i < allSrv.size(); i++) {
+            fsrv << allSrv[i]->getId() << ";"
+                 << allSrv[i]->getServiceName() << ";"
+                 << allSrv[i]->getPrice() << "\n";
         }
         fsrv.close();
     }
@@ -338,22 +375,26 @@ void Database::saveAllData() {
         fappt.close();
     }
 
+    // ==========================================
+    // 3. MEDICINES (ĐÃ CHUYỂN SANG BST)
+    // ==========================================
     ofstream fmed(medicineFile);
     if (fmed.is_open()) {
-        for (const auto& med : medicines) {
-            fmed << med.getMedicineId() << ";"
-                 << med.getMedicineName() << ";"
-                 << med.getUnitPrice() << ";"
-                 << med.getDosage() << "\n";
+        vector<Medicine*> allMed = medicines.getAllPointers();
+        for (size_t i = 0; i < allMed.size(); i++) {
+            fmed << allMed[i]->getMedicineId() << ";"
+                 << allMed[i]->getMedicineName() << ";"
+                 << allMed[i]->getUnitPrice() << ";"
+                 << allMed[i]->getDosage() << "\n";
         }
         fmed.close();
     }
+
     ofstream fMedRec(medicalRecordFile);
     ofstream fPresc("data_prescription_details.csv"); 
 
     if (fMedRec.is_open() && fPresc.is_open()) {
         for (const auto& record : medicalRecords) {
-            
             fMedRec << record.getRecordId() << ";"
                     << record.getAppointmentId() << ";"
                     << record.getSymptoms() << ";"
@@ -369,48 +410,65 @@ void Database::saveAllData() {
         fMedRec.close();
         fPresc.close();
     }
-  std::ofstream fDoc(doctorFile);
-    if (fDoc.is_open()) {
-        for (const auto& doc : doctors) {
-            fDoc << doc.getId() << ";"
-                 << doc.getFullName() << ";"
-                 << doc.getDateOfBirth() << ";"
-                 << doc.getGender() << ";"
-                 << doc.getPhoneNumber() << ";"
-                 << doc.getSpecialty() << ";"
-                 << doc.getYearsOfExperience() << "\n";
-        fDoc.close();
-    }
-    std::ofstream fSched(doctorScheduleFile); 
-    if (fSched.is_open()) {
-        for (const auto& doc : doctors) {
-            const std::vector<WorkShift>& sched = doc.getSchedule();
 
+    // ==========================================
+    // 5. DOCTORS & SCHEDULES
+    // ==========================================
+    std::ofstream fDoc(doctorFile);
+    std::ofstream fSched(doctorScheduleFile); 
+
+    if (fDoc.is_open() && fSched.is_open()) {
+        vector<Doctor*> allDocs = doctors.getAllPointers();
+        
+        for (size_t i = 0; i < allDocs.size(); i++) {
+            // Ghi file Doctors
+            fDoc << allDocs[i]->getId() << ";"
+                 << allDocs[i]->getFullName() << ";"
+                 << allDocs[i]->getDateOfBirth() << ";"
+                 << allDocs[i]->getGender() << ";"
+                 << allDocs[i]->getPhoneNumber() << ";"
+                 << allDocs[i]->getSpecialty() << ";"
+                 << allDocs[i]->getYearsOfExperience() << "\n";
+            
+            // Ghi file Schedules (Lịch trực)
+            const std::vector<WorkShift>& sched = allDocs[i]->getSchedule();
             for (size_t j = 0; j < sched.size(); j++) {
-                // Ghi theo cấu trúc: Mã BS ; Thứ ; Ca
-                fSched << doc.getId() << ";"
+                fSched << allDocs[i]->getId() << ";"
                        << sched[j].dayOfWeek << ";"
                        << sched[j].timeSlot << "\n";
             }
         }
+        fDoc.close();
         fSched.close();
     }
+
+    // ==========================================
+    // 6. USERS (ĐÃ CHUYỂN SANG BST)
+    // ==========================================
     ofstream fUser(userFile);
     if (fUser.is_open()) {
-        for (const auto& u : users) {
-            fUser << u.getId() << ";"
-                  << u.getUsername() << ";"
-                  << u.getPassword() << ";"
-                  << u.getFullName() << ";"
-                  << u.getRole() << ";"
-                  // Ép kiểu bool (true/false) thành chuỗi ("1"/"0")
-                  << (u.getIsActive() ? "1" : "0") << "\n";
+        vector<User*> allUsers = users.getAllPointers();
+        for (size_t i = 0; i < allUsers.size(); i++) {
+            fUser << allUsers[i]->getId() << ";"
+                  << allUsers[i]->getUsername() << ";"
+                  << allUsers[i]->getPassword() << ";"
+                  << allUsers[i]->getFullName() << ";"
+                  << allUsers[i]->getRole() << ";"
+                  << (allUsers[i]->getIsActive() ? "1" : "0") << "\n";
         }
         fUser.close();
     }
-ofstream fPat(patientFile);
+
+    // ==========================================
+    // 7. PATIENTS (BST )
+    // ==========================================
+    ofstream fPat(patientFile);
     if (fPat.is_open()) {
-        for (const auto& pat : patients) {
+        vector<Patient**> allPats = patients.getAllPointers();
+        for (size_t i = 0; i < allPats.size(); i++) {
+            // Phá vỏ con trỏ cấp 2 để lấy con trỏ Patient* thật
+            Patient* pat = *(allPats[i]); 
+            
             if (Inpatient* inpat = dynamic_cast<Inpatient*>(pat)) {
                 fPat << "NoiTru;"
                      << inpat->getId() << ";"
@@ -420,13 +478,11 @@ ofstream fPat(patientFile);
                      << inpat->getPhoneNumber() << ";"
                      << inpat->getMedicalRecordId() << ";"
                      << inpat->getInsuranceDiscount() << ";"
-                     
                      << inpat->getAdmissionDate() << ";"
                      << inpat->getDischargeDate() << ";"
                      << inpat->getRoomNumber() << ";"
                      << inpat->getBedNumber() << "\n";
             } 
-            // Ép kiểu xuống Ngoại trú để lấy các biến riêng (Ngày hẹn, Phòng khám)
             else if (Outpatient* outpat = dynamic_cast<Outpatient*>(pat)) {
                 fPat << "NgoaiTru;"
                      << outpat->getId() << ";"
@@ -436,7 +492,6 @@ ofstream fPat(patientFile);
                      << outpat->getPhoneNumber() << ";"
                      << outpat->getMedicalRecordId() << ";"
                      << outpat->getInsuranceDiscount() << ";"
-
                      << outpat->getAppointmentDate() << ";"
                      << outpat->getClinicRoom() << "\n";
             }
@@ -448,13 +503,11 @@ ofstream fPat(patientFile);
 
     if (fInv.is_open() && fInvDetail.is_open()) {
         for (const auto& inv : invoices) {
-
             fInv << inv.getId() << ";"
                  << inv.getPatientId() << ";"
                  << inv.getMedicineFee() << "\n";
 
             for (const auto& detail : inv.getDetails()) {
-                
                 fInvDetail << detail.getDetailId() << ";"
                            << inv.getId() << ";"
                            << detail.getServiceId() << ";"
@@ -465,33 +518,27 @@ ofstream fPat(patientFile);
         fInv.close();
         fInvDetail.close();
     }
-    }
 }
 Doctor* Database::findDoctorById(string id) {
-    for (size_t i = 0; i < doctors.size(); i++) {
-        if (doctors[i].getId() == id) {
-            return &doctors[i];
-        }
-    }
-    return nullptr;
+    return doctors.search(id);
 }
 
 // 2. Tìm Bệnh nhân
 Patient* Database::findPatientById(string id) {
-    for (size_t i = 0; i < patients.size(); i++) {
-        if (patients[i]->getId() == id) {
-            return patients[i];
-        }
-    }
+   Patient** p = patients.search(id); 
+    if (p != nullptr) { return *p;}
     return nullptr;
 }
 vector<Patient*> Database::searchPatients(string keyword) {
-    vector<Patient*> results;
-    for (size_t i = 0; i < patients.size(); i++) {
-        string id = patients[i]->getId();
-        string name = patients[i]->getFullName();
+   vector<Patient*> results;
+    vector<Patient**> allPats = patients.getAllPointers();
+    for (size_t i = 0; i < allPats.size(); i++) {
+        Patient* pat = *(allPats[i]); 
+        string id = pat->getId();
+        string name = pat->getFullName();
+        // Nếu ID khớp chính xác HOẶC Tên có chứa từ khóa
         if (id == keyword || name.find(keyword) != string::npos) {
-            results.push_back(patients[i]);
+            results.push_back(pat);
         }
     }
     
@@ -499,12 +546,7 @@ vector<Patient*> Database::searchPatients(string keyword) {
 }
 // 3. Tìm Thuốc
 Medicine* Database::findMedicineById(string id) {
-    for (size_t i = 0; i < medicines.size(); i++) {
-        if (medicines[i].getMedicineId() == id){
-            return &medicines[i];
-        }
-    }
-    return nullptr;
+    return medicines.search(id);
 }
 // 4.tim cuoc hen
 Appointment* Database::findAppointmentById(string id) {
@@ -525,37 +567,37 @@ MedicalRecord* Database::findMedicalRecordById(string id){
     return nullptr;
 }
 void Database::deleteDoctor(string id) {
-    for (size_t i = 0; i < doctors.size(); i++) {
-        if (doctors[i].getId() == id) {
-            // Xóa phần tử tại vị trí thứ i
-            doctors.erase(doctors.begin() + i);
-            cout << "=> Da xoa Bac si thanh cong!\n";
-            return;
-        }
+    // Gọi thẳng hàm remove của Cây. Nếu xóa thành công nó sẽ trả về true.
+    if (doctors.remove(id)) {
+        cout << "=> Da xoa Bac si thanh cong!\n";
+    } else {
+        cout << "Loi: Khong tim thay ID Bac si nay!\n";
     }
-    cout << "Loi: Khong tim thay ID Bac si nay!\n";
 }
 
 void Database::deleteMedicine(string id) {
-    for (size_t i = 0; i < medicines.size(); i++) {
-        if (medicines[i].getMedicineId() == id) {
-            medicines.erase(medicines.begin() + i);
-            cout << "=> Da xoa Thuoc thanh cong!\n";
-            return;
-        }
+    if (medicines.remove(id)) {
+        cout << "=> Da xoa Thuoc thanh cong!\n";
+    } else {
+        cout << "Loi: Khong tim thay ID Thuoc!\n";
     }
-    cout << "Loi: Khong tim thay ID Thuoc!\n";
 }
-void Database::deletePatient(string id){
-    for (size_t i = 0; i < patients.size(); i++) {
-        if (patients[i]->getId() == id) {
-            delete patients[i]; 
-            patients.erase(patients.begin() + i); 
-            cout << "=> Da xoa Benh nhan thanh cong!\n";
-            return;
-        }
+
+void Database::deletePatient(string id) {
+    // BƯỚC 1: Phải tìm được con trỏ Patient* đang giữ vùng nhớ (new)
+    Patient* pat = findPatientById(id);
+    
+    if (pat != nullptr) {
+        // BƯỚC 2: Gọi delete để tiêu hủy vùng nhớ Inpatient/Outpatient
+        delete pat; 
+        
+        // BƯỚC 3: Xóa cái Node (lá cây) đang chứa cái con trỏ rỗng đó đi
+        patients.remove(id); 
+        
+        cout << "=> Da xoa Benh nhan thanh cong!\n";
+    } else {
+        cout << "Loi: Khong tim thay ID Benh nhan!\n";
     }
-    cout << "Loi: Khong tim thay ID Benh nhan!\n";
 }
 void Database::updateDoctor(string id) {
     Doctor* doc = findDoctorById(id);
@@ -735,19 +777,20 @@ void Database::addDoctor() {
 
         newDoctor.setWorkSchedule(day, shift);
     }
-    doctors.push_back(newDoctor);
+    doctors.insert(id,newDoctor);
     cout << "=> Da them Bac si thanh cong!\n";
 }
 
 void Database::showAllDoctors() const {
     cout << "\n--- DANH SACH BAC SI ---\n";
-    if (doctors.empty()) {
+    if (doctors.isEmpty()) {
         cout << "Chua co du lieu!\n";
         return;
     }
-    for (size_t i = 0; i < doctors.size(); i++) {
+    vector<Doctor*> allDocs = doctors.getAllPointers();
+    for (size_t i = 0; i < allDocs.size(); i++){
         cout << i + 1 << ". ";
-        doctors[i].displayData();
+        allDocs[i]->displayData();
     }
 }
 void Database::addMedicine() {
@@ -786,19 +829,20 @@ void Database::addMedicine() {
     cout << "Nhap Lieu dung / Cach dung: ";
     getline(cin, dosage); sanitizeInput(dosage);
 
-    medicines.push_back(Medicine(id, name, price, dosage));
+    medicines.insert(id,Medicine(id, name, price, dosage));
     cout << "=> Da them Thuoc thanh cong!\n";
 }
 
 void Database::showAllMedicine() const {
     cout << "\n--- DANH SACH THUOC ---\n";
-    if (medicines.empty()) {
+    if (medicines.isEmpty()) {
         cout << "Chua co du lieu!\n";
         return;
     }
-    for (size_t i = 0; i < medicines.size(); i++) {
+    vector<Medicine*> allMeds = medicines.getAllPointers();
+    for (size_t i = 0; i < allMeds.size(); i++){
         cout << i + 1 << ". ";
-        medicines[i].displayData(); 
+        allMeds[i]->displayData(); 
     }
 }
 void Database::addPatient() {
@@ -846,14 +890,14 @@ void Database::addPatient() {
         cout << "Nhap So giuong: "; getline(cin, bed); sanitizeInput(bed);
 
         // Tạo đối tượng Nội trú và đẩy con trỏ vào mảng
-        patients.push_back(new Inpatient(id, name, dob, gender, phone, recordId, discount, admDate, disDate, room, bed));
+        patients.insert(id,new Inpatient(id, name, dob, gender, phone, recordId, discount, admDate, disDate, room, bed));
         cout << "=> Da them Benh nhan Noi tru thanh cong!\n";
 
     } else if (choice == "2") {
         string apptDate, clinic;
         cout << "Nhap Ngay hen kham: "; getline(cin, apptDate); sanitizeInput(apptDate);
         cout << "Nhap Phong kham (VD: Khoa Noi, Phong 102): "; getline(cin, clinic); sanitizeInput(clinic);
-        patients.push_back(new Outpatient(id, name, dob, gender, phone, recordId, discount, apptDate, clinic));
+        patients.insert(id,new Outpatient(id, name, dob, gender, phone, recordId, discount, apptDate, clinic));
         cout << "=> Da them Benh nhan Ngoai tru thanh cong!\n";
         
     } else {
@@ -863,30 +907,31 @@ void Database::addPatient() {
 
 void Database::showAllPatients() const {
     cout << "\n--- DANH SACH BENH NHAN ---\n";
-    if (patients.empty()) {
+    if (patients.isEmpty()) {
         cout << "Chua co du lieu!\n";
         return;
     }
-    for (size_t i = 0; i < patients.size(); i++) {
+    vector<Patient**> allPats = patients.getAllPointers();
+    for (size_t i = 0; i < allPats.size(); i++) {
         cout << i + 1 << ". ";
-        patients[i]->displayData(); 
+        (*allPats[i])->displayData();
     }
 }
 
 bool Database::addInpatientFromQT(string id, string name, string dob, string gender, string phone, string recordId, double discount, string admDate, string disDate, string room, string bed) {
     if (findPatientById(id) != nullptr) return false;
-    patients.push_back(new Inpatient(id, name, dob, gender, phone, recordId, discount, admDate, disDate, room, bed));
+    patients.insert(id,new Inpatient(id, name, dob, gender, phone, recordId, discount, admDate, disDate, room, bed));
     return true;
 }
 
 bool Database::addOutpatientFromQT(string id, string name, string dob, string gender, string phone, string recordId, double discount, string apptDate, string clinic) {
     if (findPatientById(id) != nullptr) return false;
-    patients.push_back(new Outpatient(id, name, dob, gender, phone, recordId, discount, apptDate, clinic));
+    patients.insert(id,new Outpatient(id, name, dob, gender, phone, recordId, discount, apptDate, clinic));
     return true;
 }
 bool Database::addDoctorFromQT(string id, string fullName, string dob, string gender, string phone, string specialty, int expYears){
     if(findDoctorById(id) !=nullptr) return false;
-    doctors.push_back(Doctor(id, fullName, dob ,gender ,phone , specialty,expYears));
+    doctors.insert(id,Doctor(id, fullName, dob ,gender ,phone , specialty,expYears));
     return true; 
 }
 bool Database::addShiftToDoctorFromQT(string doctorId, string day, string time) {
@@ -906,21 +951,26 @@ bool Database::addShiftToDoctorFromQT(string doctorId, string day, string time) 
         return 2;
     } 
     else {
-        medicines.push_back(Medicine(medicineId, medicineName, unitPrice, dosage, addQty));
+        medicines.insert(medicineId,Medicine(medicineId, medicineName, unitPrice, dosage, addQty));
         
         return 1;
     }
  }
- vector<Doctor*> Database::getAvailableDoctors(string day, string shift){
+vector<Doctor*> Database::getAvailableDoctors(string day, string shift) {
     vector<Doctor*> availableDocs;
-    for (size_t i = 0; i < doctors.size(); i++) {
-        for (const auto& w : doctors[i].getSchedule()) {
+    // 1. Kéo toàn bộ danh bạ con trỏ Bác sĩ từ Cây ra
+    vector<Doctor*> allDocs = doctors.getAllPointers();
+    // 2. Duyệt qua mảng con trỏ này
+    for (size_t i = 0; i < allDocs.size(); i++) {
+        for (const auto& w : allDocs[i]->getSchedule()) {
             if (w.dayOfWeek == day && w.timeSlot == shift) {
-                availableDocs.push_back(&doctors[i]);
+                // allDocs[i] bản chất đã là Doctor*, nên nhét thẳng vào mảng luôn
+                availableDocs.push_back(allDocs[i]);
                 break;
             }
         }
     }
+    
     return availableDocs;
 }
 int Database::bookAppointmentFromQT(string patientId, string doctorId, string receptionistId, string day, string time) {
@@ -1053,12 +1103,13 @@ vector<MedicalRecord*> Database::getPatientHistory(string patientId) {
 //login 
 User* Database::loginFromQT(string username, string password) {
     // 1. Quét toàn bộ mảng users để tìm tài khoản
-    for (size_t i = 0; i < users.size(); i++) {
-        if (users[i].getUsername() == username) {
+       vector<User*> allusers = users.getAllPointers();
+    for (size_t i = 0; i < allusers.size(); i++) {
+        if (allusers[i]->getUsername() == username) {
             
             // 2. Tìm thấy tài khoản -> Gọi hàm authenticate (bcrypt)
-            if (users[i].authenticate(password)) {
-                return &users[i];
+            if (allusers[i]->authenticate(password)) {
+                return allusers[i];
             } else {
                 return nullptr; 
             }
@@ -1068,35 +1119,44 @@ User* Database::loginFromQT(string username, string password) {
 }
 // Hàm này nằm trong Database.cpp
 int Database::addUserFromQT(string id, string username, string plainPassword, string fullName, string role) {
-    // 1. Quét mảng users để kiểm tra trùng lặp ID hoặc Username
-    for (const auto& u : users) {
-        if (u.getId() == id || u.getUsername() == username) {
-            return -1; // Báo lỗi trùng lặp
+    // 1. Kiểm tra trùng lặp ID: Tận dụng hàm search của Cây để tìm siêu tốc O(log n)
+    if (users.search(id) != nullptr) {
+        return -1; // Báo lỗi trùng lặp ID
+    }
+    // 2. Kiểm tra trùng lặp Username: Cây bị mù với Username nên phải quét danh bạ O(n)
+    vector<User*> allUsers = users.getAllPointers();
+    for (size_t i = 0; i < allUsers.size(); i++) {
+        if (allUsers[i]->getUsername() == username) {
+            return -1; // Báo lỗi trùng lặp Username
         }
     }
-    // 2. Khởi tạo đối tượng User mới. Tạm thời để trống phần passwordHash
+    // 3. Khởi tạo đối tượng User mới. Tạm thời để trống phần passwordHash
     User newUser(id, username, "", fullName, role, true);
     newUser.setPassword(plainPassword);
-    users.push_back(newUser);
+    // 4. Đưa User mới lên Cây
+    users.insert(id, newUser); 
     return 1;
 }
 int Database::addDoctorWithAccount(string id, string name, string dob, string gender, string phone, string specialty, int expYears, string username, string plainPassword) {
-    
-    // 1. Kiểm tra trùng lặp ID và Username
-    for (const auto& doc : doctors) {
-        if (doc.getId() == id) return -1;
+   
+     if (doctors.search(id) != nullptr) {
+        return -1; // Báo lỗi trùng lặp ID
     }
-    for (const auto& u : users) {
-        if (u.getUsername() == username) return -2;
+    // 2. Kiểm tra trùng lặp Username: Cây bị mù với Username nên phải quét danh bạ O(n)
+    vector<Doctor*> allDocs = doctors.getAllPointers();
+    for (size_t i = 0; i < allDocs.size(); i++) {
+        if (allDocs[i]->getFullName() == username) {
+            return -2; // Báo lỗi trùng lặp Username
+        }
     }
 
     // 2. LỆNH PUSH_BACK ĐÃ ĐƯỢC SỬA LỖI (Truyền đủ 7 tham số)
-    doctors.push_back(Doctor(id, name, dob, gender, phone, specialty, expYears));
+    doctors.insert(id,Doctor(id, name, dob, gender, phone, specialty, expYears));
 
     // 3. TẠO TÀI KHOẢN KÈM BĂM MẬT KHẨU
     User newAccount(id, username, "", name, "Doctor", true); 
     newAccount.setPassword(plainPassword); 
-    users.push_back(newAccount);
+    users.insert(id,newAccount);
 
     return 1;
 }
