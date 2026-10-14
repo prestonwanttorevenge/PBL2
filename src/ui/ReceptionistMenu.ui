@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>ReceptionistMenu</class>
+ <widget class="QMainWindow" name="ReceptionistMenu">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1100</width>
+    <height>700</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Giao Diện Lễ Tân - Receptionist Menu</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+
+   <!-- PHẦN ĐĂNG KÝ / ĐẶT LỊCH -->
+   <widget class="QLineEdit" name="txtPatientId">
+    <property name="geometry"><rect><x>10</x><y>10</y><width>120</width><height>30</height></rect></property>
+    <property name="placeholderText"><string>Mã Bệnh nhân</string></property>
+   </widget>
+   <widget class="QLineEdit" name="txtPatientName">
+    <property name="geometry"><rect><x>140</x><y>10</y><width>180</width><height>30</height></rect></property>
+    <property name="placeholderText"><string>Họ và Tên</string></property>
+   </widget>
+   <widget class="QLineEdit" name="txtPatientPhone">
+    <property name="geometry"><rect><x>330</x><y>10</y><width>120</width><height>30</height></rect></property>
+    <property name="placeholderText"><string>Số điện thoại</string></property>
+   </widget>
+   <widget class="QRadioButton" name="radioNoiTru">
+    <property name="geometry"><rect><x>10</x><y>50</y><width>100</width><height>30</height></rect></property>
+    <property name="text"><string>Nội Trú</string></property>
+   </widget>
+   <widget class="QPushButton" name="btnRegisterPatient">
+    <property name="geometry"><rect><x>300</x><y>50</y><width>150</width><height>30</height></rect></property>
+    <property name="text"><string>Đăng Ký Bệnh Nhân Mới</string></property>
+   </widget>
+
+   <widget class="QComboBox" name="cbDay">
+    <property name="geometry"><rect><x>10</x><y>110</y><width>120</width><height>30</height></rect></property>
+    <item><property name="text"><string>Thứ 2</string></property></item>
+    <item><property name="text"><string>Thứ 3</string></property></item>
+    <item><property name="text"><string>Thứ 4</string></property></item>
+    <item><property name="text"><string>Thứ 5</string></property></item>
+    <item><property name="text"><string>Thứ 6</string></property></item>
+    <item><property name="text"><string>Thứ 7</string></property></item>
+    <item><property name="text"><string>Chủ nhật</string></property></item>
+   </widget>
+   <widget class="QComboBox" name="cbShift">
+    <property name="geometry"><rect><x>140</x><y>110</y><width>100</width><height>30</height></rect></property>
+    <item><property name="text"><string>Sáng</string></property></item>
+    <item><property name="text"><string>Chiều</string></property></item>
+    <item><property name="text"><string>Tối</string></property></item>
+   </widget>
+   <widget class="QComboBox" name="cbDoctor">
+    <property name="geometry"><rect><x>250</x><y>110</y><width>200</width><height>30</height></rect></property>
+   </widget>
+   <widget class="QPushButton" name="btnBookAppointment">
+    <property name="geometry"><rect><x>10</x><y>150</y><width>440</width><height>40</height></rect></property>
+    <property name="text"><string>Đặt Lịch Hẹn Khám</string></property>
+   </widget>
+
+   <!-- PHẦN HÓA ĐƠN & TRA CỨU -->
+   <widget class="QLineEdit" name="txtPatientId_Invoice">
+    <property name="geometry"><rect><x>10</x><y>250</y><width>160</width><height>30</height></rect></property>
+    <property name="placeholderText"><string>Mã Bệnh Nhân (Hóa đơn)</string></property>
+   </widget>
+   <widget class="QPushButton" name="btnCreateInvoice">
+    <property name="geometry"><rect><x>180</x><y>250</y><width>270</width><height>30</height></rect></property>
+    <property name="text"><string>Lập Hóa Đơn &amp;&amp; Thanh Toán</string></property>
+   </widget>
+
+   <widget class="QLineEdit" name="txtSearchPatient">
+    <property name="geometry"><rect><x>10</x><y>310</y><width>310</width><height>30</height></rect></property>
+    <property name="placeholderText"><string>Nhập Mã hoặc Tên để tìm kiếm...</string></property>
+   </widget>
+   <widget class="QPushButton" name="btnSearchPatient">
+    <property name="geometry"><rect><x>330</x><y>310</y><width>120</width><height>30</height></rect></property>
+    <property name="text"><string>Tra Cứu</string></property>
+   </widget>
+
+   <widget class="QPushButton" name="btnLogout">
+    <property name="geometry"><rect><x>10</x><y>640</y><width>120</width><height>40</height></rect></property>
+    <property name="text"><string>Đăng Xuất</string></property>
+   </widget>
+
+   <!-- BẢNG DỮ LIỆU BÊN PHẢI -->
+   <widget class="QTableWidget" name="tablePatients">
+    <property name="geometry"><rect><x>480</x><y>10</y><width>600</width><height>670</height></rect></property>
+   </widget>
+
+  </widget>
+ </widget>
+</ui>

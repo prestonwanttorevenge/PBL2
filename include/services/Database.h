@@ -4,52 +4,54 @@
 #include <vector>
 #include "BST.h"
 #include <string>
-#include "Doctor.h"
-#include "Patient.h"
-#include "Inpatient.h" 
-#include "Outpatient.h"
-#include "Medicine.h" 
-#include "Invoice.h"
-#include "User.h"
-#include "Appointment.h"
-#include "MedicalRecord.h"
-#include "Service.h"
+#include "models/Doctor.h"
+#include "models/Patient.h"
+#include "models/Inpatient.h"
+#include "models/Outpatient.h"
+#include "models/Medicine.h"
+#include "models/Invoice.h"
+#include "models/User.h"
+#include "models/Appointment.h"
+#include "models/MedicalRecord.h"
+#include "models/Service.h"
+
+using namespace std;
 
 class Database {
 private:
     BST<Doctor> doctors;
-    BST<Patient*> patients; 
-    std::vector<Invoice> invoices;
+    BST<Patient*> patients;
+    vector<Invoice> invoices;
     BST<Medicine> medicines;
- 
+
     BST<User> users;
-    std::vector<Appointment> appointments;
-    std::vector<MedicalRecord> medicalRecords;
+    vector<Appointment> appointments;
+    vector<MedicalRecord> medicalRecords;
     BST<Service> services;
 
-    const std::string doctorFile = "data_doctors.csv";
-    const std::string patientFile = "data_patients.csv";
-    const std::string invoiceFile = "data_invoice.csv";
-    const std::string invoiceDetailsFile = "data_invoice_details.csv";
-    const std::string medicineFile = "data_medicine.csv";
-    const std::string userFile = "data_users.csv";
-    const std::string appointmentFile = "data_appointments.csv";
-    const std::string medicalRecordFile = "data_medical_records.csv";
-    const std::string serviceFile = "data_services.csv";
-    const std::string doctorScheduleFile = "data_doctor_schedules.csv";
+    const std::string doctorFile = "data/doctors.csv";
+    const std::string patientFile = "data/patients.csv";
+    const std::string invoiceFile = "data/invoices.csv";
+    const std::string invoiceDetailsFile = "data/data_invoice_details.csv";
+    const std::string medicineFile = "data/medicines.csv";
+    const std::string userFile = "data/users.csv";
+    const std::string appointmentFile = "data/data_appointments.csv";
+    const std::string medicalRecordFile = "data/medical_records.csv";
+    const std::string serviceFile = "data/data_services.csv";
+    const std::string doctorScheduleFile = "data/data_doctor_schedules.csv";
     void sanitizeInput(string& input);
 public:
 
     Database();
     Database(Database&);
     ~Database();
-    
+
     Doctor* findDoctorById(string id);
     Patient* findPatientById(string id);
     Medicine* findMedicineById(string id);
     Appointment* findAppointmentById(string id);
-    MedicalRecord* findMedicalRecordById(string id); 
-    std::vector<Patient*> searchPatients(std::string keyword);
+    MedicalRecord* findMedicalRecordById(string id);
+    vector<Patient*> searchPatients(string keyword);
 
     BST<User>& getUsers() { return users; }
     BST<Doctor>& getDoctors() { return doctors; }
@@ -57,9 +59,9 @@ public:
     BST<Medicine>& getMedicines() { return medicines; }
     BST<Service>& getServices() { return services; }
 
-    std::vector<Appointment>& getAppointments() { return appointments; }
-    std::vector<Invoice>& getInvoices() { return invoices; }
-    std::vector<MedicalRecord>& getMedicalRecords() { return medicalRecords; }
+    vector<Appointment>& getAppointments() { return appointments; }
+    vector<Invoice>& getInvoices() { return invoices; }
+    vector<MedicalRecord>& getMedicalRecords() { return medicalRecords; }
 
     void deleteDoctor(string id);
     void deleteMedicine(string id);
@@ -74,7 +76,7 @@ public:
     void addDoctor();
     void showAllDoctors() const;
 
-    void addPatient(); 
+    void addPatient();
     void showAllPatients() const;
 
     void addInvoice(const Invoice& inv);
@@ -100,20 +102,19 @@ public:
     bool addDoctorFromQT(string id, string fullName, string dob, string gender, string phone, string specialty, int expYears);
     bool addShiftToDoctorFromQT(string doctorId, string day, string time);
     int addMedicineFromQT(string medicineId,string medicineName,double unitPrice,string dosage,int addQty);
-    bool addPatientFromGUI(std::string id, std::string name, std::string phone, bool isNoiTru);
+    bool addPatientFromGUI(string id, string name, string phone, bool isNoiTru);
     vector<Doctor*> getAvailableDoctors(string day, string shift);
     int bookAppointmentFromQT(string patientId, string doctorId, string receptionistId, string day, string time);
-    int createInvoiceFromQT(std::string patientId, double medFee);
     int createMedicalRecordFromQT(string apptId, string symp, string diag, string notes);
     int prescribeMedicineFromQT(string recordId, string medId, string dosage, int qty);
-    int createInvoiceFromQT(std::string patientId, double& outTotalFee);
-    int addServiceFromQT(std::string id, std::string name, double price);
+    int createInvoiceFromQT(string patientId, double& outTotalFee);
+    int addServiceFromQT(string id, string name, double price);
 
-    std::vector<MedicalRecord*> getPatientHistory(std::string patientId);
-    
+    vector<MedicalRecord*> getPatientHistory(string patientId);
+
     //login
-    User* loginFromQT(std::string username, std::string password);
-    
+    User* loginFromQT(string username, string password);
+
     //admin
     int addUserFromQT(string id, string username, string plainPassword, string fullName, string role);
     int addDoctorWithAccount(string id, string name, string dob, string gender, string phone, string specialty, int expYears, string username, string plainPassword);

@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>AdminMenu</class>
+ <widget class="QMainWindow" name="AdminMenu">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1000</width>
+    <height>650</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Quản Trị Hệ Thống - Admin Menu</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <widget class="QPushButton" name="btnManageUsers">
+    <property name="geometry"><rect><x>10</x><y>10</y><width>120</width><height>35</height></rect></property>
+    <property name="text"><string>Tài Khoản</string></property>
+   </widget>
+   <widget class="QPushButton" name="btnManageDoctors">
+    <property name="geometry"><rect><x>140</x><y>10</y><width>120</width><height>35</height></rect></property>
+    <property name="text"><string>Bác Sĩ</string></property>
+   </widget>
+   <widget class="QPushButton" name="btnManageMedicines">
+    <property name="geometry"><rect><x>270</x><y>10</y><width>120</width><height>35</height></rect></property>
+    <property name="text"><string>Kho Thuốc</string></property>
+   </widget>
+   <widget class="QPushButton" name="btnManageServices">
+    <property name="geometry"><rect><x>400</x><y>10</y><width>120</width><height>35</height></rect></property>
+    <property name="text"><string>Dịch Vụ</string></property>
+   </widget>
+   <widget class="QPushButton" name="btnLogout">
+    <property name="geometry"><rect><x>860</x><y>10</y><width>120</width><height>35</height></rect></property>
+    <property name="text"><string>Đăng Xuất</string></property>
+   </widget>
+
+   <widget class="QStackedWidget" name="stackedWidget">
+    <property name="geometry"><rect><x>10</x><y>60</y><width>970</width><height>570</height></rect></property>
+    <property name="currentIndex"><number>0</number></property>
+
+    <!-- TRANG 1: USERS -->
+    <widget class="QWidget" name="pageUsers">
+     <widget class="QLineEdit" name="txtUserId"><property name="geometry"><rect><x>10</x><y>10</y><width>120</width><height>30</height></rect></property><property name="placeholderText"><string>User ID</string></property></widget>
+     <widget class="QLineEdit" name="txtUserFullName"><property name="geometry"><rect><x>140</x><y>10</y><width>180</width><height>30</height></rect></property><property name="placeholderText"><string>Họ và Tên</string></property></widget>
+     <widget class="QLineEdit" name="txtUsername"><property name="geometry"><rect><x>330</x><y>10</y><width>140</width><height>30</height></rect></property><property name="placeholderText"><string>Username</string></property></widget>
+     <widget class="QLineEdit" name="txtPassword"><property name="geometry"><rect><x>480</x><y>10</y><width>140</width><height>30</height></rect></property><property name="placeholderText"><string>Mật khẩu</string></property></widget>
+     <widget class="QComboBox" name="cbUserRole">
+      <property name="geometry"><rect><x>630</x><y>10</y><width>120</width><height>30</height></rect></property>
+      <item><property name="text"><string>Admin</string></property></item>
+      <item><property name="text"><string>Doctor</string></property></item>
+      <item><property name="text"><string>Receptionist</string></property></item>
+      <item><property name="text"><string>QuanLyKho</string></property></item>
+     </widget>
+     <widget class="QPushButton" name="btnAddUser"><property name="geometry"><rect><x>760</x><y>10</y><width>120</width><height>30</height></rect></property><property name="text"><string>Thêm User</string></property></widget>
+
+     <!-- ĐẢM BẢO THẺ NÀY LÀ QTableWidget -->
+     <widget class="QTableWidget" name="tableUsers"><property name="geometry"><rect><x>10</x><y>50</y><width>950</width><height>500</height></rect></property></widget>
+    </widget>
+
+    <!-- TRANG 2: DOCTORS -->
+    <widget class="QWidget" name="pageDoctors">
+     <widget class="QLineEdit" name="txtDocId"><property name="geometry"><rect><x>10</x><y>10</y><width>90</width><height>30</height></rect></property><property name="placeholderText"><string>Mã BS</string></property></widget>
+     <widget class="QLineEdit" name="txtDocName"><property name="geometry"><rect><x>110</x><y>10</y><width>140</width><height>30</height></rect></property><property name="placeholderText"><string>Họ Tên BS</string></property></widget>
+     <widget class="QLineEdit" name="txtDob"><property name="geometry"><rect><x>260</x><y>10</y><width>100</width><height>30</height></rect></property><property name="placeholderText"><string>Ngày sinh</string></property></widget>
+     <widget class="QComboBox" name="cbGender"><property name="geometry"><rect><x>370</x><y>10</y><width>80</width><height>30</height></rect></property><item><property name="text"><string>Nam</string></property></item><item><property name="text"><string>Nữ</string></property></item></widget>
+     <widget class="QLineEdit" name="txtPhone"><property name="geometry"><rect><x>460</x><y>10</y><width>100</width><height>30</height></rect></property><property name="placeholderText"><string>SĐT</string></property></widget>
+     <widget class="QLineEdit" name="txtDocSpecialty"><property name="geometry"><rect><x>570</x><y>10</y><width>120</width><height>30</height></rect></property><property name="placeholderText"><string>Chuyên khoa</string></property></widget>
+     <widget class="QSpinBox" name="spinExpYears"><property name="geometry"><rect><x>700</x><y>10</y><width>60</width><height>30</height></rect></property></widget>
+     <widget class="QLineEdit" name="txtDocUsername"><property name="geometry"><rect><x>10</x><y>50</y><width>120</width><height>30</height></rect></property><property name="placeholderText"><string>Tên Đăng Nhập</string></property></widget>
+     <widget class="QLineEdit" name="txtDocPassword"><property name="geometry"><rect><x>140</x><y>50</y><width>120</width><height>30</height></rect></property><property name="placeholderText"><string>Mật Khẩu</string></property></widget>
+     <widget class="QPushButton" name="btnAddDoctor"><property name="geometry"><rect><x>270</x><y>50</y><width>150</width><height>30</height></rect></property><property name="text"><string>Thêm Bác Sĩ</string></property></widget>
+
+     <widget class="QTableWidget" name="tableDoctors"><property name="geometry"><rect><x>10</x><y>90</y><width>950</width><height>460</height></rect></property></widget>
+    </widget>
+
+    <!-- TRANG 3: MEDICINES -->
+    <widget class="QWidget" name="pageMedicines">
+     <widget class="QLineEdit" name="txtMedId"><property name="geometry"><rect><x>10</x><y>10</y><width>100</width><height>30</height></rect></property><property name="placeholderText"><string>Mã Thuốc</string></property></widget>
+     <widget class="QLineEdit" name="txtMedName"><property name="geometry"><rect><x>120</x><y>10</y><width>160</width><height>30</height></rect></property><property name="placeholderText"><string>Tên Thuốc</string></property></widget>
+     <widget class="QLineEdit" name="txtDosage"><property name="geometry"><rect><x>290</x><y>10</y><width>140</width><height>30</height></rect></property><property name="placeholderText"><string>Liều lượng</string></property></widget>
+     <widget class="QLineEdit" name="txtMedPrice"><property name="geometry"><rect><x>440</x><y>10</y><width>100</width><height>30</height></rect></property><property name="placeholderText"><string>Đơn giá</string></property></widget>
+     <widget class="QSpinBox" name="spinMedQty"><property name="geometry"><rect><x>550</x><y>10</y><width>70</width><height>30</height></rect></property><property name="value"><number>1</number></property></widget>
+     <widget class="QPushButton" name="btnAddMedicine"><property name="geometry"><rect><x>630</x><y>10</y><width>120</width><height>30</height></rect></property><property name="text"><string>Thêm Thuốc</string></property></widget>
+
+     <widget class="QTableWidget" name="tableMedicines"><property name="geometry"><rect><x>10</x><y>50</y><width>950</width><height>500</height></rect></property></widget>
+    </widget>
+
+    <!-- TRANG 4: SERVICES -->
+    <widget class="QWidget" name="pageServices">
+     <widget class="QLineEdit" name="txtServiceId"><property name="geometry"><rect><x>10</x><y>10</y><width>120</width><height>30</height></rect></property><property name="placeholderText"><string>Mã Dịch Vụ</string></property></widget>
+     <widget class="QLineEdit" name="txtServiceName"><property name="geometry"><rect><x>140</x><y>10</y><width>200</width><height>30</height></rect></property><property name="placeholderText"><string>Tên Dịch Vụ Y Tế</string></property></widget>
+     <widget class="QLineEdit" name="txtServicePrice"><property name="geometry"><rect><x>350</x><y>10</y><width>120</width><height>30</height></rect></property><property name="placeholderText"><string>Giá Dịch Vụ</string></property></widget>
+     <widget class="QPushButton" name="btnAddService"><property name="geometry"><rect><x>480</x><y>10</y><width>140</width><height>30</height></rect></property><property name="text"><string>Thêm Dịch Vụ</string></property></widget>
+
+     <widget class="QTableWidget" name="tableServices"><property name="geometry"><rect><x>10</x><y>50</y><width>950</width><height>500</height></rect></property></widget>
+    </widget>
+
+   </widget>
+  </widget>
+ </widget>
+</ui>

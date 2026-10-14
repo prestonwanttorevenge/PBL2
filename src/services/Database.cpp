@@ -1,8 +1,13 @@
-#include "Database.h"
+#include "services/Database.h"
 #include <fstream>
 #include <sstream>
 #include <iostream>
 #include <string>
+
+Database::Database() {
+    // Để rỗng ở đây
+}
+
 Database::~Database() {
     vector<Patient**> allPatients = patients.getAllPointers();
     // Duyệt qua mảng và tiêu hủy các vùng nhớ con (Inpatient / Outpatient)
@@ -457,6 +462,12 @@ void Database::saveAllData() {
                   << (allUsers[i]->getIsActive() ? "1" : "0") << "\n";
         }
         fUser.close();
+
+        if (users.isEmpty()) {
+        User defaultAdmin("ADMIN01", "admin", "", "Quan Tri Vien", "Admin", true);
+        defaultAdmin.setPassword("admin123"); // Tự băm mật khẩu mã hóa chuẩn
+        users.insert("ADMIN01", defaultAdmin);
+    }
     }
 
     // ==========================================
@@ -1013,16 +1024,6 @@ int Database::bookAppointmentFromQT(string patientId, string doctorId, string re
     appointments.push_back(Appointment(newAppId, patientId, doctorId, receptionistId, day, time, "Cho Kham"));
     return 1; // Thành công
 }
-int Database::createInvoiceFromQT(string patientId, double medFee) {
-    Patient* pat = findPatientById(patientId);
-    if (pat == nullptr) {
-        return -1;
-    }
-    string newInvId = "INV" + to_string(invoices.size() + 1);
-    double finalFee = medFee * (1.0 - pat->getInsuranceDiscount()); 
-    invoices.push_back(Invoice(newInvId, patientId, finalFee));
-    return 1;
-}
 int Database::createMedicalRecordFromQT(string apptId, string symp, string diag, string notes) {
     if(findAppointmentById(apptId) == nullptr) return -1;
     // Tự động sinh mã Bệnh án mới (VD: MR1, MR2)
@@ -1119,8 +1120,14 @@ vector<MedicalRecord*> Database::getPatientHistory(string patientId) {
     return history;
 }
 //login 
-User* Database::loginFromQT(string username, string password) {
-    // 1. Quét toàn bộ mảng users để tìm tài khoản
+    User* Database::loginFromQT(string username, string password) {
+    // CHỐT CHẶN AN TOÀN: Nếu hệ thống chưa có tài khoản nào, tự tạo Admin ngay tại chỗ
+    if (users.isEmpty() && username == "admin" && password == "admin123") {
+        User defaultAdmin("ADMIN01", "admin", "", "Quan Tri Vien", "Admin", true);
+        defaultAdmin.setPassword("admin123");
+        users.insert("ADMIN01", defaultAdmin);
+        return users.search("ADMIN01");
+    }
        vector<User*> allusers = users.getAllPointers();
     for (size_t i = 0; i < allusers.size(); i++) {
         if (allusers[i]->getUsername() == username) {

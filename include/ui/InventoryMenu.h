@@ -2,7 +2,7 @@
 #define INVENTORYMENU_H
 
 #include <QMainWindow>
-#include "Database.h" 
+#include "services/Database.h" // Chuẩn hóa đường dẫn
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class InventoryMenu; }
@@ -13,7 +13,8 @@ class InventoryMenu : public QMainWindow
     Q_OBJECT // Bắt buộc phải có để các nút bấm hoạt động
 
 public:
-    explicit InventoryMenu(QWidget *parent = nullptr);
+    // Đã thêm tham số Database& để khởi tạo biến db
+    explicit InventoryMenu(Database& database, QWidget *parent = nullptr);
     ~InventoryMenu();
 
 private slots:
@@ -23,8 +24,7 @@ private slots:
 
 private:
     Ui::InventoryMenu *ui;
-
-    Database& db; 
+    Database& db; // Biến tham chiếu phải được khởi tạo ở constructor
 };
 
 #endif // INVENTORYMENU_H

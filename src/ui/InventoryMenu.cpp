@@ -1,18 +1,17 @@
-#include "InventoryMenu.h"
+#include "ui/InventoryMenu.h"
 #include "ui_InventoryMenu.h"
+#include "ui/Login.h" // Đã sửa đường dẫn
 #include <QMessageBox>
 #include <stdexcept>
-#include <Login.h>
+
 using namespace std;
-InventoryMenu::InventoryMenu(QWidget *parent, Database *dbPointer) :
-    QMainWindow(parent), ui(new Ui::InventoryMenu), db(dbPointer) {
-    ui->setupUi(this);
-}
 
 // --- HÀM DỰNG (Khởi tạo giao diện) ---
-InventoryMenu::InventoryMenu(QWidget *parent) :
+// Đã gộp thành 1 hàm duy nhất và chuẩn hóa tham số Database& db
+InventoryMenu::InventoryMenu(Database& database, QWidget *parent) :
     QMainWindow(parent),
-    ui(new Ui::InventoryMenu)
+    ui(new Ui::InventoryMenu),
+    db(database) // Khởi tạo biến tham chiếu
 {
     ui->setupUi(this);
 }
@@ -50,13 +49,12 @@ void InventoryMenu::on_btnImportMedicine_clicked()
     }
 
     // 4. Giao việc cho Backend: Thêm thuốc hoặc Cộng dồn số lượng
-
     int result = db.addMedicineFromQT(medId, medName, price, dosage, qty);
 
     // 5. Trả kết quả lên màn hình
     if (result == 1) {
         QMessageBox::information(this, "Thành công", "Đã thêm THUỐC MỚI vào danh mục!");
-    } 
+    }
     else if (result == 2) {
         QMessageBox::information(this, "Thành công", "Thuốc đã tồn tại. Đã CỘNG DỒN số lượng vào kho!");
     }
@@ -73,13 +71,13 @@ void InventoryMenu::on_btnImportMedicine_clicked()
 void InventoryMenu::on_btnLogout_clicked()
 {
     // Hiển thị hộp thoại xác nhận
-    QMessageBox::StandardButton reply = QMessageBox::question(this, "Đăng xuất", 
-                                "Bạn có chắc chắn muốn đăng xuất không?", 
-                                QMessageBox::Yes | QMessageBox::No);
-                                
+    QMessageBox::StandardButton reply = QMessageBox::question(this, "Đăng xuất",
+                                                              "Bạn có chắc chắn muốn đăng xuất không?",
+                                                              QMessageBox::Yes | QMessageBox::No);
+
     if (reply == QMessageBox::Yes) {
-        // Mở lại màn hình Login
-        Login *loginForm = new Login();
+        // Mở lại màn hình Login (đã thêm tham số this->db)
+        Login *loginForm = new Login(this->db);
         loginForm->show();
         this->close(); // Đóng giao diện Quản lý kho
     }

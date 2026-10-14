@@ -1,14 +1,16 @@
 #ifndef ADMINMENU_H
 #define ADMINMENU_H
+
 #include <QMainWindow>
-#include "../services/Database.h"
-#include "../services/AuthService.h"
+#include "services/Database.h"
+#include "services/AuthService.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class AdminMenu; }
 QT_END_NAMESPACE
+
 class AdminMenu : public QMainWindow {
-    Q_OBJECT 
+    Q_OBJECT
 
 public:
     explicit AdminMenu(Database& database, AuthService& authService, QWidget *parent = nullptr);
@@ -16,7 +18,7 @@ public:
 
 private slots:
     void on_btnLogout_clicked();
-    
+
     void on_btnManageDoctors_clicked();
     void on_btnAddDoctor_clicked();
 
@@ -30,11 +32,13 @@ private slots:
     void on_btnAddUser_clicked();
 
 private:
-    Ui::AdminMenu *ui; 
-    Database& db;      
-    AuthService& auth; 
+    Ui::AdminMenu *ui;
+    Database& db;
+    AuthService& auth;
     void refreshDoctorTable();
     void refreshUserTable();
+    void refreshMedicineTable(); // Đã thêm
+    void refreshServiceTable();  // Đã thêm
 };
 
 #endif // ADMINMENU_H

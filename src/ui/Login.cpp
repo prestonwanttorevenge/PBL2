@@ -1,17 +1,28 @@
-#include "Login.h"
+#include "ui/Login.h"
 #include "ui_Login.h"
-// Bắt buộc include các Menu khác để mở form
-#include "DoctorMenu.h"
-#include "ReceptionistMenu.h"
-#include "InventoryMenu.h" 
+#include "ui/AdminMenu.h"
+#include "ui/DoctorMenu.h"
+#include "ui/ReceptionistMenu.h"
+#include "ui/InventoryMenu.h"
 #include <QMessageBox>
-Login::Login(QWidget *parent, Database& dbRef) : 
-    QMainWindow(parent), ui(new Ui::Login), db(dbRef)
+
+using namespace std;
+
+Login::Login(Database& database, QWidget *parent) :
+    QMainWindow(parent),
+    ui(new Ui::Login),
+    db(database),
+    auth(database)
 {
     ui->setupUi(this);
+    this->setAttribute(Qt::WA_DeleteOnClose); // Giải phóng RAM khi đóng form
 }
+
+Login::~Login() {
+    delete ui;
+}
+
 void Login::on_btnLogin_clicked() {
-    // 1. Hút dữ liệu nhập vào
     string username = ui->txtUsername->text().toStdString();
     string password = ui->txtPassword->text().toStdString();
 
@@ -20,51 +31,46 @@ void Login::on_btnLogin_clicked() {
         return;
     }
 
-    // 2. Giao việc cho Backend kiểm tra
     User* loggedInUser = db.loginFromQT(username, password);
 
-    // 3. Xử lý kết quả trả về
     if (loggedInUser == nullptr) {
         QMessageBox::critical(this, "Đăng nhập thất bại", "Sai tài khoản hoặc mật khẩu!");
         return;
     }
 
-    // 4. Kiểm tra trạng thái khóa tài khoản
-    if (loggedInUser->getIsActive() == false) {
+    if (!loggedInUser->getIsActive()) {
         QMessageBox::warning(this, "Tài khoản bị khóa", "Tài khoản của bạn đã bị khóa. Vui lòng liên hệ Admin!");
         return;
     }
 
-    // 5. CHIA NGẢ ĐƯỜNG (ROUTING) DỰA VÀO QUYỀN
-    string role = loggedInUser->getRole(); // Lấy quyền từ object User
+    string role = loggedInUser->getRole();
 
+    // Khởi tạo các Menu & Xóa sạch RAM khi Menu đóng
     if (role == "Admin" || role == "QuanTri") {
-    // Mở màn hình Admin (Quản lý nhân sự, thống kê doanh thu...)
-        AdminMenu *adminMenu = new AdminMenu();
+        AdminMenu *adminMenu = new AdminMenu(this->db, this->auth);
+        adminMenu->setAttribute(Qt::WA_DeleteOnClose);
         adminMenu->show();
-    QMessageBox::information(this, "Hệ thống", "Đăng nhập thành công với quyền Admin!");
-    this->close(); 
-}
-// 5.2. Các quyền nghiệp vụ tiêu chuẩn
-else if (role == "BacSi" || role == "Doctor") {
-    DoctorMenu *docMenu = new DoctorMenu();
-    docMenu->show();
-    this->close();
-} 
-else if (role == "LeTan" || role == "Receptionist") {
-    ReceptionistMenu *recMenu = new ReceptionistMenu();
-    recMenu->show();
-    this->close();
-} 
-else if (role == "QuanLyKho" || role == "DuocSi") {
-    InventoryMenu *invMenu = new InventoryMenu();
-    invMenu->show();
-    this->close();
-} 
-// 5.3. CHỐT CHẶN AN TOÀN (Vô hiệu hóa mọi quyền lạ)
-else {
-    QMessageBox::critical(this, "Lỗi Phân Quyền", "Mã quyền [" + QString::fromStdString(role) + "] không hợp lệ!\nVui lòng liên hệ Quản trị viên để kiểm tra lại cơ sở dữ liệu.");
-    Không this->close()
-}
-
+        this->close();
+    }
+    else if (role == "BacSi" || role == "Doctor") {
+        DoctorMenu *docMenu = new DoctorMenu(this->db, this->auth);
+        docMenu->setAttribute(Qt::WA_DeleteOnClose);
+        docMenu->show();
+        this->close();
+    }
+    else if (role == "LeTan" || role == "Receptionist") {
+        ReceptionistMenu *recMenu = new ReceptionistMenu(this->db, this->auth);
+        recMenu->setAttribute(Qt::WA_DeleteOnClose);
+        recMenu->show();
+        this->close();
+    }
+    else if (role == "QuanLyKho" || role == "DuocSi") {
+        InventoryMenu *invMenu = new InventoryMenu(this->db);
+        invMenu->setAttribute(Qt::WA_DeleteOnClose);
+        invMenu->show();
+        this->close();
+    }
+    else {
+        QMessageBox::critical(this, "Lỗi Phân Quyền", "Quyền không hợp lệ!");
+    }
 }

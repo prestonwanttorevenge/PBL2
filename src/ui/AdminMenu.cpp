@@ -1,23 +1,26 @@
-#include "../../include/ui/AdminMenu.h"
+#include "ui/AdminMenu.h"
 #include "ui_AdminMenu.h"
+#include "ui/Login.h"
 #include <QMessageBox>
 #include <QTableWidgetItem>
-#include "../../include/services/Database.h"
-#include "../../include/services/AuthService.h"
-#include "Login.h"
 #include <string>
 #include <vector>
 
 using std::string;
 using std::vector;
+
 AdminMenu::AdminMenu(Database& database, AuthService& authService, QWidget *parent)
-    : QMainWindow(parent), ui(new Ui::AdminMenu), db(database), auth(authService) 
+    : QMainWindow(parent), ui(new Ui::AdminMenu), db(database), auth(authService)
 {
     ui->setupUi(this);
-    refreshUserTable();
-    refreshDoctorTable();
-    refreshMedicineTable();
-    refreshServiceTable();
+    try {
+        refreshUserTable();
+        refreshDoctorTable();
+        refreshMedicineTable();
+        refreshServiceTable();
+    } catch (...) {
+    }
+    
     ui->stackedWidget->setCurrentIndex(0);
 }
 
@@ -39,7 +42,7 @@ void AdminMenu::on_btnAddUser_clicked() {
     string name = ui->txtUserFullName->text().toStdString();
     string username = ui->txtUsername->text().toStdString();
     string password = ui->txtPassword->text().toStdString();
-    string role = ui->cbUserRole->currentText().toStdString(); // Admin, Receptionist, Inventory, Doctor
+    string role = ui->cbUserRole->currentText().toStdString();
 
     if (id.empty() || name.empty() || username.empty() || password.empty()) {
         QMessageBox::warning(this, "Lỗi nhập liệu", "Vui lòng nhập đầy đủ thông tin tài khoản!");
@@ -81,7 +84,7 @@ void AdminMenu::on_btnAddDoctor_clicked() {
     string username = ui->txtDocUsername->text().toStdString();
     string password = ui->txtDocPassword->text().toStdString();
 
-    if (id.empty() || name.empty() || dob.empty() || phone.empty() || 
+    if (id.empty() || name.empty() || dob.empty() || phone.empty() ||
         spec.empty() || username.empty() || password.empty()) {
         QMessageBox::warning(this, "Lỗi nhập liệu", "Vui lòng điền đầy đủ tất cả các trường thông tin Bác sĩ!");
         return;
@@ -91,15 +94,15 @@ void AdminMenu::on_btnAddDoctor_clicked() {
 
     if (result == -1) {
         QMessageBox::critical(this, "Lỗi", "Mã Bác sĩ (ID) đã tồn tại trong hệ thống!");
-    } 
+    }
     else if (result == -2) {
         QMessageBox::critical(this, "Lỗi", "Tên đăng nhập (Username) đã bị trùng!");
-    } 
+    }
     else if (result == 1) {
         QMessageBox::information(this, "Thành công", "Đã thêm Bác sĩ mới và cấp tài khoản đăng nhập!");
-        
-        refreshDoctorTable(); 
-        refreshUserTable();   
+
+        refreshDoctorTable();
+        refreshUserTable();
         ui->txtDocId->clear();
         ui->txtDocName->clear();
         ui->txtDob->clear();
@@ -118,7 +121,7 @@ void AdminMenu::on_btnAddDoctor_clicked() {
 
 void AdminMenu::on_btnManageMedicines_clicked() {
     ui->stackedWidget->setCurrentIndex(2);
-    refreshMedicineTable(); 
+    refreshMedicineTable();
 }
 
 void AdminMenu::on_btnAddMedicine_clicked() {
@@ -134,10 +137,10 @@ void AdminMenu::on_btnAddMedicine_clicked() {
     }
 
     double price = 0.0;
-    try { 
-        price = stod(priceStr); 
+    try {
+        price = std::stod(priceStr);
     } catch (...) {
-        QMessageBox::warning(this, "Lỗi kiểu dữ liệu", "Đơn giá thuốc phải là số!"); 
+        QMessageBox::warning(this, "Lỗi kiểu dữ liệu", "Đơn giá thuốc phải là số!");
         return;
     }
 
@@ -148,7 +151,7 @@ void AdminMenu::on_btnAddMedicine_clicked() {
     } else if (result == 2) {
         QMessageBox::information(this, "Thành công", "Đã CỘNG DỒN số lượng thuốc vào kho!");
     }
-    
+
     refreshMedicineTable();
     ui->txtMedId->clear();
     ui->txtMedName->clear();
@@ -177,10 +180,10 @@ void AdminMenu::on_btnAddService_clicked() {
     }
 
     double price = 0.0;
-    try { 
-        price = stod(priceStr); 
+    try {
+        price = std::stod(priceStr);
     } catch (...) {
-        QMessageBox::warning(this, "Lỗi kiểu dữ liệu", "Phí dịch vụ phải là số!"); 
+        QMessageBox::warning(this, "Lỗi kiểu dữ liệu", "Phí dịch vụ phải là số!");
         return;
     }
 
@@ -205,11 +208,12 @@ void AdminMenu::on_btnLogout_clicked() {
     QMessageBox::StandardButton reply = QMessageBox::question(
         this, "Đăng xuất", "Bạn có chắc chắn muốn thoát quyền Admin?",
         QMessageBox::Yes | QMessageBox::No
-    );
-    
+        );
+
     if (reply == QMessageBox::Yes) {
         auth.logout();
-        Login *loginForm = new Login(this->db, this->auth);
+        // SỬA Ở ĐÂY: Hàm Login chỉ nhận tham số db
+        Login *loginForm = new Login(this->db);
         loginForm->show();
         this->close();
     }
@@ -220,9 +224,13 @@ void AdminMenu::on_btnLogout_clicked() {
 // ==========================================
 
 void AdminMenu::refreshUserTable() {
+    // THÊM 2 DÒNG NÀY ĐỂ BẢNG HIỆN CỘT:
+    ui->tableUsers->setColumnCount(5);
+    ui->tableUsers->setHorizontalHeaderLabels({"User ID", "Username", "Họ và Tên", "Vai trò", "Trạng thái"});
+
     ui->tableUsers->setRowCount(0);
     vector<User*> usersList = db.getUsers().getAllPointers();
-    
+
     int row = 0;
     for (auto u : usersList) {
         ui->tableUsers->insertRow(row);
@@ -236,9 +244,13 @@ void AdminMenu::refreshUserTable() {
 }
 
 void AdminMenu::refreshDoctorTable() {
+    // THÊM 2 DÒNG NÀY ĐỂ BẢNG HIỆN CỘT:
+    ui->tableDoctors->setColumnCount(5);
+    ui->tableDoctors->setHorizontalHeaderLabels({"Mã BS", "Họ Tên", "Chuyên Khoa", "SĐT", "Kinh Nghiệm"});
+
     ui->tableDoctors->setRowCount(0);
-    vector<Doctor*> doctorsList = db.getDoctors().getAllPointers(); 
-    
+    vector<Doctor*> doctorsList = db.getDoctors().getAllPointers();
+
     int row = 0;
     for (auto doc : doctorsList) {
         ui->tableDoctors->insertRow(row);
@@ -252,9 +264,13 @@ void AdminMenu::refreshDoctorTable() {
 }
 
 void AdminMenu::refreshMedicineTable() {
+    // THÊM 2 DÒNG NÀY ĐỂ BẢNG HIỆN CỘT:
+    ui->tableMedicines->setColumnCount(5);
+    ui->tableMedicines->setHorizontalHeaderLabels({"Mã Thuốc", "Tên Thuốc", "Đơn Giá", "Liều Lượng", "Tồn Kho"});
+
     ui->tableMedicines->setRowCount(0);
     vector<Medicine*> medList = db.getMedicines().getAllPointers();
-    
+
     int row = 0;
     for (auto med : medList) {
         ui->tableMedicines->insertRow(row);
@@ -268,9 +284,13 @@ void AdminMenu::refreshMedicineTable() {
 }
 
 void AdminMenu::refreshServiceTable() {
+    // THÊM 2 DÒNG NÀY ĐỂ BẢNG HIỆN CỘT:
+    ui->tableServices->setColumnCount(3);
+    ui->tableServices->setHorizontalHeaderLabels({"Mã Dịch Vụ", "Tên Dịch Vụ Y Tế", "Giá Tiền"});
+
     ui->tableServices->setRowCount(0);
     vector<Service*> srvList = db.getServices().getAllPointers();
-    
+
     int row = 0;
     for (auto srv : srvList) {
         ui->tableServices->insertRow(row);

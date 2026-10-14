@@ -1,6 +1,7 @@
 #include "../../include/ui/DoctorMenu.h"
 #include "ui_DoctorMenu.h"
 #include <QMessageBox>
+#include <QTableWidgetItem>
 #include "../../include/services/Database.h"
 
 DoctorMenu::DoctorMenu(Database& database, AuthService& authService, QWidget *parent)
@@ -158,7 +159,7 @@ void DoctorMenu::loadPatientQueue() {
             ui->tableAppointments->insertRow(row);
             ui->tableAppointments->setItem(row, 0, new QTableWidgetItem(QString::fromStdString(appt.getAppointmentId())));
             ui->tableAppointments->setItem(row, 1, new QTableWidgetItem(QString::fromStdString(appt.getPatientId())));
-            ui->tableAppointments->setItem(row, 2, new QTableWidgetItem(QString::fromStdString(appt.getAppointmentDate())));
+            ui->tableAppointments->setItem(row, 2, new QTableWidgetItem(QString::fromStdString(appt.getDate())));
             row++;
         }
     }

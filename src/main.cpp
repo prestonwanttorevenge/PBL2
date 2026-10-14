@@ -1,29 +1,19 @@
 #include <QApplication>
-#include "../include/services/Database.h"
-#include "../include/services/AuthService.h"
-#include "../include/ui/AdminMenu.h"
-// #include "../include/ui/DoctorMenu.h"
-// #include "../include/ui/ReceptionistMenu.h"
+#include "ui/Login.h"
+#include "services/Database.h"
 
 int main(int argc, char *argv[]) {
     QApplication a(argc, argv);
 
-    // Khởi tạo Database và tải toàn bộ dữ liệu từ CSV
+    // Ngăn chặn app tự tắt khi form chuyển đổi
+    a.setQuitOnLastWindowClosed(false);
+
     Database db;
     db.loadAllData();
 
-    // Khởi tạo dịch vụ xác thực (truyền db vào)
-    AuthService auth(db);
+    // SỬA Ở ĐÂY: Dùng con trỏ 'new' thay vì khai báo biến stack cục bộ
+    Login *w = new Login(db);
+    w->show();
 
-    // KHỞI CHẠY GIAO DIỆN (Test thử form Admin)
-    AdminMenu adminWindow(db, auth);
-    adminWindow.show();
-
-    // Chạy vòng lặp sự kiện của Qt
-    int result = a.exec();
-
-    // Tự động lưu toàn bộ dữ liệu xuống CSV trước khi tắt app
-    db.saveAllData();
-
-    return result;
+    return a.exec();
 }

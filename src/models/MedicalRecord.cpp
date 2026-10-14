@@ -1,4 +1,4 @@
-#include "MedicalRecord.h"
+#include "models/MedicalRecord.h"
 
 MedicalRecord::~MedicalRecord() {}
 

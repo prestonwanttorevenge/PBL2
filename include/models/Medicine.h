@@ -21,7 +21,7 @@ public:
     int getStock() const {return stock;}
     void setUnitPrice(double newPrice);
     void setDosage(std::string newDosage);
-    int setStock(int stock) {this->stock = stock;}
+    void setStock(int stock) {this->stock = stock;}
     
     void displayData() const;
     void inputData();   

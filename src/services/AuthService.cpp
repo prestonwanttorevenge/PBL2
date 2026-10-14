@@ -1,20 +1,20 @@
-#include "../../include/services/AuthService.h"
+#include "services/AuthService.h"
 
 AuthService::AuthService(Database& database) : db(database), currentUser(nullptr) {}
 AuthService::~AuthService() {}
 
 bool AuthService::login(const std::string& inputUsername, const std::string& inputPassword) {
-    for (auto& user : db.getUsers()) {
-        if (user.getUsername() == inputUsername) {
-            if (!user.getIsActive()) return false; 
-            if (user.authenticate(inputPassword)) {
-                currentUser = &user; 
-                return true;
-            }
-            return false; 
+    // Tìm trực tiếp User trong Cây BST theo Username (không dùng vòng lặp for)
+    User* user = db.getUsers().search(inputUsername);
+
+    if (user != nullptr) {
+        if (!user->getIsActive()) return false;
+        if (user->authenticate(inputPassword)) {
+            currentUser = user;
+            return true;
         }
     }
-    return false; 
+    return false;
 }
 
 void AuthService::logout() {
