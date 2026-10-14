@@ -100,12 +100,15 @@ public:
     bool addDoctorFromQT(string id, string fullName, string dob, string gender, string phone, string specialty, int expYears);
     bool addShiftToDoctorFromQT(string doctorId, string day, string time);
     int addMedicineFromQT(string medicineId,string medicineName,double unitPrice,string dosage,int addQty);
+    bool addPatientFromGUI(std::string id, std::string name, std::string phone, bool isNoiTru);
     vector<Doctor*> getAvailableDoctors(string day, string shift);
     int bookAppointmentFromQT(string patientId, string doctorId, string receptionistId, string day, string time);
     int createInvoiceFromQT(std::string patientId, double medFee);
     int createMedicalRecordFromQT(string apptId, string symp, string diag, string notes);
     int prescribeMedicineFromQT(string recordId, string medId, string dosage, int qty);
     int createInvoiceFromQT(std::string patientId, double& outTotalFee);
+    int addServiceFromQT(std::string id, std::string name, double price);
+
     std::vector<MedicalRecord*> getPatientHistory(std::string patientId);
     
     //login
