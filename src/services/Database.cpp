@@ -942,6 +942,17 @@ bool Database::addShiftToDoctorFromQT(string doctorId, string day, string time) 
     }
     return false;
 }
+bool Database::addPatientFromGUI(string id, string name, string phone, bool isNoiTru){
+    if (findPatientById(id) != nullptr){
+        return false;
+    }
+    if (isNoiTru){
+        patients.insert(id, new Inpatient(id, name, "", "", phone, "", 0.0, "", "", "", ""));
+    } else{
+        patients.insert(id, new Outpatient(id, name, "", "", phone, "", 0.0, "", ""));
+    }
+    return true;
+}
  int Database::addMedicineFromQT(string medicineId,string medicineName,double unitPrice,string dosage ,int addQty){
     Medicine* existingMed = findMedicineById(medicineId);
     
@@ -956,6 +967,13 @@ bool Database::addShiftToDoctorFromQT(string doctorId, string day, string time) 
         return 1;
     }
  }
+int Database::addServiceFromQT(string id, string name, double price){
+    if (services.search(id) != nullptr){
+        return -1;
+    }
+    services.insert(id, Service(id, name, price));
+    return 1;
+}
 vector<Doctor*> Database::getAvailableDoctors(string day, string shift) {
     vector<Doctor*> availableDocs;
     // 1. Kéo toàn bộ danh bạ con trỏ Bác sĩ từ Cây ra
