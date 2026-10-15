@@ -20,6 +20,7 @@ Login::Login(Database& database, QWidget *parent) :
 
 Login::~Login() {
     delete ui;
+    db.saveAllData();
 }
 
 void Login::on_btnLogin_clicked() {
