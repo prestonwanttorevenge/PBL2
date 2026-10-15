@@ -21,7 +21,7 @@ public:
     InvoiceDetail(const InvoiceDetail&) = default;
 
     ~InvoiceDetail(){}
-
+    std::string getInvoiceId() const { return invoiceId; }
     std::string getDetailId() const { return detailId; }
     std::string getServiceId() const { return serviceId; }
     int getQuantity() const { return quantity; }

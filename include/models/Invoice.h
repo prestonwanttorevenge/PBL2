@@ -30,7 +30,8 @@ public:
     string getPatientId() const {return patientId;}
     double getMedicineFee() const {return medicineFee;}
     vector<InvoiceDetail> getDetails() const {return details;}
-    
+    double getConsultationFee() const { return consultationFee; }
+    double getTotalAmount() const { return totalAmount; }
     void setMedicineFee(double fee);
     void printInvoice() const;
     

@@ -1051,12 +1051,12 @@ int Database::prescribeMedicineFromQT(string recordId, string medId, string dosa
 
     return 1;
 }
-int Database::createInvoiceFromQT(string patientId, double& outTotalFee) {
-    // 1. Kiểm tra Bệnh nhân có thật không
+int Database::createInvoiceFromQT(string patientId, double& outTotalFee){
+    // 1. Kiểm tra Bệnh nhân có tồn tại không
     Patient* pat = findPatientById(patientId);
     if (pat == nullptr) return -1;
 
-    // 2. TRUY VẾT 1: Tìm Lịch hẹn mới nhất của Bệnh nhân này
+    // 2. Tìm Lịch hẹn mới nhất của Bệnh nhân này
     string targetApptId = "";
     for (int i = appointments.size() - 1; i >= 0; i--) {
         if (appointments[i].getPatientId() == patientId) {
@@ -1066,6 +1066,7 @@ int Database::createInvoiceFromQT(string patientId, double& outTotalFee) {
     }
     if (targetApptId == "") return -2;
 
+    // 3. Tìm Bệnh án tương ứng với Lịch hẹn
     MedicalRecord* record = nullptr;
     for (size_t i = 0; i < medicalRecords.size(); i++) {
         if (medicalRecords[i].getAppointmentId() == targetApptId) {
@@ -1075,24 +1076,59 @@ int Database::createInvoiceFromQT(string patientId, double& outTotalFee) {
     }
     if (record == nullptr) return -3;
 
-    // 3. BẮT ĐẦU TÍNH TIỀN TỰ ĐỘNG (Phí khám 100k + Tiền thuốc)
-    double totalFee = 100000; 
+    // 4. TÍNH TIỀN THUỐC (medicineFee) từ đơn thuốc trong Bệnh án
+    double medFee = 0.0; 
     for (const auto& rx : record->getPrescriptions()) {
         Medicine* med = findMedicineById(rx.medicineId);
         if (med != nullptr) {
-            totalFee += (med->getUnitPrice() * rx.quantity);
+            medFee += (med->getUnitPrice() * rx.quantity);
         }
     }
 
-    // 5. Khấu trừ Bảo Hiểm Y Tế
-    double discount = pat->getInsuranceDiscount();
-    double finalFee = totalFee * (1.0 - discount); 
-    
-    outTotalFee = finalFee; // Ném tiền ra cho giao diện
-
-    // 6. Tạo Hóa đơn và lưu lại
+    // 5. KHỞI TẠO HÓA ĐƠN (Truyền mã HĐ, mã BN và Tiền thuốc vào trước)
     string newInvId = "INV" + to_string(invoices.size() + 1);
-    invoices.push_back(Invoice(newInvId, patientId, finalFee));
+    Invoice newInv(newInvId, patientId, medFee);
+
+    // 6. TẠO CHI TIẾT DỊCH VỤ (InvoiceDetail) TỪ CLASS SERVICE
+    string srvId = "SRV01";          // Mã dịch vụ khám mặc định
+    double srvPrice = 100000.0;      // Giá mặc định nếu trong kho chưa có dịch vụ nào
+
+    // Tự động lấy Dịch vụ từ cây BST services (nếu Admin đã thêm dịch vụ)
+    vector<Service*> srvList = services.getAllPointers();
+    if (!srvList.empty()) {
+        // Ưu tiên tìm dịch vụ có mã "SRV01" hoặc "DV01", nếu không có thì lấy dịch vụ đầu tiên trong bảng
+        Service* selectedSrv = srvList[0];
+        for (auto s : srvList) {
+            if (s->getId() == "SRV01" || s->getId() == "DV01") {
+                selectedSrv = s;
+                break;
+            }
+        }
+        srvId = selectedSrv->getId();
+        srvPrice = selectedSrv->getPrice();
+    }
+
+    // Đóng gói vào InvoiceDetail (Thứ tự constructor: detailId, serviceId, invoiceId, quantity, unitPrice)
+    string detailId = newInvId + "_D1";
+    InvoiceDetail consultDetail(detailId, srvId, newInvId, 1, srvPrice);
+
+    // Đẩy vào Hóa đơn -> Tự động cập nhật consultationFee và cộng tổng totalAmount
+    newInv.addDetail(consultDetail);
+
+    // 7. ÁP DỤNG BẢO HIỂM Y TẾ (Lấy từ tổng tiền consultationFee + medicineFee)
+    double discount = pat->getInsuranceDiscount();
+    // Hỗ trợ cả 2 kiểu nhập: nhập 20 (tức 20%) hoặc nhập 0.2 (tức 20%)
+    double discountRate = (discount > 1.0) ? (discount / 100.0) : discount;
+
+    // Lấy tổng tiền gốc (Phí dịch vụ + Tiền thuốc) nhân với tỷ lệ sau giảm giá
+    double rawTotal = srvPrice + medFee; 
+    double finalFee = rawTotal * (1.0 - discountRate); 
+
+    outTotalFee = finalFee; // Trả kết quả ra giao diện Qt
+
+    // 8. Lưu Hóa đơn vào вектор và ghi xuống file CSV ngay lập tức
+    invoices.push_back(newInv);
+    saveAllData(); 
 
     return 1;
 }
