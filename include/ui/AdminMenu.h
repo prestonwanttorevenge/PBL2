@@ -21,15 +21,19 @@ private slots:
 
     void on_btnManageDoctors_clicked();
     void on_btnAddDoctor_clicked();
+    void on_btnDeleteDoctor_clicked();
 
     void on_btnManageMedicines_clicked();
     void on_btnAddMedicine_clicked();
+    void on_btnDeleteMedicine_clicked();
 
     void on_btnManageServices_clicked();
     void on_btnAddService_clicked();
+    void on_btnDeleteService_clicked();
 
     void on_btnManageUsers_clicked();
     void on_btnAddUser_clicked();
+    void on_btnDeleteUser_clicked();
 
 private:
     Ui::AdminMenu *ui;

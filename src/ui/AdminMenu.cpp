@@ -199,7 +199,146 @@ void AdminMenu::on_btnAddService_clicked() {
         ui->txtServicePrice->clear();
     }
 }
+// ==========================================
+// XÓA TÀI KHOẢN (TRANG SỐ 0)
+// ==========================================
+void AdminMenu::on_btnDeleteUser_clicked() {
+    string id = "";
+    int row = ui->tableUsers->currentRow();
 
+    // Ưu tiên lấy ID từ dòng đang click chọn trên bảng, nếu không chọn thì lấy từ ô txtUserId
+    if (row >= 0) {
+        id = ui->tableUsers->item(row, 0)->text().toStdString();
+    } else {
+        id = ui->txtUserId->text().toStdString();
+    }
+
+    if (id.empty()) {
+        QMessageBox::warning(this, "Chưa chọn", "Vui lòng click chọn một tài khoản trên bảng (hoặc nhập User ID) để xóa!");
+        return;
+    }
+
+    // Không cho phép xóa tài khoản đang đăng nhập hoặc tài khoản gốc (tuỳ chọn)
+    if (id == "U01" || id == "ADMIN") {
+        QMessageBox::critical(this, "Cảnh báo", "Không thể xóa tài khoản Quản trị viên gốc!");
+        return;
+    }
+
+    auto reply = QMessageBox::question(this, "Xác nhận xóa",
+                                       "Bạn có chắc chắn muốn xóa tài khoản có mã [" + QString::fromStdString(id) + "] không?",
+                                       QMessageBox::Yes | QMessageBox::No);
+
+    if (reply == QMessageBox::Yes) {
+        if (db.deleteUserFromQT(id)) {
+            db.saveAllData(); // Lưu xuống file CSV ngay lập tức
+            QMessageBox::information(this, "Thành công", "Đã xóa tài khoản thành công!");
+            refreshUserTable();
+            ui->txtUserId->clear();
+        } else {
+            QMessageBox::critical(this, "Lỗi", "Không tìm thấy mã tài khoản này trong hệ thống!");
+        }
+    }
+}
+
+// ==========================================
+// XÓA BÁC SĨ (TRANG SỐ 1)
+// ==========================================
+void AdminMenu::on_btnDeleteDoctor_clicked() {
+    string id = "";
+    int row = ui->tableDoctors->currentRow();
+    if (row >= 0) {
+        id = ui->tableDoctors->item(row, 0)->text().toStdString();
+    } else {
+        id = ui->txtDocId->text().toStdString();
+    }
+
+    if (id.empty()) {
+        QMessageBox::warning(this, "Chưa chọn", "Vui lòng click chọn một Bác sĩ trên bảng để xóa!");
+        return;
+    }
+
+    auto reply = QMessageBox::question(this, "Xác nhận xóa",
+                                       "Xóa Bác sĩ [" + QString::fromStdString(id) + "] sẽ xóa luôn tài khoản đăng nhập của họ.\nBạn có chắc chắn muốn xóa?",
+                                       QMessageBox::Yes | QMessageBox::No);
+
+    if (reply == QMessageBox::Yes) {
+        if (db.deleteDoctorFromQT(id)) {
+            db.saveAllData();
+            QMessageBox::information(this, "Thành công", "Đã xóa Bác sĩ và tài khoản liên kết!");
+            refreshDoctorTable();
+            refreshUserTable(); // Làm mới cả bảng User vì tài khoản Bác sĩ cũng bị xóa
+            ui->txtDocId->clear();
+        } else {
+            QMessageBox::critical(this, "Lỗi", "Không tìm thấy Mã Bác sĩ này!");
+        }
+    }
+}
+
+// ==========================================
+// XÓA THUỐC (TRANG SỐ 2)
+// ==========================================
+void AdminMenu::on_btnDeleteMedicine_clicked() {
+    string id = "";
+    int row = ui->tableMedicines->currentRow();
+    if (row >= 0) {
+        id = ui->tableMedicines->item(row, 0)->text().toStdString();
+    } else {
+        id = ui->txtMedId->text().toStdString();
+    }
+
+    if (id.empty()) {
+        QMessageBox::warning(this, "Chưa chọn", "Vui lòng click chọn một loại thuốc trên bảng để xóa!");
+        return;
+    }
+
+    auto reply = QMessageBox::question(this, "Xác nhận xóa",
+                                       "Bạn có chắc chắn muốn xóa thuốc [" + QString::fromStdString(id) + "] khỏi kho?",
+                                       QMessageBox::Yes | QMessageBox::No);
+
+    if (reply == QMessageBox::Yes) {
+        if (db.deleteMedicineFromQT(id)) {
+            db.saveAllData();
+            QMessageBox::information(this, "Thành công", "Đã xóa thuốc khỏi kho!");
+            refreshMedicineTable();
+            ui->txtMedId->clear();
+        } else {
+            QMessageBox::critical(this, "Lỗi", "Không tìm thấy Mã thuốc này!");
+        }
+    }
+}
+
+// ==========================================
+// XÓA DỊCH VỤ Y TẾ (TRANG SỐ 3)
+// ==========================================
+void AdminMenu::on_btnDeleteService_clicked() {
+    string id = "";
+    int row = ui->tableServices->currentRow();
+    if (row >= 0) {
+        id = ui->tableServices->item(row, 0)->text().toStdString();
+    } else {
+        id = ui->txtServiceId->text().toStdString();
+    }
+
+    if (id.empty()) {
+        QMessageBox::warning(this, "Chưa chọn", "Vui lòng click chọn một dịch vụ trên bảng để xóa!");
+        return;
+    }
+
+    auto reply = QMessageBox::question(this, "Xác nhận xóa",
+                                       "Bạn có chắc chắn muốn xóa dịch vụ [" + QString::fromStdString(id) + "] không?",
+                                       QMessageBox::Yes | QMessageBox::No);
+
+    if (reply == QMessageBox::Yes) {
+        if (db.deleteServiceFromQT(id)) {
+            db.saveAllData();
+            QMessageBox::information(this, "Thành công", "Đã xóa dịch vụ y tế!");
+            refreshServiceTable();
+            ui->txtServiceId->clear();
+        } else {
+            QMessageBox::critical(this, "Lỗi", "Không tìm thấy Mã dịch vụ này!");
+        }
+    }
+}
 // ==========================================
 // 5. ĐĂNG XUẤT HỆ THỐNG
 // ==========================================

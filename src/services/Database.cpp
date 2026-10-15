@@ -1185,3 +1185,32 @@ int Database::addDoctorWithAccount(string id, string name, string dob, string ge
 
     return 1;
 }
+
+bool Database::deleteUserFromQT(const std::string& id) {
+    if (users.search(id) == nullptr) return false; // Không tìm thấy
+    users.remove(id); // Gọi hàm xóa trên cây BST
+    return true;
+}
+
+bool Database::deleteDoctorFromQT(const std::string& id) {
+    if (doctors.search(id) == nullptr) return false;
+    doctors.remove(id);
+
+    // Xóa luôn tài khoản đăng nhập có cùng ID của Bác sĩ đó (nếu lúc tạo dùng chung ID)
+    if (users.search(id) != nullptr) {
+        users.remove(id);
+    }
+    return true;
+}
+
+bool Database::deleteMedicineFromQT(const std::string& id) {
+    if (medicines.search(id) == nullptr) return false;
+    medicines.remove(id);
+    return true;
+}
+
+bool Database::deleteServiceFromQT(const std::string& id) {
+    if (services.search(id) == nullptr) return false;
+    services.remove(id);
+    return true;
+}

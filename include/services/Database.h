@@ -119,6 +119,10 @@ public:
     //admin
     int addUserFromQT(string id, string username, string plainPassword, string fullName, string role);
     int addDoctorWithAccount(string id, string name, string dob, string gender, string phone, string specialty, int expYears, string username, string plainPassword);
+    bool deleteUserFromQT(const std::string& id);
+    bool deleteDoctorFromQT(const std::string& id);
+    bool deleteMedicineFromQT(const std::string& id);
+    bool deleteServiceFromQT(const std::string& id);
 };
 
 #endif
