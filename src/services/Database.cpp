@@ -61,7 +61,7 @@ void Database::loadAllData() {
     }
 
     // Lịch trực Bác sĩ
-    std::ifstream fSched("data_doctor_schedules.csv");
+    std::ifstream fSched(doctorScheduleFile);
     if (fSched.is_open()) {
         std::string line;
         while (std::getline(fSched, line)) {
@@ -155,7 +155,7 @@ void Database::loadAllData() {
         cout << "- Chua co file " << invoiceFile << " (Se tao moi khi luu)\n";
     }
 
-    ifstream fDetail("data_invoice_details.csv");
+    ifstream fDetail(invoiceDetailsFile);
     if (fDetail.is_open()) {
         string line;
         while (getline(fDetail, line)) {
@@ -313,7 +313,7 @@ void Database::loadAllData() {
         fMedRec.close();
     }
 
-    ifstream fPresc("data_prescription_details.csv");
+    ifstream fPresc(prescriptionDetailFile);
     if (fPresc.is_open()) {
         string line;
         while (getline(fPresc, line)) {
@@ -396,7 +396,7 @@ void Database::saveAllData() {
     }
 
     ofstream fMedRec(medicalRecordFile);
-    ofstream fPresc("data_prescription_details.csv"); 
+    ofstream fPresc(prescriptionDetailFile); 
 
     if (fMedRec.is_open() && fPresc.is_open()) {
         for (const auto& record : medicalRecords) {

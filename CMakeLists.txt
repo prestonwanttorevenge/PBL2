@@ -24,3 +24,7 @@ add_executable(PBL2_App ${SRC_FILES} ${HEADER_FILES} ${UI_FILES})
 # Liên kết thư viện
 target_link_libraries(PBL2_App PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)
 target_include_directories(PBL2_App PRIVATE include)
+
+# Tự động copy thư mục "data" từ thư mục gốc (D:/VSC++/PBL2/data) 
+# vào thư mục chứa file chạy (.exe) mỗi khi Build
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/data DESTINATION ${CMAKE_CURRENT_BINARY_DIR})

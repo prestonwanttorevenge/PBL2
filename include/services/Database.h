@@ -39,6 +39,7 @@ private:
     const std::string medicalRecordFile = "data/medical_records.csv";
     const std::string serviceFile = "data/data_services.csv";
     const std::string doctorScheduleFile = "data/data_doctor_schedules.csv";
+    const std::string prescriptionDetailFile = "data/data_prescription_details.csv";
     void sanitizeInput(string& input);
 public:
 
