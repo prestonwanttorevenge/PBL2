@@ -1,95 +1,147 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version='1.0' encoding='utf-8'?>
 <ui version="4.0">
  <class>ReceptionistMenu</class>
  <widget class="QMainWindow" name="ReceptionistMenu">
-  <property name="geometry">
-   <rect>
-    <x>0</x>
-    <y>0</y>
-    <width>1100</width>
-    <height>700</height>
-   </rect>
-  </property>
-  <property name="windowTitle">
-   <string>Giao Diện Lễ Tân - Receptionist Menu</string>
-  </property>
-  <widget class="QWidget" name="centralwidget">
+  <property name="geometry"><rect><x>0</x><y>0</y><width>1100</width><height>700</height></rect></property>
+  <property name="windowTitle"><string>Giao Diện Lễ Tân - Receptionist Menu</string></property>
+  <property name="styleSheet"><string>QWidget {
+    font-family: 'Inter', 'Segoe UI', 'Arial', sans-serif;
+    font-size: 14px;
+    color: #18181b; /* kẽm-900 (zinc-900) - màu đen dịu */
+    background-color: #fafafa; /* kẽm-50 (zinc-50) - nền trắng xám dịu mắt */
+}
 
-   <!-- PHẦN ĐĂNG KÝ / ĐẶT LỊCH -->
-   <widget class="QLineEdit" name="txtPatientId">
-    <property name="geometry"><rect><x>10</x><y>10</y><width>120</width><height>30</height></rect></property>
-    <property name="placeholderText"><string>Mã Bệnh nhân</string></property>
-   </widget>
-   <widget class="QLineEdit" name="txtPatientName">
-    <property name="geometry"><rect><x>140</x><y>10</y><width>180</width><height>30</height></rect></property>
-    <property name="placeholderText"><string>Họ và Tên</string></property>
-   </widget>
-   <widget class="QLineEdit" name="txtPatientPhone">
-    <property name="geometry"><rect><x>330</x><y>10</y><width>120</width><height>30</height></rect></property>
-    <property name="placeholderText"><string>Số điện thoại</string></property>
-   </widget>
-   <widget class="QRadioButton" name="radioNoiTru">
-    <property name="geometry"><rect><x>10</x><y>50</y><width>100</width><height>30</height></rect></property>
-    <property name="text"><string>Nội Trú</string></property>
-   </widget>
-   <widget class="QPushButton" name="btnRegisterPatient">
-    <property name="geometry"><rect><x>300</x><y>50</y><width>150</width><height>30</height></rect></property>
-    <property name="text"><string>Đăng Ký Bệnh Nhân Mới</string></property>
-   </widget>
+QMainWindow {
+    background-color: #fafafa;
+}
 
-   <widget class="QComboBox" name="cbDay">
-    <property name="geometry"><rect><x>10</x><y>110</y><width>120</width><height>30</height></rect></property>
-    <item><property name="text"><string>Thứ 2</string></property></item>
-    <item><property name="text"><string>Thứ 3</string></property></item>
-    <item><property name="text"><string>Thứ 4</string></property></item>
-    <item><property name="text"><string>Thứ 5</string></property></item>
-    <item><property name="text"><string>Thứ 6</string></property></item>
-    <item><property name="text"><string>Thứ 7</string></property></item>
-    <item><property name="text"><string>Chủ nhật</string></property></item>
-   </widget>
-   <widget class="QComboBox" name="cbShift">
-    <property name="geometry"><rect><x>140</x><y>110</y><width>100</width><height>30</height></rect></property>
-    <item><property name="text"><string>Sáng</string></property></item>
-    <item><property name="text"><string>Chiều</string></property></item>
-    <item><property name="text"><string>Tối</string></property></item>
-   </widget>
-   <widget class="QComboBox" name="cbDoctor">
-    <property name="geometry"><rect><x>250</x><y>110</y><width>200</width><height>30</height></rect></property>
-   </widget>
-   <widget class="QPushButton" name="btnBookAppointment">
-    <property name="geometry"><rect><x>10</x><y>150</y><width>440</width><height>40</height></rect></property>
-    <property name="text"><string>Đặt Lịch Hẹn Khám</string></property>
-   </widget>
+/* NÚT BẤM CHUNG - Màu Oceanic Azure #002B8C */
+QPushButton {
+    background-color: #0F52BA; /* Sapphire - Màu chính cho nút thao tác */
+    color: white;
+    border-radius: 6px;
+    padding: 8px 16px;
+    font-weight: 500;
+    border: none;
+}
 
-   <!-- PHẦN HÓA ĐƠN & TRA CỨU -->
-   <widget class="QLineEdit" name="txtPatientId_Invoice">
-    <property name="geometry"><rect><x>10</x><y>250</y><width>160</width><height>30</height></rect></property>
-    <property name="placeholderText"><string>Mã Bệnh Nhân (Hóa đơn)</string></property>
-   </widget>
-   <widget class="QPushButton" name="btnCreateInvoice">
-    <property name="geometry"><rect><x>180</x><y>250</y><width>270</width><height>30</height></rect></property>
-    <property name="text"><string>Lập Hóa Đơn &amp;&amp; Thanh Toán</string></property>
-   </widget>
+QPushButton:hover {
+    background-color: #002B8C; /* Oceanic Azure - Đậm hơn khi hover */
+}
 
-   <widget class="QLineEdit" name="txtSearchPatient">
-    <property name="geometry"><rect><x>10</x><y>310</y><width>310</width><height>30</height></rect></property>
-    <property name="placeholderText"><string>Nhập Mã hoặc Tên để tìm kiếm...</string></property>
-   </widget>
-   <widget class="QPushButton" name="btnSearchPatient">
-    <property name="geometry"><rect><x>330</x><y>310</y><width>120</width><height>30</height></rect></property>
-    <property name="text"><string>Tra Cứu</string></property>
-   </widget>
+QPushButton:pressed {
+    background-color: #282888; /* Indigo Blue - Khi nhấn */
+}
 
-   <widget class="QPushButton" name="btnLogout">
-    <property name="geometry"><rect><x>10</x><y>640</y><width>120</width><height>40</height></rect></property>
-    <property name="text"><string>Đăng Xuất</string></property>
-   </widget>
+/* NÚT ĐĂNG XUẤT / XÓA KHẨN CẤP */
+QPushButton#btnLogout, QPushButton#btnDeleteUser, QPushButton#btnDeleteDoctor, QPushButton#btnDeleteMedicine, QPushButton#btnDeleteService {
+    background-color: #e74c3c; /* Đỏ nhạt để cảnh báo */
+}
 
-   <!-- BẢNG DỮ LIỆU BÊN PHẢI -->
-   <widget class="QTableWidget" name="tablePatients">
-    <property name="geometry"><rect><x>480</x><y>10</y><width>600</width><height>670</height></rect></property>
-   </widget>
+QPushButton#btnLogout:hover, QPushButton#btnDeleteUser:hover, QPushButton#btnDeleteDoctor:hover, QPushButton#btnDeleteMedicine:hover, QPushButton#btnDeleteService:hover {
+    background-color: #c0392b;
+}
 
+/* Ô NHẬP LIỆU (Input / ComboBox / SpinBox) */
+QLineEdit, QTextEdit, QPlainTextEdit, QComboBox, QSpinBox {
+    background-color: white;
+    border: 1px solid #e4e4e7; /* zinc-200 */
+    border-radius: 6px;
+    padding: 8px 12px;
+    color: #3f3f46; /* zinc-700 */
+}
+
+QLineEdit:focus, QTextEdit:focus, QComboBox:focus, QSpinBox:focus {
+    border: 1px solid #0F52BA; /* Viền Sapphire khi focus */
+    background-color: #F0FFFF; /* Azure nhạt khi focus */
+}
+
+/* BẢNG DỮ LIỆU (Table Widget) */
+QTableView, QTableWidget {
+    background-color: white;
+    gridline-color: #f4f4f5; /* zinc-100 */
+    border: 1px solid #e4e4e7; /* zinc-200 */
+    border-radius: 8px;
+    selection-background-color: #F0FFFF; /* Azure nhạt khi chọn */
+    selection-color: #002B8C; /* Oceanic Azure đậm khi chọn */
+}
+
+/* TIÊU ĐỀ CỘT CỦA BẢNG */
+QHeaderView::section {
+    background-color: #f4f4f5; /* zinc-100 */
+    color: #52525b; /* zinc-600 */
+    padding: 10px;
+    font-weight: bold;
+    border: none;
+    border-bottom: 2px solid #e4e4e7; /* zinc-200 */
+    text-transform: uppercase;
+}
+
+QTableView::item {
+    padding: 8px;
+    border-bottom: 1px solid #f4f4f5;
+}
+
+QTableView::item:hover {
+    background-color: #fafafa;
+}
+</string></property><widget class="QWidget" name="centralwidget">
+   <layout class="QHBoxLayout" name="horizontalLayoutMain">
+    <item>
+     <layout class="QVBoxLayout" name="verticalLayoutLeftPanel">
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayoutPatientInfo">
+        <item><widget class="QLineEdit" name="txtPatientId"><property name="placeholderText"><string>Mã Bệnh nhân</string></property></widget></item>
+        <item><widget class="QLineEdit" name="txtPatientName"><property name="placeholderText"><string>Họ và Tên</string></property></widget></item>
+        <item><widget class="QLineEdit" name="txtPatientPhone"><property name="placeholderText"><string>Số điện thoại</string></property></widget></item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayoutPatientReg">
+        <item><widget class="QRadioButton" name="radioNoiTru"><property name="text"><string>Nội Trú</string></property></widget></item>
+        <item><spacer name="horizontalSpacerReg"><property name="orientation"><enum>Qt::Horizontal</enum></property></spacer></item>
+        <item><widget class="QPushButton" name="btnRegisterPatient"><property name="text"><string>Đăng Ký Mới</string></property></widget></item>
+       </layout>
+      </item>
+      <item><spacer name="verticalSpacer1"><property name="orientation"><enum>Qt::Vertical</enum></property></spacer></item>
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayoutAppointment">
+        <item><widget class="QComboBox" name="cbDay">
+          <item><property name="text"><string>Thứ 2</string></property></item><item><property name="text"><string>Thứ 3</string></property></item>
+          <item><property name="text"><string>Thứ 4</string></property></item><item><property name="text"><string>Thứ 5</string></property></item>
+          <item><property name="text"><string>Thứ 6</string></property></item><item><property name="text"><string>Thứ 7</string></property></item>
+          <item><property name="text"><string>Chủ nhật</string></property></item>
+        </widget></item>
+        <item><widget class="QComboBox" name="cbShift">
+          <item><property name="text"><string>Sáng</string></property></item><item><property name="text"><string>Chiều</string></property></item>
+          <item><property name="text"><string>Tối</string></property></item>
+        </widget></item>
+        <item><widget class="QComboBox" name="cbDoctor" /></item>
+       </layout>
+      </item>
+      <item><widget class="QPushButton" name="btnBookAppointment"><property name="text"><string>Đặt Lịch Hẹn Khám</string></property></widget></item>
+      <item><spacer name="verticalSpacer2"><property name="orientation"><enum>Qt::Vertical</enum></property></spacer></item>
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayoutInvoice">
+        <item><widget class="QLineEdit" name="txtPatientId_Invoice"><property name="placeholderText"><string>Mã BN (Hóa đơn)</string></property></widget></item>
+        <item><widget class="QPushButton" name="btnCreateInvoice"><property name="text"><string>Lập Hóa Đơn &amp;&amp; Thanh Toán</string></property></widget></item>
+       </layout>
+      </item>
+      <item><spacer name="verticalSpacer3"><property name="orientation"><enum>Qt::Vertical</enum></property></spacer></item>
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayoutSearch">
+        <item><widget class="QLineEdit" name="txtSearchPatient"><property name="placeholderText"><string>Nhập Mã hoặc Tên để tìm...</string></property></widget></item>
+        <item><widget class="QPushButton" name="btnSearchPatient"><property name="text"><string>Tra Cứu</string></property></widget></item>
+       </layout>
+      </item>
+      <item><spacer name="verticalSpacer4"><property name="orientation"><enum>Qt::Vertical</enum></property></spacer></item>
+      <item><widget class="QPushButton" name="btnLogout"><property name="text"><string>Đăng Xuất</string></property></widget></item>
+     </layout>
+    </item>
+    <item>
+     <widget class="QTableWidget" name="tablePatients" />
+    </item>
+   </layout>
   </widget>
  </widget>
 </ui>
