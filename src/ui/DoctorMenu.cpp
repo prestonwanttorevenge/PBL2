@@ -16,11 +16,17 @@ DoctorMenu::~DoctorMenu() {
 }
 
 void DoctorMenu::on_btnLogout_clicked() {
-    auth.logout();
-    QMessageBox::information(this, "Đăng xuất", "Bác sĩ đã đăng xuất an toàn!");
-    Login *loginForm = new Login(this->db);
-    loginForm->show();
-    this->close();
+    QMessageBox::StandardButton reply = QMessageBox::question(
+        this, "Đăng xuất", "Bác sĩ có chắc chắn muốn đăng xuất?",
+        QMessageBox::Yes | QMessageBox::No
+    );
+
+    if (reply == QMessageBox::Yes) {
+        // Mở form Login mới
+        Login *loginForm = new Login(this->db);
+        loginForm->show();
+        this->close(); 
+    }
 }
 
 void DoctorMenu::on_btnViewSchedule_clicked() {

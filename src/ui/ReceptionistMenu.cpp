@@ -1,6 +1,7 @@
 #include "ui/ReceptionistMenu.h"
 #include "ui_ReceptionistMenu.h"
 #include "services/Database.h"
+#include "ui/Login.h"
 #include <QMessageBox>
 #include <QTableWidgetItem> // Bắt buộc phải có để thao tác với bảng
 #include <QComboBox>        // Bắt buộc phải có để thao tác với hộp chọn (cbDay, cbShift)
@@ -24,11 +25,18 @@ ReceptionistMenu::~ReceptionistMenu() {
 }
 
 void ReceptionistMenu::on_btnLogout_clicked() {
-    auth.logout();
-    QMessageBox::information(this, "Đăng xuất", "Lễ tân đã đăng xuất hệ thống!");
-    this->close();
-}
+     QMessageBox::StandardButton reply = QMessageBox::question(
+        this, "Đăng xuất", "Bạn có chắc chắn muốn đăng xuất?",
+        QMessageBox::Yes | QMessageBox::No
+    );
 
+    if (reply == QMessageBox::Yes) {
+        // Mở form Login mới
+        Login *loginForm = new Login(this->db);
+        loginForm->show();
+        this->close(); 
+    }
+}
 void ReceptionistMenu::on_btnRegisterPatient_clicked() {
     QString qId = ui->txtPatientId->text();
     QString qName = ui->txtPatientName->text();
