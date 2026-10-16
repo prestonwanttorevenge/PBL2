@@ -1,5 +1,6 @@
 #include "../../include/ui/DoctorMenu.h"
 #include "ui_DoctorMenu.h"
+#include "ui/Login.h"
 #include <QMessageBox>
 #include <QTableWidgetItem>
 #include "../../include/services/Database.h"
@@ -17,6 +18,8 @@ DoctorMenu::~DoctorMenu() {
 void DoctorMenu::on_btnLogout_clicked() {
     auth.logout();
     QMessageBox::information(this, "Đăng xuất", "Bác sĩ đã đăng xuất an toàn!");
+    Login *loginForm = new Login(this->db);
+    loginForm->show();
     this->close();
 }
 
