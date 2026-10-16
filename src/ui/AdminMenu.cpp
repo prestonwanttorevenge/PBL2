@@ -350,7 +350,6 @@ void AdminMenu::on_btnLogout_clicked() {
         );
 
     if (reply == QMessageBox::Yes) {
-        auth.logout();
         // SỬA Ở ĐÂY: Hàm Login chỉ nhận tham số db
         Login *loginForm = new Login(this->db);
         loginForm->show();

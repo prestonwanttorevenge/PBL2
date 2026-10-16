@@ -31,10 +31,14 @@ void DoctorMenu::on_btnLogout_clicked() {
 
 void DoctorMenu::on_btnViewSchedule_clicked() {
     QMessageBox::information(this, "Lịch Trực", "Hiển thị lịch trực của bác sĩ trong tuần...");
-    string currentDoctorId = "BS01"; 
+    User* currentUser = auth.getCurrentUser();
+    if (currentUser == nullptr) {
+        QMessageBox::critical(this, "Lỗi", "Phiên đăng nhập không hợp lệ!");
+        return;
+    }
+    string currentDoctorId = currentUser->getId(); // Lấy ID động của bác sĩ đang đăng nhập
 
     Doctor* doc = db.findDoctorById(currentDoctorId);
-
     if (doc == nullptr) {
         QMessageBox::critical(this, "Lỗi", "Không tìm thấy dữ liệu của bạn trên hệ thống!");
         return;
