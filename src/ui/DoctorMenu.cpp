@@ -1,9 +1,9 @@
-#include "../../include/ui/DoctorMenu.h"
+#include "ui/DoctorMenu.h"
 #include "ui_DoctorMenu.h"
 #include "ui/Login.h"
+#include "services/Database.h"
 #include <QMessageBox>
 #include <QTableWidgetItem>
-#include "../../include/services/Database.h"
 
 DoctorMenu::DoctorMenu(Database& database, AuthService& authService, QWidget *parent)
     : QMainWindow(parent), ui(new Ui::DoctorMenu), db(database), auth(authService) {

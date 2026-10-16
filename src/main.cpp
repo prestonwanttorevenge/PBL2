@@ -14,6 +14,8 @@ int main(int argc, char *argv[]) {
     // SỬA Ở ĐÂY: Dùng con trỏ 'new' thay vì khai báo biến stack cục bộ
     Login *w = new Login(db);
     w->show();
-    db.saveAllData();
-    return a.exec();
+    int result = a.exec(); 
+    db.saveAllData(); 
+
+    return result;
 }
