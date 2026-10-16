@@ -30,7 +30,7 @@ void DoctorMenu::on_btnLogout_clicked() {
 }
 
 void DoctorMenu::on_btnViewSchedule_clicked() {
-    QMessageBox::information(this, "Lịch Trực", "Hiển thị lịch trực của bác sĩ trong tuần...");
+    // QMessageBox::information(this, "Lịch Trực", "Hiển thị lịch trực của bác sĩ trong tuần..."); // Loại bỏ dòng thông báo dư thừa
     User* currentUser = auth.getCurrentUser();
     if (currentUser == nullptr) {
         QMessageBox::critical(this, "Lỗi", "Phiên đăng nhập không hợp lệ!");
@@ -86,7 +86,7 @@ void DoctorMenu::on_btnCreateMedicalRecord_clicked() {
     }
 }
 void DoctorMenu::on_btnPrescribeMedicine_clicked() {
-    QMessageBox::information(this, "Kê Đơn Thuốc", "Mở danh sách thuốc để kê đơn.");
+    // QMessageBox::information(this, "Kê Đơn Thuốc", "Mở danh sách thuốc để kê đơn."); // Bỏ dòng này
     string recordId = ui->txtRecordId->text().toStdString(); // Mã bệnh án Bác sĩ đang thao tác
     string medId = ui->cbMedicine->currentData().toString().toStdString(); // Lấy ID Thuốc đang ẩn
     string dosage = ui->txtDosage->text().toStdString();
@@ -118,7 +118,7 @@ void DoctorMenu::on_btnPrescribeMedicine_clicked() {
 }
 
 void DoctorMenu::on_btnViewPatientHistory_clicked() {
-    QMessageBox::information(this, "Lịch Sử Khám", "Tra cứu lịch sử khám bệnh cũ của bệnh nhân.");
+    // QMessageBox::information(this, "Lịch Sử Khám", "Tra cứu lịch sử khám bệnh cũ của bệnh nhân."); // Bỏ dòng dư thừa
     // 1. Lấy Mã Bệnh Nhân do Bác sĩ gõ
     string patientId = ui->txtPatientId_History->text().toStdString();
 
@@ -163,6 +163,13 @@ void DoctorMenu::on_btnViewPatientHistory_clicked() {
 }
 
 void DoctorMenu::loadPatientQueue() {
+    // 1. Phải khai báo số lượng cột và tiêu đề thì bảng mới hiện ra!
+    ui->tableAppointments->setColumnCount(4);
+    ui->tableAppointments->setHorizontalHeaderLabels({"Mã Lịch Hẹn", "Mã Bệnh Nhân", "Thời Gian", "Trạng Thái"});
+    
+    // Resize cột cho đẹp
+    ui->tableAppointments->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+
     ui->tableAppointments->setRowCount(0);
     auto& appts = db.getAppointments();
     
@@ -173,6 +180,7 @@ void DoctorMenu::loadPatientQueue() {
             ui->tableAppointments->setItem(row, 0, new QTableWidgetItem(QString::fromStdString(appt.getAppointmentId())));
             ui->tableAppointments->setItem(row, 1, new QTableWidgetItem(QString::fromStdString(appt.getPatientId())));
             ui->tableAppointments->setItem(row, 2, new QTableWidgetItem(QString::fromStdString(appt.getDate())));
+            ui->tableAppointments->setItem(row, 3, new QTableWidgetItem(QString::fromUtf8("Chờ Khám")));
             row++;
         }
     }

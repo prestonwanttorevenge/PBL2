@@ -1,0 +1,124 @@
+
+QWidget {
+    font-family: 'Instrument Sans', 'Segoe UI', Arial, sans-serif;
+    font-size: 13px;
+    color: #0F172A;
+    background-color: #F8FAFC;
+}
+
+QMainWindow, QWidget#centralwidget, QStackedWidget, 
+QWidget#pageUsers, QWidget#pageDoctors, QWidget#pageMedicines, QWidget#pageServices {
+    background-color: #F8FAFC;
+}
+
+QPushButton {
+    background-color: #43a350;
+    color: #FFFFFF;
+    border-radius: 6px;
+    padding: 8px 16px;
+    font-weight: 600;
+    border: none;
+}
+
+QPushButton:hover {
+    background-color: #3b8e46; 
+}
+
+QPushButton:pressed {
+    background-color: #2e7037; 
+}
+
+QPushButton:disabled {
+    background-color: #E2E8F0;
+    color: #94A3B8;
+}
+
+QPushButton#btnLogout, 
+QPushButton#btnDeleteUser, 
+QPushButton#btnDeleteDoctor, 
+QPushButton#btnDeleteMedicine, 
+QPushButton#btnDeleteService {
+    background-color: #FFFFFF;
+    color: #EF4444;
+    border: 1px solid #E2E8F0;
+}
+
+QPushButton#btnLogout:hover, 
+QPushButton#btnDeleteUser:hover, 
+QPushButton#btnDeleteDoctor:hover, 
+QPushButton#btnDeleteMedicine:hover, 
+QPushButton#btnDeleteService:hover {
+    background-color: #FEE2E2;
+    border: 1px solid #FECACA;
+    color: #DC2626;
+}
+
+/* Ô NHẬP LIỆU & COMBOBOX */
+QLineEdit, QTextEdit, QPlainTextEdit, QComboBox, QSpinBox {
+    background-color: #FFFFFF;
+    border: 1px solid #CBD5E1;
+    border-radius: 6px;
+    padding: 6px 12px;
+    color: #0F172A;
+    selection-background-color: #43a350;
+    selection-color: #FFFFFF;
+}
+
+/* Viền xanh lá khi click vào ô nhập liệu */
+QLineEdit:focus, QTextEdit:focus, QComboBox:focus, QSpinBox:focus {
+    background-color: #FFFFFF;
+    border: 2px solid #43a350;
+}
+
+QLineEdit#txtAppointmentId, QLineEdit#txtRecordId, QLineEdit#txtPatientId,
+QLineEdit#txtPatientId_Invoice, QLineEdit#txtPatientId_History,
+QLineEdit#txtUserId, QLineEdit#txtDocId, QLineEdit#txtMedId, QLineEdit#txtServiceId {
+    font-family: 'Consolas', 'Courier New', monospace;
+    font-weight: 600;
+}
+
+QComboBox::drop-down { border: none; width: 20px; }
+QComboBox QAbstractItemView {
+    background-color: #FFFFFF;
+    border: 1px solid #CBD5E1;
+    selection-background-color: #E8F5E9; /* Xanh lá siêu nhạt */
+    selection-color: #2E7D32; /* Chữ xanh lá đậm */
+}
+
+/* BẢNG DỮ LIỆU */
+QTableWidget, QTableView {
+    background-color: #FFFFFF;
+    border: 1px solid #E2E8F0;
+    border-radius: 8px;
+    gridline-color: #F1F5F9;
+    outline: none;
+    color: #0F172A;
+}
+
+QHeaderView::section {
+    background-color: #F1F5F9;
+    color: #475569;
+    padding: 8px 10px;
+    font-weight: 700;
+    font-size: 11px;
+    border: none;
+    border-bottom: 2px solid #E2E8F0;
+    text-transform: uppercase;
+}
+
+QTableWidget::item, QTableView::item {
+    padding: 6px 10px;
+    border-bottom: 1px solid #F1F5F9;
+    background-color: #FFFFFF;
+    color: #0F172A;
+}
+
+QTableWidget::item:selected, QTableView::item:selected {
+    background-color: #E8F5E9;
+    color: #2E7D32;
+    font-weight: bold;
+}
+
+QTableWidget::item:hover, QTableView::item:hover {
+    background-color: #F8FAFC;
+}

@@ -12,7 +12,27 @@ ReceptionistMenu::ReceptionistMenu(Database& database, AuthService& authService,
     : QMainWindow(parent), ui(new Ui::ReceptionistMenu), db(database), auth(authService) {
     ui->setupUi(this);
 
-    // Kết nối tín hiệu khi đổi ngày/ca khám thì tự cập nhật danh sách Bác sĩ
+    // --- NẠP 14 CHUYÊN KHOA VÀO COMBOBOX CHUYÊN KHOA ---
+    QStringList specialties = {
+        QString::fromUtf8("Khoa Khám bệnh"),
+        QString::fromUtf8("Khoa Hồi sức cấp cứu"),
+        QString::fromUtf8("Khoa Nội tổng hợp"),
+        QString::fromUtf8("Khoa Truyền nhiễm"),
+        QString::fromUtf8("Khoa Nhi"),
+        QString::fromUtf8("Khoa Ngoại tổng hợp"),
+        QString::fromUtf8("Khoa Phụ sản"),
+        QString::fromUtf8("Liên chuyên khoa (Tai - Mũi - Họng, Răng - Hàm - Mặt, Mắt)"),
+        QString::fromUtf8("Khoa Xét nghiệm (Huyết học, Hóa sinh, Vi sinh)"),
+        QString::fromUtf8("Khoa Chẩn đoán hình ảnh"),
+        QString::fromUtf8("Khoa Giải phẫu bệnh"),
+        QString::fromUtf8("Khoa Chống nhiễm khuẩn"),
+        QString::fromUtf8("Khoa Dược"),
+        QString::fromUtf8("Khoa Dinh dưỡng")
+    };
+    ui->cbSpecialty->addItems(specialties);
+
+    // Kết nối tín hiệu khi đổi chuyên khoa/ngày/ca khám thì tự cập nhật danh sách Bác sĩ
+    connect(ui->cbSpecialty, &QComboBox::currentTextChanged, this, &ReceptionistMenu::on_cbSpecialty_currentIndexChanged);
     connect(ui->cbDay, &QComboBox::currentTextChanged, this, &ReceptionistMenu::updateAvailableDoctors);
     connect(ui->cbShift, &QComboBox::currentTextChanged, this, &ReceptionistMenu::updateAvailableDoctors);
 
@@ -68,16 +88,25 @@ void ReceptionistMenu::on_btnRegisterPatient_clicked() {
 void ReceptionistMenu::updateAvailableDoctors() {
     ui->cbDoctor->clear();
 
+    string targetSpecialty = ui->cbSpecialty->currentText().toStdString();
     string day = ui->cbDay->currentText().toStdString();
     string shift = ui->cbShift->currentText().toStdString();
 
     vector<Doctor*> availableDocs = db.getAvailableDoctors(day, shift);
+    
+    // Lọc thêm theo chuyên khoa
+    vector<Doctor*> filteredDocs;
+    for (Doctor* doc : availableDocs) {
+        if (doc->getSpecialty() == targetSpecialty) {
+            filteredDocs.push_back(doc);
+        }
+    }
 
-    if (availableDocs.empty()) {
+    if (filteredDocs.empty()) {
         ui->cbDoctor->addItem("Không có Bác sĩ rảnh");
         ui->cbDoctor->setEnabled(false);
     } else {
-        for (Doctor* doc : availableDocs) {
+        for (Doctor* doc : filteredDocs) {
             QString displayText = QString::fromStdString(doc->getId() + " - " + doc->getFullName());
             ui->cbDoctor->addItem(displayText, QString::fromStdString(doc->getId()));
         }
@@ -171,21 +200,14 @@ void ReceptionistMenu::on_btnSearchPatient_clicked() {
 }
 // Bắt sự kiện khi Lễ tân đổi Chuyên khoa
 void ReceptionistMenu::on_cbSpecialty_currentIndexChanged(const QString &specialtyText) {
-    ui->cbDoctor->clear(); // Xóa danh sách bác sĩ cũ
-    string targetSpecialty = specialtyText.toStdString();
-    
-    // Quét toàn bộ bác sĩ trong Database
-    vector<Doctor*> doctors = db.getDoctors().getAllPointers();
-    for (auto doc : doctors) {
-        // Chỉ thêm những bác sĩ khớp chuyên khoa vào ComboBox
-        if (doc->getSpecialty() == targetSpecialty) {
-            ui->cbDoctor->addItem(QString::fromStdString(doc->getFullName()), 
-                                  QString::fromStdString(doc->getId()));
-        }
-    }
+    updateAvailableDoctors();
 }
 
 void ReceptionistMenu::refreshPatientTable() {
+    ui->tablePatients->setColumnCount(4);
+    ui->tablePatients->setHorizontalHeaderLabels({"Mã BN", "Họ Tên", "SĐT", "Loại"});
+    ui->tablePatients->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+
     ui->tablePatients->setRowCount(0);
     vector<Patient**> patList = db.getPatients().getAllPointers();
 

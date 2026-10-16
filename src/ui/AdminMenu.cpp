@@ -13,6 +13,26 @@ AdminMenu::AdminMenu(Database& database, AuthService& authService, QWidget *pare
     : QMainWindow(parent), ui(new Ui::AdminMenu), db(database), auth(authService)
 {
     ui->setupUi(this);
+
+    // --- NẠP 14 CHUYÊN KHOA VÀO DANH SÁCH BÁC SĨ ---
+    QStringList specialties = {
+        QString::fromUtf8("Khoa Khám bệnh"),
+        QString::fromUtf8("Khoa Hồi sức cấp cứu"),
+        QString::fromUtf8("Khoa Nội tổng hợp"),
+        QString::fromUtf8("Khoa Truyền nhiễm"),
+        QString::fromUtf8("Khoa Nhi"),
+        QString::fromUtf8("Khoa Ngoại tổng hợp"),
+        QString::fromUtf8("Khoa Phụ sản"),
+        QString::fromUtf8("Liên chuyên khoa (Tai - Mũi - Họng, Răng - Hàm - Mặt, Mắt)"),
+        QString::fromUtf8("Khoa Xét nghiệm (Huyết học, Hóa sinh, Vi sinh)"),
+        QString::fromUtf8("Khoa Chẩn đoán hình ảnh"),
+        QString::fromUtf8("Khoa Giải phẫu bệnh"),
+        QString::fromUtf8("Khoa Chống nhiễm khuẩn"),
+        QString::fromUtf8("Khoa Dược"),
+        QString::fromUtf8("Khoa Dinh dưỡng")
+    };
+    ui->cbDocSpecialty->addItems(specialties);
+
     try {
         refreshUserTable();
         refreshDoctorTable();
@@ -78,7 +98,7 @@ void AdminMenu::on_btnAddDoctor_clicked() {
     string dob = ui->txtDob->text().toStdString();
     string gender = ui->cbGender->currentText().toStdString();
     string phone = ui->txtPhone->text().toStdString();
-    string spec = ui->txtDocSpecialty->text().toStdString();
+    string spec = ui->cbDocSpecialty->currentText().toStdString(); 
     int expYears = ui->spinExpYears->value();
 
     string username = ui->txtDocUsername->text().toStdString();
@@ -108,7 +128,7 @@ void AdminMenu::on_btnAddDoctor_clicked() {
         ui->txtDob->clear();
         ui->cbGender->setCurrentIndex(0);
         ui->txtPhone->clear();
-        ui->txtDocSpecialty->clear();
+        ui->cbDocSpecialty->setCurrentIndex(0);
         ui->spinExpYears->setValue(0);
         ui->txtDocUsername->clear();
         ui->txtDocPassword->clear();
