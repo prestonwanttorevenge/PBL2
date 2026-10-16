@@ -22,7 +22,7 @@ private slots:
     void on_btnBookAppointment_clicked();  
     void on_btnCreateInvoice_clicked();  
     void on_btnSearchPatient_clicked();
-
+    void on_cbSpecialty_currentIndexChanged(const QString &specialtyText);
 private:
     Ui::ReceptionistMenu *ui;
     Database& db;

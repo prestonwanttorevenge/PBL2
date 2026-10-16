@@ -105,7 +105,7 @@ public:
     int addMedicineFromQT(string medicineId,string medicineName,double unitPrice,string dosage,int addQty);
     bool addPatientFromGUI(string id, string name, string phone, bool isNoiTru);
     vector<Doctor*> getAvailableDoctors(string day, string shift);
-    int bookAppointmentFromQT(string patientId, string doctorId, string receptionistId, string day, string time);
+    int bookAppointmentFromQT(string patientId, string doctorId, string receptionistId,string specialty ,string day, string time);
     int createMedicalRecordFromQT(string apptId, string symp, string diag, string notes);
     int prescribeMedicineFromQT(string recordId, string medId, string dosage, int qty);
     int createInvoiceFromQT(string patientId, double& outTotalFee);

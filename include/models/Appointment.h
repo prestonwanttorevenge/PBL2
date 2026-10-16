@@ -1,14 +1,14 @@
 #ifndef APPOINTMENT_H
 #define APPOINTMENT_H
-
+#include <iostream>
 #include <string>
-
 class Appointment {
 private:
     std::string appointmentId;
     std::string patientId;
     std::string doctorId;
     std::string receptionistId;
+    std::string specialty;
     std::string day;
     std::string time;
     std::string status;
@@ -18,6 +18,7 @@ public:
                 const std::string& pId = "-1",
                 const std::string& dId = "-1",
                 const std::string& rId = "-1",
+                const std::string& spec = "-1",
                 const std::string& day = "",
                 const std::string& time = "",
                 const std::string& stat = "Pending")
@@ -34,6 +35,7 @@ public:
     std::string getDayOfWeek() const { return day; }
     std::string getTimeSlot() const { return time; }
     std::string getStatus() const { return status; }
+    std::string getSpecialty() const { return specialty; }
 
     // Bổ sung hàm khớp với giao diện DoctorMenu.cpp
     std::string getAppointmentDate() const {

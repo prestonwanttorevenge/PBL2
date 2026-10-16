@@ -90,14 +90,21 @@ void ReceptionistMenu::on_btnBookAppointment_clicked() {
     string day = ui->cbDay->currentText().toStdString();
     string time = ui->cbShift->currentText().toStdString();
     string doctorId = ui->cbDoctor->currentData().toString().toStdString();
-    string receptionistId = "LT01";
+    string selectedSpecialty = ui->cbSpecialty->currentText().toStdString();
+    User* currentUser = auth.getCurrentUser(); 
+    
+    if (currentUser == nullptr) {
+        QMessageBox::critical(this, "Lỗi", "Phiên đăng nhập đã hết hạn hoặc không hợp lệ!");
+        return;
+    }
+    string receptionistId = currentUser->getId();
 
     if (patientId.empty() || doctorId.empty() || day.empty() || time.empty()) {
         QMessageBox::warning(this, "Cảnh báo", "Vui lòng điền đủ thông tin và chọn Bác sĩ hợp lệ!");
         return;
     }
 
-    int result = db.bookAppointmentFromQT(patientId, doctorId, receptionistId, day, time);
+    int result = db.bookAppointmentFromQT(patientId, doctorId, receptionistId, selectedSpecialty, day, time);
 
     if (result == 1) {
         QMessageBox::information(this, "Thành công", "Đã chốt lịch hẹn thành công!\nTrạng thái: Chờ Khám");
@@ -159,6 +166,21 @@ void ReceptionistMenu::on_btnSearchPatient_clicked() {
             ui->tablePatients->setItem(i, 1, new QTableWidgetItem(QString::fromStdString(foundPatients[i]->getFullName())));
             ui->tablePatients->setItem(i, 2, new QTableWidgetItem(QString::fromStdString(foundPatients[i]->getPhoneNumber())));
             ui->tablePatients->setItem(i, 3, new QTableWidgetItem(QString::fromStdString(foundPatients[i]->getType())));
+        }
+    }
+}
+// Bắt sự kiện khi Lễ tân đổi Chuyên khoa
+void ReceptionistMenu::on_cbSpecialty_currentIndexChanged(const QString &specialtyText) {
+    ui->cbDoctor->clear(); // Xóa danh sách bác sĩ cũ
+    string targetSpecialty = specialtyText.toStdString();
+    
+    // Quét toàn bộ bác sĩ trong Database
+    vector<Doctor*> doctors = db.getDoctors().getAllPointers();
+    for (auto doc : doctors) {
+        // Chỉ thêm những bác sĩ khớp chuyên khoa vào ComboBox
+        if (doc->getSpecialty() == targetSpecialty) {
+            ui->cbDoctor->addItem(QString::fromStdString(doc->getFullName()), 
+                                  QString::fromStdString(doc->getId()));
         }
     }
 }

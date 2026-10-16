@@ -277,16 +277,17 @@ void Database::loadAllData() {
         while (getline(fAppt, line)) {
             if (line.empty()) continue;
             stringstream ss(line);
-            string aId, pId, dId, rId, date, status;
+            string aId, pId, dId, rId, spec ,date, status;
 
             getline(ss, aId, ';');
             getline(ss, pId, ';');
             getline(ss, dId, ';');
             getline(ss, rId, ';');
+            getline(ss,spec,';');
             getline(ss, date, ';');
             getline(ss, status, ';');
 
-            appointments.push_back(Appointment(aId, pId, dId, rId, date, status));
+            appointments.push_back(Appointment(aId, pId, dId, rId, spec,date, status));
         }
         fAppt.close();
     }
@@ -373,6 +374,7 @@ void Database::saveAllData() {
                   << appt.getPatientId() << ";"
                   << appt.getDoctorId() << ";"
                   << appt.getReceptionistId() << ";"
+                  << appt.getSpecialty() << ";"
                   << appt.getDayOfWeek() << ";"
                   << appt.getTimeSlot() << ";"
                   << appt.getStatus() << "\n";
@@ -1002,7 +1004,7 @@ vector<Doctor*> Database::getAvailableDoctors(string day, string shift) {
     
     return availableDocs;
 }
-int Database::bookAppointmentFromQT(string patientId, string doctorId, string receptionistId, string day, string time) {
+int Database::bookAppointmentFromQT(string patientId, string doctorId, string receptionistId,string specialty, string day, string time) {
     if (findPatientById(patientId) == nullptr) {
         return -1; // Lỗi: Không tìm thấy Bệnh nhân
     }
@@ -1021,7 +1023,7 @@ int Database::bookAppointmentFromQT(string patientId, string doctorId, string re
         return -3;
     }
     string newAppId = "APP" + to_string(appointments.size() + 1);
-    appointments.push_back(Appointment(newAppId, patientId, doctorId, receptionistId, day, time, "Cho Kham"));
+    appointments.push_back(Appointment(newAppId, patientId, doctorId, receptionistId,specialty,day, time, "Cho Kham"));
     return 1; // Thành công
 }
 int Database::createMedicalRecordFromQT(string apptId, string symp, string diag, string notes) {
