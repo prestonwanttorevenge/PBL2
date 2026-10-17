@@ -11,6 +11,12 @@
     </item>
     <item>
      <layout class="QVBoxLayout" name="verticalLayoutRightPanel">
+      
+      <!-- BẮT ĐẦU: NÚT HỦY LỊCH BỊ THIẾU ĐÃ ĐƯỢC THÊM VÀO -->
+      <item><widget class="QPushButton" name="btnCancelAppointment"><property name="text"><string>Hủy Lịch Hẹn (Đang chọn trên bảng)</string></property></widget></item>
+      <item><spacer name="verticalSpacer0"><property name="orientation"><enum>Qt::Vertical</enum></property></spacer></item>
+      <!-- KẾT THÚC: NÚT HỦY LỊCH -->
+
       <item><widget class="QLineEdit" name="txtAppointmentId"><property name="placeholderText"><string>Mã Lịch Hẹn</string></property></widget></item>
       <item><widget class="QLineEdit" name="txtSymptoms"><property name="placeholderText"><string>Triệu chứng</string></property></widget></item>
       <item><widget class="QLineEdit" name="txtDiagnosis"><property name="placeholderText"><string>Chẩn đoán</string></property></widget></item>

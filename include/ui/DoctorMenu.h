@@ -1,8 +1,9 @@
 #ifndef DOCTORMENU_H
 #define DOCTORMENU_H
+
 #include <QMainWindow>
-#include "../services/Database.h"
-#include "../services/AuthService.h"
+#include "services/Database.h"
+#include "services/AuthService.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class DoctorMenu; }
@@ -22,12 +23,14 @@ private slots:
     void on_btnPrescribeMedicine_clicked();
     void on_btnViewPatientHistory_clicked();
     void on_btnCancelAppointment_clicked();
+
 private:
     Ui::DoctorMenu *ui;
     Database& db;
     AuthService& auth;
     
     void loadPatientQueue();
+    void loadMedicineComboBox(); // Bổ sung hàm nạp danh mục thuốc
 };
 
 #endif // DOCTORMENU_H

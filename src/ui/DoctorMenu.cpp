@@ -9,10 +9,26 @@ DoctorMenu::DoctorMenu(Database& database, AuthService& authService, QWidget *pa
     : QMainWindow(parent), ui(new Ui::DoctorMenu), db(database), auth(authService) {
     ui->setupUi(this);
     loadPatientQueue();
+    loadMedicineComboBox(); // Nạp thuốc vào ComboBox ngay khi mở
 }
 
 DoctorMenu::~DoctorMenu() {
     delete ui;
+}
+
+void DoctorMenu::loadMedicineComboBox() {
+    ui->cbMedicine->clear();
+    vector<Medicine*> meds = db.getMedicines().getAllPointers();
+    if (meds.empty()) {
+        ui->cbMedicine->addItem("Không có thuốc trong kho");
+        ui->cbMedicine->setEnabled(false);
+    } else {
+        for (auto med : meds) {
+            QString displayText = QString::fromStdString(med->getMedicineId() + " - " + med->getMedicineName() + " (Tồn: " + std::to_string(med->getStock()) + ")");
+            ui->cbMedicine->addItem(displayText, QString::fromStdString(med->getMedicineId()));
+        }
+        ui->cbMedicine->setEnabled(true);
+    }
 }
 
 void DoctorMenu::on_btnLogout_clicked() {
@@ -22,7 +38,6 @@ void DoctorMenu::on_btnLogout_clicked() {
     );
 
     if (reply == QMessageBox::Yes) {
-        // Mở form Login mới
         Login *loginForm = new Login(this->db);
         loginForm->show();
         this->close(); 
@@ -30,13 +45,12 @@ void DoctorMenu::on_btnLogout_clicked() {
 }
 
 void DoctorMenu::on_btnViewSchedule_clicked() {
-    // QMessageBox::information(this, "Lịch Trực", "Hiển thị lịch trực của bác sĩ trong tuần..."); // Loại bỏ dòng thông báo dư thừa
     User* currentUser = auth.getCurrentUser();
     if (currentUser == nullptr) {
         QMessageBox::critical(this, "Lỗi", "Phiên đăng nhập không hợp lệ!");
         return;
     }
-    string currentDoctorId = currentUser->getId(); // Lấy ID động của bác sĩ đang đăng nhập
+    string currentDoctorId = currentUser->getId();
 
     Doctor* doc = db.findDoctorById(currentDoctorId);
     if (doc == nullptr) {
@@ -60,7 +74,6 @@ void DoctorMenu::on_btnViewSchedule_clicked() {
 }
 
 void DoctorMenu::on_btnCreateMedicalRecord_clicked() {
-    // 1. Lấy dữ liệu từ giao diện
     string apptId = ui->txtAppointmentId->text().toStdString();
     string symp = ui->txtSymptoms->text().toStdString();
     string diag = ui->txtDiagnosis->text().toStdString();
@@ -71,40 +84,40 @@ void DoctorMenu::on_btnCreateMedicalRecord_clicked() {
         return;
     }
 
-    // 2. Gọi Backend
     int result = db.createMedicalRecordFromQT(apptId, symp, diag, notes);
 
-    // 3. Xử lý kết quả
     if (result == 1) {
+        db.saveAllData(); // Lưu CSDL
         QMessageBox::information(this, "Thành công", "Đã tạo Hồ sơ Bệnh án mới thành công!");
         ui->txtAppointmentId->clear();
         ui->txtSymptoms->clear();
         ui->txtDiagnosis->clear();
         ui->txtNotes->clear();
+        loadPatientQueue();
     } else if (result == -1) {
         QMessageBox::critical(this, "Lỗi", "Mã Lịch hẹn không hợp lệ!");
     }
 }
+
 void DoctorMenu::on_btnPrescribeMedicine_clicked() {
-    // QMessageBox::information(this, "Kê Đơn Thuốc", "Mở danh sách thuốc để kê đơn."); // Bỏ dòng này
-    string recordId = ui->txtRecordId->text().toStdString(); // Mã bệnh án Bác sĩ đang thao tác
-    string medId = ui->cbMedicine->currentData().toString().toStdString(); // Lấy ID Thuốc đang ẩn
+    string recordId = ui->txtRecordId->text().toStdString();
+    string medId = ui->cbMedicine->currentData().toString().toStdString();
     string dosage = ui->txtDosage->text().toStdString();
-    int qty = ui->spinBoxQuantity->value(); // Hộp nhập số lượng
+    int qty = ui->spinBoxQuantity->value();
 
     if (recordId.empty() || medId.empty() || qty <= 0) {
         QMessageBox::warning(this, "Lỗi", "Vui lòng nhập đủ thông tin và số lượng lớn hơn 0.");
         return;
     }
 
-    // 2. Chuyển cho Backend gánh vác việc kiểm tra
     int result = db.prescribeMedicineFromQT(recordId, medId, dosage, qty);
 
-    // 3. Phản hồi lại giao diện
     if (result == 1) {
+        db.saveAllData(); // Lưu ngay xuống CSV
         QMessageBox::information(this, "Kê đơn", "Đã thêm thuốc vào Bệnh án thành công!");
         ui->txtDosage->clear();
         ui->spinBoxQuantity->setValue(1);
+        loadMedicineComboBox(); // Làm mới lại số lượng tồn kho trên ComboBox
     } 
     else if (result == -1) {
         QMessageBox::critical(this, "Lỗi", "Mã Bệnh án không tồn tại!");
@@ -118,8 +131,6 @@ void DoctorMenu::on_btnPrescribeMedicine_clicked() {
 }
 
 void DoctorMenu::on_btnViewPatientHistory_clicked() {
-    // QMessageBox::information(this, "Lịch Sử Khám", "Tra cứu lịch sử khám bệnh cũ của bệnh nhân."); // Bỏ dòng dư thừa
-    // 1. Lấy Mã Bệnh Nhân do Bác sĩ gõ
     string patientId = ui->txtPatientId_History->text().toStdString();
 
     if (patientId.empty()) {
@@ -127,25 +138,20 @@ void DoctorMenu::on_btnViewPatientHistory_clicked() {
         return;
     }
 
-    // 2. Chốt chặn: Kiểm tra Bệnh nhân có thật không
     if (db.findPatientById(patientId) == nullptr) {
         QMessageBox::critical(this, "Lỗi", "Mã Bệnh nhân không tồn tại trên hệ thống!");
         return;
     }
 
-    // 3. Gọi Backend lấy danh sách lịch sử
     vector<MedicalRecord*> history = db.getPatientHistory(patientId);
 
-    // 4. Xử lý kết quả trả về
     if (history.empty()) {
         QMessageBox::information(this, "Lịch Sử", "Bệnh nhân này chưa từng khám hoặc chưa có bệnh án nào được ghi nhận.");
         return;
     }
 
-    // 5. Hiển thị Lịch sử ra màn hình (Gom các bệnh án thành 1 chuỗi văn bản dài)
     QString msg = "LỊCH SỬ KHÁM CỦA BỆNH NHÂN: " + QString::fromStdString(patientId) + "\n\n";
     
-    // Duyệt qua từng tờ bệnh án trong quá khứ
     for (size_t i = 0; i < history.size(); i++) {
         msg += "--- Lần khám thứ " + QString::number(i + 1) + " ---\n";
         msg += "+ Mã Bệnh Án: " + QString::fromStdString(history[i]->getRecordId()) + "\n";
@@ -156,23 +162,19 @@ void DoctorMenu::on_btnViewPatientHistory_clicked() {
         msg += "--------------------------\n\n";
     }
 
-    // Hiển thị khung thông báo chứa toàn bộ chuỗi msg
     QMessageBox::information(this, "Lịch Sử Khám Bệnh", msg);
-    
     ui->txtPatientId_History->clear();
 }
+
 void DoctorMenu::on_btnCancelAppointment_clicked() {
-    // 1. Kiểm tra xem Bác sĩ đã click chọn dòng nào trên bảng chưa
     int row = ui->tableAppointments->currentRow();
     if (row < 0) {
         QMessageBox::warning(this, "Chưa chọn", "Vui lòng click chọn một lịch hẹn trên bảng để hủy!");
         return;
     }
 
-    // 2. Rút mã Lịch Hẹn (Cột số 0) từ dòng đang chọn
     string apptId = ui->tableAppointments->item(row, 0)->text().toStdString();
 
-    // 3. Hỏi xác nhận để tránh bấm nhầm
     auto reply = QMessageBox::question(this, "Xác nhận Hủy", 
                                        "Bệnh nhân vắng mặt? Bạn có chắc muốn Hủy lịch hẹn này không?", 
                                        QMessageBox::Yes | QMessageBox::No);
@@ -182,7 +184,6 @@ void DoctorMenu::on_btnCancelAppointment_clicked() {
         
         if (result == 1) {
             QMessageBox::information(this, "Thành công", "Đã hủy lịch hẹn thành công!");
-            // Gọi lại hàm này để load lại bảng (Lịch "Canceled" sẽ tự biến mất vì bảng chỉ lọc "Pending")
             loadPatientQueue(); 
         } 
         else if (result == -2) {
@@ -192,11 +193,8 @@ void DoctorMenu::on_btnCancelAppointment_clicked() {
 }
 
 void DoctorMenu::loadPatientQueue() {
-    // 1. Phải khai báo số lượng cột và tiêu đề thì bảng mới hiện ra!
     ui->tableAppointments->setColumnCount(4);
     ui->tableAppointments->setHorizontalHeaderLabels({"Mã Lịch Hẹn", "Mã Bệnh Nhân", "Thời Gian", "Trạng Thái"});
-    
-    // Resize cột cho đẹp
     ui->tableAppointments->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 
     ui->tableAppointments->setRowCount(0);

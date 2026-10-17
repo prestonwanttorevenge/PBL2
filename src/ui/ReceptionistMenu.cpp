@@ -3,9 +3,10 @@
 #include "services/Database.h"
 #include "ui/Login.h"
 #include <QMessageBox>
-#include <QTableWidgetItem> // Bắt buộc phải có để thao tác với bảng
-#include <QComboBox>        // Bắt buộc phải có để thao tác với hộp chọn (cbDay, cbShift)
+#include <QTableWidgetItem>
+#include <QComboBox>
 #include "services/AuthService.h"
+
 using namespace std;
 
 ReceptionistMenu::ReceptionistMenu(Database& database, AuthService& authService, QWidget *parent)
@@ -20,7 +21,7 @@ ReceptionistMenu::ReceptionistMenu(Database& database, AuthService& authService,
         QString::fromUtf8("Khoa Truyền nhiễm"),
         QString::fromUtf8("Khoa Nhi"),
         QString::fromUtf8("Khoa Ngoại tổng hợp"),
-        QString::fromUtf8("Khoa Phụ sản"),
+        QString::fromUtf8("fKhoa Phụ sản"),
         QString::fromUtf8("Liên chuyên khoa (Tai - Mũi - Họng, Răng - Hàm - Mặt, Mắt)"),
         QString::fromUtf8("Khoa Xét nghiệm (Huyết học, Hóa sinh, Vi sinh)"),
         QString::fromUtf8("Khoa Chẩn đoán hình ảnh"),
@@ -38,6 +39,7 @@ ReceptionistMenu::ReceptionistMenu(Database& database, AuthService& authService,
 
     updateAvailableDoctors();
     refreshPatientTable();
+    loadPendingAppointments(); // Nạp lịch chờ ngay khi mở form
 }
 
 ReceptionistMenu::~ReceptionistMenu() {
@@ -51,12 +53,12 @@ void ReceptionistMenu::on_btnLogout_clicked() {
     );
 
     if (reply == QMessageBox::Yes) {
-        // Mở form Login mới
         Login *loginForm = new Login(this->db);
         loginForm->show();
         this->close(); 
     }
 }
+
 void ReceptionistMenu::on_btnRegisterPatient_clicked() {
     QString qId = ui->txtPatientId->text();
     QString qName = ui->txtPatientName->text();
@@ -74,12 +76,12 @@ void ReceptionistMenu::on_btnRegisterPatient_clicked() {
 
     bool success = db.addPatientFromGUI(id, name, phone, isNoiTru);
     if (success) {
+        db.saveAllData(); // Lưu ngay xuống file
         QMessageBox::information(this, "Thành công", "Đã thêm bệnh nhân mới!");
         ui->txtPatientId->clear();
         ui->txtPatientName->clear();
         ui->txtPatientPhone->clear();
         refreshPatientTable();
-        db.saveAllData();
     } else {
         QMessageBox::critical(this, "Lỗi", "ID Bệnh nhân đã tồn tại!");
     }
@@ -136,9 +138,10 @@ void ReceptionistMenu::on_btnBookAppointment_clicked() {
     int result = db.bookAppointmentFromQT(patientId, doctorId, receptionistId, selectedSpecialty, day, time);
 
     if (result == 1) {
+        db.saveAllData(); // Lưu ngay sau khi chốt lịch
         QMessageBox::information(this, "Thành công", "Đã chốt lịch hẹn thành công!\nTrạng thái: Chờ Khám");
         ui->txtPatientId->clear();
-        loadPendingAppointments();
+        loadPendingAppointments(); // Nạp lại danh sách lịch chờ
     }
     else if (result == -1) {
         QMessageBox::critical(this, "Lỗi", "Mã Bệnh Nhân không tồn tại!");
@@ -199,10 +202,10 @@ void ReceptionistMenu::on_btnSearchPatient_clicked() {
         }
     }
 }
+
 void ReceptionistMenu::loadPendingAppointments() {
     ui->cbPendingAppointments->clear(); // Xóa sạch dữ liệu cũ
     
-    // Lấy toàn bộ danh sách lịch hẹn từ Database
     auto& appts = db.getAppointments(); 
     bool hasPending = false;
 
@@ -210,18 +213,15 @@ void ReceptionistMenu::loadPendingAppointments() {
         if (appt.getStatus() == "Pending") {
             hasPending = true;
             
-            // Tìm tên bệnh nhân để hiển thị cho thân thiện
             string patientName = "Không rõ";
             Patient* pat = db.findPatientById(appt.getPatientId());
             if (pat != nullptr) {
                 patientName = pat->getFullName();
             }
 
-            // Text hiển thị trên màn hình: "APP1 - Nguyen Van A (Thứ 2 - Sáng)"
             QString displayText = QString::fromStdString(appt.getAppointmentId() + " - " + patientName 
-                                  + " (" + appt.getDay() + ", " + appt.getTime() + ")");
+                              + " (" + appt.getDayOfWeek() + ", " + appt.getTimeSlot() + ")");
             
-            // Data ngầm lưu trữ: "APP1" (chỉ lưu mã ID để lát nữa gọi hàm Hủy)
             ui->cbPendingAppointments->addItem(displayText, QString::fromStdString(appt.getAppointmentId()));
         }
     }
@@ -229,14 +229,14 @@ void ReceptionistMenu::loadPendingAppointments() {
     if (!hasPending) {
         ui->cbPendingAppointments->addItem("Không có lịch chờ khám");
         ui->cbPendingAppointments->setEnabled(false);
-        ui->btnCancelAppointment->setEnabled(false); // Khóa nút Hủy
+        ui->btnCancelAppointment->setEnabled(false);
     } else {
         ui->cbPendingAppointments->setEnabled(true);
-        ui->btnCancelAppointment->setEnabled(true);  // Mở nút Hủy
+        ui->btnCancelAppointment->setEnabled(true);
     }
 }
+
 void ReceptionistMenu::on_btnCancelAppointment_clicked() {
-    // 1. Rút mã Lịch Hẹn (ID ngầm) từ mục đang được chọn trên ComboBox
     string apptId = ui->cbPendingAppointments->currentData().toString().toStdString();
 
     if (apptId.empty()) {
@@ -244,27 +244,23 @@ void ReceptionistMenu::on_btnCancelAppointment_clicked() {
         return;
     }
 
-    // 2. Hỏi xác nhận
     auto reply = QMessageBox::question(this, "Xác nhận Hủy", 
                                        "Bạn có chắc chắn muốn hủy lịch hẹn [" + QString::fromStdString(apptId) + "] không?", 
                                        QMessageBox::Yes | QMessageBox::No);
                                        
     if (reply == QMessageBox::Yes) {
-        // 3. Gọi Backend để hủy
         int result = db.cancelAppointmentFromQT(apptId);
         
         if (result == 1) {
             QMessageBox::information(this, "Thành công", "Đã hủy lịch hẹn thành công!");
-            
-            // 4. QUAN TRỌNG: Load lại cái ComboBox để nó đá cái lịch vừa Hủy biến mất!
-            loadPendingAppointments(); 
+            loadPendingAppointments(); // Nạp lại ComboBox
         } 
         else {
             QMessageBox::critical(this, "Lỗi", "Không thể hủy lịch hẹn này!");
         }
     }
 }
-// Bắt sự kiện khi Lễ tân đổi Chuyên khoa
+
 void ReceptionistMenu::on_cbSpecialty_currentIndexChanged(const QString &specialtyText) {
     updateAvailableDoctors();
 }

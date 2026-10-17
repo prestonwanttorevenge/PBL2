@@ -41,8 +41,8 @@ private:
     AuthService& auth;
     void refreshDoctorTable();
     void refreshUserTable();
-    void refreshMedicineTable(); // Đã thêm
-    void refreshServiceTable();  // Đã thêm
+    void refreshMedicineTable(); 
+    void refreshServiceTable();  
 };
 
 #endif // ADMINMENU_H

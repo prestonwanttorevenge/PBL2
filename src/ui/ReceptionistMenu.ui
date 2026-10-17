@@ -40,6 +40,17 @@
        </layout>
       </item>
       <item><widget class="QPushButton" name="btnBookAppointment"><property name="text"><string>Đặt Lịch Hẹn Khám</string></property></widget></item>
+      
+      <!-- BẮT ĐẦU: KHU VỰC HỦY LỊCH HẸN BỊ THIẾU ĐÃ ĐƯỢC THÊM VÀO -->
+      <item><spacer name="verticalSpacerCancel"><property name="orientation"><enum>Qt::Vertical</enum></property></spacer></item>
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayoutCancel">
+        <item><widget class="QComboBox" name="cbPendingAppointments" /></item>
+        <item><widget class="QPushButton" name="btnCancelAppointment"><property name="text"><string>Hủy Lịch Hẹn</string></property></widget></item>
+       </layout>
+      </item>
+      <!-- KẾT THÚC: KHU VỰC HỦY LỊCH HẸN -->
+
       <item><spacer name="verticalSpacer2"><property name="orientation"><enum>Qt::Vertical</enum></property></spacer></item>
       <item>
        <layout class="QHBoxLayout" name="horizontalLayoutInvoice">

@@ -1,8 +1,9 @@
 #ifndef RECEPTIONISTMENU_H
 #define RECEPTIONISTMENU_H
+
 #include <QMainWindow>
-#include "../services/Database.h"
-#include "../services/AuthService.h"
+#include "services/Database.h"
+#include "services/AuthService.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class ReceptionistMenu; }
@@ -25,6 +26,7 @@ private slots:
     void on_cbSpecialty_currentIndexChanged(const QString &specialtyText);
     void on_btnCancelAppointment_clicked();
     void loadPendingAppointments();
+    
 private:
     Ui::ReceptionistMenu *ui;
     Database& db;

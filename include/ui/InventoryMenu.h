@@ -2,7 +2,7 @@
 #define INVENTORYMENU_H
 
 #include <QMainWindow>
-#include "services/Database.h" // Chuẩn hóa đường dẫn
+#include "services/Database.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class InventoryMenu; }
@@ -10,21 +10,21 @@ QT_END_NAMESPACE
 
 class InventoryMenu : public QMainWindow
 {
-    Q_OBJECT // Bắt buộc phải có để các nút bấm hoạt động
+    Q_OBJECT
 
 public:
-    // Đã thêm tham số Database& để khởi tạo biến db
     explicit InventoryMenu(Database& database, QWidget *parent = nullptr);
     ~InventoryMenu();
 
 private slots:
-    // Nơi khai báo các nút bấm trên giao diện
-    void on_btnImportMedicine_clicked(); // Nút Nhập thuốc / Thêm thuốc mới
-    void on_btnLogout_clicked();         // Nút Đăng xuất (Tùy chọn)
+    void on_btnImportMedicine_clicked();
+    void on_btnLogout_clicked();
 
 private:
     Ui::InventoryMenu *ui;
-    Database& db; // Biến tham chiếu phải được khởi tạo ở constructor
+    Database& db;
+    
+    void refreshMedicineTable(); // Bổ sung hàm cập nhật bảng kho thuốc
 };
 
 #endif // INVENTORYMENU_H
