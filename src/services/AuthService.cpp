@@ -5,14 +5,11 @@ AuthService::~AuthService() {}
 
 bool AuthService::login(const std::string& inputUsername, const std::string& inputPassword) {
     // Tìm trực tiếp User trong Cây BST theo Username (không dùng vòng lặp for)
-    User* user = db.getUsers().search(inputUsername);
+    User* user = db.loginFromQT(inputUsername, inputPassword);
 
     if (user != nullptr) {
-        if (!user->getIsActive()) return false;
-        if (user->authenticate(inputPassword)) {
-            currentUser = user;
-            return true;
-        }
+        currentUser = user;
+        return true;
     }
     return false;
 }

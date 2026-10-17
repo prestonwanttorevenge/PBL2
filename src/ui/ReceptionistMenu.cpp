@@ -5,7 +5,7 @@
 #include <QMessageBox>
 #include <QTableWidgetItem> // Bắt buộc phải có để thao tác với bảng
 #include <QComboBox>        // Bắt buộc phải có để thao tác với hộp chọn (cbDay, cbShift)
-
+#include "services/AuthService.h"
 using namespace std;
 
 ReceptionistMenu::ReceptionistMenu(Database& database, AuthService& authService, QWidget *parent)

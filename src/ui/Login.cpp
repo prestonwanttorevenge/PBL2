@@ -32,7 +32,14 @@ void Login::on_btnLogin_clicked() {
         return;
     }
 
-    User* loggedInUser = db.loginFromQT(username, password);
+   // 1. GỌI AUTH.LOGIN ĐỂ HỆ THỐNG GHI NHẬN PHIÊN ĐĂNG NHẬP
+    if (!auth.login(username, password)) {
+        QMessageBox::critical(this, "Đăng nhập thất bại", "Sai tài khoản hoặc mật khẩu!");
+        return;
+    }
+
+    // 2. Rút User hiện tại ra để kiểm tra quyền hạn
+    User* loggedInUser = auth.getCurrentUser();
 
     if (loggedInUser == nullptr) {
         QMessageBox::critical(this, "Đăng nhập thất bại", "Sai tài khoản hoặc mật khẩu!");
