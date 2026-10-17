@@ -21,7 +21,7 @@ private slots:
     void on_btnCreateMedicalRecord_clicked();
     void on_btnPrescribeMedicine_clicked();
     void on_btnViewPatientHistory_clicked();
-
+    void on_btnCancelAppointment_clicked();
 private:
     Ui::DoctorMenu *ui;
     Database& db;

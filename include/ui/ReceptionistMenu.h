@@ -23,6 +23,8 @@ private slots:
     void on_btnCreateInvoice_clicked();  
     void on_btnSearchPatient_clicked();
     void on_cbSpecialty_currentIndexChanged(const QString &specialtyText);
+    void on_btnCancelAppointment_clicked();
+    void loadPendingAppointments();
 private:
     Ui::ReceptionistMenu *ui;
     Database& db;

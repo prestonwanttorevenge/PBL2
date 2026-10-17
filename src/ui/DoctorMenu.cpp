@@ -161,6 +161,35 @@ void DoctorMenu::on_btnViewPatientHistory_clicked() {
     
     ui->txtPatientId_History->clear();
 }
+void DoctorMenu::on_btnCancelAppointment_clicked() {
+    // 1. Kiểm tra xem Bác sĩ đã click chọn dòng nào trên bảng chưa
+    int row = ui->tableAppointments->currentRow();
+    if (row < 0) {
+        QMessageBox::warning(this, "Chưa chọn", "Vui lòng click chọn một lịch hẹn trên bảng để hủy!");
+        return;
+    }
+
+    // 2. Rút mã Lịch Hẹn (Cột số 0) từ dòng đang chọn
+    string apptId = ui->tableAppointments->item(row, 0)->text().toStdString();
+
+    // 3. Hỏi xác nhận để tránh bấm nhầm
+    auto reply = QMessageBox::question(this, "Xác nhận Hủy", 
+                                       "Bệnh nhân vắng mặt? Bạn có chắc muốn Hủy lịch hẹn này không?", 
+                                       QMessageBox::Yes | QMessageBox::No);
+                                       
+    if (reply == QMessageBox::Yes) {
+        int result = db.cancelAppointmentFromQT(apptId);
+        
+        if (result == 1) {
+            QMessageBox::information(this, "Thành công", "Đã hủy lịch hẹn thành công!");
+            // Gọi lại hàm này để load lại bảng (Lịch "Canceled" sẽ tự biến mất vì bảng chỉ lọc "Pending")
+            loadPatientQueue(); 
+        } 
+        else if (result == -2) {
+            QMessageBox::warning(this, "Lỗi", "Lịch hẹn này đã khám xong, không thể hủy!");
+        }
+    }
+}
 
 void DoctorMenu::loadPatientQueue() {
     // 1. Phải khai báo số lượng cột và tiêu đề thì bảng mới hiện ra!

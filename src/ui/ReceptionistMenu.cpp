@@ -138,6 +138,7 @@ void ReceptionistMenu::on_btnBookAppointment_clicked() {
     if (result == 1) {
         QMessageBox::information(this, "Thành công", "Đã chốt lịch hẹn thành công!\nTrạng thái: Chờ Khám");
         ui->txtPatientId->clear();
+        loadPendingAppointments();
     }
     else if (result == -1) {
         QMessageBox::critical(this, "Lỗi", "Mã Bệnh Nhân không tồn tại!");
@@ -195,6 +196,71 @@ void ReceptionistMenu::on_btnSearchPatient_clicked() {
             ui->tablePatients->setItem(i, 1, new QTableWidgetItem(QString::fromStdString(foundPatients[i]->getFullName())));
             ui->tablePatients->setItem(i, 2, new QTableWidgetItem(QString::fromStdString(foundPatients[i]->getPhoneNumber())));
             ui->tablePatients->setItem(i, 3, new QTableWidgetItem(QString::fromStdString(foundPatients[i]->getType())));
+        }
+    }
+}
+void ReceptionistMenu::loadPendingAppointments() {
+    ui->cbPendingAppointments->clear(); // Xóa sạch dữ liệu cũ
+    
+    // Lấy toàn bộ danh sách lịch hẹn từ Database
+    auto& appts = db.getAppointments(); 
+    bool hasPending = false;
+
+    for (const auto& appt : appts) {
+        if (appt.getStatus() == "Pending") {
+            hasPending = true;
+            
+            // Tìm tên bệnh nhân để hiển thị cho thân thiện
+            string patientName = "Không rõ";
+            Patient* pat = db.findPatientById(appt.getPatientId());
+            if (pat != nullptr) {
+                patientName = pat->getFullName();
+            }
+
+            // Text hiển thị trên màn hình: "APP1 - Nguyen Van A (Thứ 2 - Sáng)"
+            QString displayText = QString::fromStdString(appt.getAppointmentId() + " - " + patientName 
+                                  + " (" + appt.getDay() + ", " + appt.getTime() + ")");
+            
+            // Data ngầm lưu trữ: "APP1" (chỉ lưu mã ID để lát nữa gọi hàm Hủy)
+            ui->cbPendingAppointments->addItem(displayText, QString::fromStdString(appt.getAppointmentId()));
+        }
+    }
+
+    if (!hasPending) {
+        ui->cbPendingAppointments->addItem("Không có lịch chờ khám");
+        ui->cbPendingAppointments->setEnabled(false);
+        ui->btnCancelAppointment->setEnabled(false); // Khóa nút Hủy
+    } else {
+        ui->cbPendingAppointments->setEnabled(true);
+        ui->btnCancelAppointment->setEnabled(true);  // Mở nút Hủy
+    }
+}
+void ReceptionistMenu::on_btnCancelAppointment_clicked() {
+    // 1. Rút mã Lịch Hẹn (ID ngầm) từ mục đang được chọn trên ComboBox
+    string apptId = ui->cbPendingAppointments->currentData().toString().toStdString();
+
+    if (apptId.empty()) {
+        QMessageBox::warning(this, "Lỗi", "Không có lịch hẹn nào được chọn!");
+        return;
+    }
+
+    // 2. Hỏi xác nhận
+    auto reply = QMessageBox::question(this, "Xác nhận Hủy", 
+                                       "Bạn có chắc chắn muốn hủy lịch hẹn [" + QString::fromStdString(apptId) + "] không?", 
+                                       QMessageBox::Yes | QMessageBox::No);
+                                       
+    if (reply == QMessageBox::Yes) {
+        // 3. Gọi Backend để hủy
+        int result = db.cancelAppointmentFromQT(apptId);
+        
+        if (result == 1) {
+            QMessageBox::information(this, "Thành công", "Đã hủy lịch hẹn thành công!");
+            
+            // 4. QUAN TRỌNG: Load lại cái ComboBox để nó đá cái lịch vừa Hủy biến mất!
+            loadPendingAppointments(); 
+        } 
+        else {
+            QMessageBox::critical(this, "Lỗi", "Không thể hủy lịch hẹn này!");
         }
     }
 }

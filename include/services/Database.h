@@ -98,31 +98,52 @@ public:
     void addService(const Service& srv);
     void showAllServices() const;
 
-    bool addInpatientFromQT(string id, string name, string dob, string gender, string phone,string recordId, double discount, string admDate, string disDate, string room, string bed);
-    bool addOutpatientFromQT(string id, string name, string dob, string gender, string phone, string recordId, double discount, string apptDate, string clinic);
-    bool addDoctorFromQT(string id, string fullName, string dob, string gender, string phone, string specialty, int expYears);
-    bool addShiftToDoctorFromQT(string doctorId, string day, string time);
-    int addMedicineFromQT(string medicineId,string medicineName,double unitPrice,string dosage,int addQty);
-    bool addPatientFromGUI(string id, string name, string phone, bool isNoiTru);
-    vector<Doctor*> getAvailableDoctors(string day, string shift);
-    int bookAppointmentFromQT(string patientId, string doctorId, string receptionistId,string specialty ,string day, string time);
-    int createMedicalRecordFromQT(string apptId, string symp, string diag, string notes);
-    int prescribeMedicineFromQT(string recordId, string medId, string dosage, int qty);
-    int createInvoiceFromQT(string patientId, double& outTotalFee);
-    int addServiceFromQT(string id, string name, double price);
-
-    vector<MedicalRecord*> getPatientHistory(string patientId);
-
-    //login
+    // ==========================================
+    // Hệ thống & Đăng nhập (System / Login)
+    // ==========================================
     User* loginFromQT(string username, string password);
 
-    //admin
+    // ==========================================
+    // Quản Trị Viên (Admin)
+    // ==========================================
     int addUserFromQT(string id, string username, string plainPassword, string fullName, string role);
     int addDoctorWithAccount(string id, string name, string dob, string gender, string phone, string specialty, int expYears, string username, string plainPassword);
+    bool addDoctorFromQT(string id, string fullName, string dob, string gender, string phone, string specialty, int expYears);
+    bool addShiftToDoctorFromQT(string doctorId, string day, string time);
+    int addServiceFromQT(string id, string name, double price);
+    
     bool deleteUserFromQT(const std::string& id);
     bool deleteDoctorFromQT(const std::string& id);
     bool deleteMedicineFromQT(const std::string& id);
     bool deleteServiceFromQT(const std::string& id);
+
+    // ==========================================
+    // Lễ Tân (Receptionist)
+    // ==========================================
+    bool addPatientFromGUI(string id, string name, string phone, bool isNoiTru);
+    bool addInpatientFromQT(string id, string name, string dob, string gender, string phone,string recordId, double discount, string admDate, string disDate, string room, string bed);
+    bool addOutpatientFromQT(string id, string name, string dob, string gender, string phone, string recordId, double discount, string apptDate, string clinic);
+    
+    vector<Doctor*> getAvailableDoctors(string day, string shift);
+    int bookAppointmentFromQT(string patientId, string doctorId, string receptionistId,string specialty ,string day, string time);
+    int createInvoiceFromQT(string patientId, double& outTotalFee);
+
+    // ==========================================
+    // Bác Sĩ (Doctor)
+    // ==========================================
+    int createMedicalRecordFromQT(string apptId, string symp, string diag, string notes);
+    int prescribeMedicineFromQT(string recordId, string medId, string dosage, int qty);
+    vector<MedicalRecord*> getPatientHistory(string patientId);
+
+    // ==========================================
+    // Dùng chung: Bác Sĩ & Lễ Tân
+    // ==========================================
+    int cancelAppointmentFromQT(string apptId);
+
+    // ==========================================
+    // Quản Lý Kho / Dược Sĩ (Inventory Menu & Admin Menu)
+    // ==========================================
+    int addMedicineFromQT(string medicineId,string medicineName,double unitPrice,string dosage,int addQty);
 };
 
 #endif

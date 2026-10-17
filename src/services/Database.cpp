@@ -1023,15 +1023,17 @@ int Database::bookAppointmentFromQT(string patientId, string doctorId, string re
         return -3;
     }
     string newAppId = "APP" + to_string(appointments.size() + 1);
-    appointments.push_back(Appointment(newAppId, patientId, doctorId, receptionistId,specialty,day, time, "Cho Kham"));
+    appointments.push_back(Appointment(newAppId, patientId, doctorId, receptionistId,specialty,day, time, "Pending"));
     return 1; // Thành công
 }
 int Database::createMedicalRecordFromQT(string apptId, string symp, string diag, string notes) {
-    if(findAppointmentById(apptId) == nullptr) return -1;
+    Appointment * appt = findAppointmentById(apptId);
+    if(appt == nullptr) return -1;
     // Tự động sinh mã Bệnh án mới (VD: MR1, MR2)
     string newRecordId = "MR" + to_string(medicalRecords.size() + 1);
     medicalRecords.push_back(MedicalRecord(newRecordId, apptId, symp, diag, notes));
-
+    appt->setStatus("Completed");
+    saveAllData();
     return 1;
 }
 int Database::prescribeMedicineFromQT(string recordId, string medId, string dosage, int qty) {
@@ -1251,4 +1253,23 @@ bool Database::deleteServiceFromQT(const std::string& id) {
     if (services.search(id) == nullptr) return false;
     services.remove(id);
     return true;
+}
+int Database::cancelAppointmentFromQT(string apptId) {
+    Appointment* appt = findAppointmentById(apptId);
+    
+    if (appt == nullptr) {
+        return -1; // Lỗi: Không tìm thấy lịch hẹn
+    }
+    
+    if (appt->getStatus() == "Completed") {
+        return -2; // Lỗi: Bệnh nhân đã khám xong, không thể hủy!
+    }
+
+    // Đổi trạng thái thành Canceled
+    appt->setStatus("Canceled");
+    
+    // Lưu ngay xuống file CSV để cập nhật hệ thống
+    saveAllData(); 
+    
+    return 1; // Hủy thành công
 }
