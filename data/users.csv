@@ -1,6 +1,13 @@
-123;Rec;$2b$10$jywNST3pDDk3NRrSuGUEPOkdmvP/ZUUu78KVotS8kuqHW.MHIiAUS;Phát quản lý;Receptionist;1
-1234;phat;$2b$10$47dfAYolewUMjgS2o1aV1eg6AvDs4/AZStyE1puakHpErHbeWEfui;Phát;Doctor;1
 ADMIN01;admin;$2b$10$9FzdNeJAw2NOstd9lbTlrOoZD3xwBAKv.J3XPDI4WnOTuNwPSmjQi;Quan Tri Vien;Admin;1
-BACSI01;Longdz;$2b$10$7eLQKn5hY92ugIOXxwBEL.3nqQkeV9iKX3hobgtRry.lIJN/8iU6e;LONG;Doctor;1
+BS03;Hoa;$2b$10$Y52a6rH6Q0sXzGHJn7uK/.C.TkhBx.qQSwV3f/iO5bIWbOMgRbVHa;Lê Thị Hoa;Doctor;1
+BS04;Nam;$2b$10$DONDxteYerAB.Fa7lbVSyO.A16JLW9.SDsqYMFHj9YAciS5Zu791C;Trần Văn Nam;Doctor;1
+BS05;Tuan;$2b$10$HLkpjQW3l5xfp2MDbFZwHeyGEKIv0YTQHUiSYrMsrt4r2r39Q5ZD.;Phạm Minh Tuấn;Doctor;1
+BS06;Lan;$2b$10$3OVLZDW06fbHt0wqvb8JAeWJM1jdYBhiPxsxt0hbKr4Mz45PHY6OW;Nguyễn Thị Lan;Doctor;1
+BS07;Hai;$2b$10$ejfTQzD3gBm085Fsxy8R5eLlK2nKMjLVFhcZmoKaWzRdfS.njANw.;Hoàng Ngọc Hải;Doctor;1
+BS08;Mai;$2b$10$KnYNHexCCKCeGF22s206JuA75mgTCZz6ilI5bys9U5g3C4oJh6xb6;Vũ Thị Mai;Doctor;1
+BS09;Vinh;$2b$10$Aoio8SWedfCCCzwRYEWkIOa/PLhxFXdxEhwPwR/lAJx0i92xhXXQG;Đặng Quang Vinh;Doctor;1
+BS10;Ha;$2b$10$otj4z2w4NKTuR.uA5Vhcvui.odVsu4cSAWsjD8H7B4dYWjrw7VXY6;Bùi Thu Hà;Doctor;1
+BS11;Bach;$2b$10$Txtqq90tlJtZbEyeVfLVRe5oUHVRg25MRJeo.EPTdx5mhJRiloAUm;Đỗ Xuân Bách;Doctor;1
+BS12;Duyen;$2b$10$E0NUglaBD4ZAeKLxIf8f5.AfaPOw18Rf/dL4/34MLCItfn/Fip2Ou;Ngô Thị Duyên;Doctor;1
 CUL01;DinhBoLinh;$2b$10$Ik/q4l1MKJp8tyKPfpZqoeMDAfru73xxcS2.B2Vd0mO5YUcuLcMNy;Dinh Ba Tien;QuanLyKho;1
 RECEP01;thinkfat;$2b$10$z6BEXItjrpUL8W2wRD052OUsynSttqxLyYJAJAwG7Kbm8ZSS0mhzK;Tran Thinh Phat;Receptionist;1
