@@ -120,9 +120,9 @@ public:
     // ==========================================
     // Lễ Tân (Receptionist)
     // ==========================================
-    bool addPatientFromGUI(string name, string phone, bool isNoiTru); 
-    bool addInpatientFromQT(string id, string name, string dob, string gender, string phone,string recordId, double discount, string admDate, string disDate, string room, string bed);
-    bool addOutpatientFromQT(string id, string name, string dob, string gender, string phone, string recordId, double discount, string apptDate, string clinic);
+    bool addPatientFromGUI(string name, string phone, string BH,bool isNoiTru); 
+    bool addInpatientFromQT(string id, string name, string dob, string gender, string phone,string recordId, string BH, string admDate, string disDate, string room, string bed);
+    bool addOutpatientFromQT(string id, string name, string dob, string gender, string phone, string recordId, string BH, string apptDate, string clinic);
     
     vector<Doctor*> getAvailableDoctors(string day, string shift);
     int bookAppointmentFromQT(string patientId, string doctorId, string receptionistId,string specialty ,string day, string time);

@@ -91,13 +91,23 @@ void ReceptionistMenu::on_btnRegisterPatient_clicked() {
     string phone = qPhone.toStdString();
     bool isNoiTru = ui->radioNoiTru->isChecked();
 
-    bool success = db.addPatientFromGUI(name, phone, isNoiTru);
+    // ==========================================
+    // RÚT TRÍCH VÀ XỬ LÝ MÃ BHYT
+    // ==========================================
+    QString qBhyt = ui->txtBHYT->text().trimmed(); // Cắt khoảng trắng thừa 2 đầu
+    string bhyt = qBhyt.isEmpty() ? "Không" : qBhyt.toStdString();
+
+    // CHÚ Ý: Truyền thêm biến bhyt vào hàm
+    bool success = db.addPatientFromGUI(name, phone, bhyt, isNoiTru);
+    
     if (success) {
         db.saveAllData(); 
         QMessageBox::information(this, "Thành công", "Đã thêm Bệnh nhân mới tự động!\nVui lòng xem danh sách bên phải để biết Mã BN.");
         
+        // Xóa trắng các ô nhập liệu để tiện nhập người tiếp theo
         ui->txtPatientName->clear();
         ui->txtPatientPhone->clear();
+        ui->txtBHYT->clear(); 
         refreshPatientTable();
     } else {
         QMessageBox::critical(this, "Lỗi", "Hệ thống gặp sự cố khi tạo mã Bệnh nhân!");

@@ -11,9 +11,9 @@ class Inpatient : public Patient {
         std::string bedNumber;
     public:
     Inpatient(string id, string name, string dob, string gender, string phone, 
-              string recordId, double discount, string admDate, string disDate, 
+              string recordId, string BH, string admDate, string disDate, 
               string room, string bed)
-        : Patient(id, name, dob, gender, phone, recordId, discount),
+        : Patient(id, name, dob, gender, phone, recordId, BH),
           admissionDate(admDate), dischargeDate(disDate), 
           roomNumber(room), bedNumber(bed) {}
         ~Inpatient() override{}

@@ -5,21 +5,24 @@
 class Patient : public Person {
 protected: 
     string medicalRecordId;   
-    double insuranceDiscount;
+    string BHYT;
 public:
     Patient();
     Patient(string id, string name, string dob, string gender, string phone, 
-            string recordId, double discount)
+            string recordId, string BH)
         : Person(id, name, dob, gender, phone), 
-          medicalRecordId(recordId), insuranceDiscount(discount){}
+          medicalRecordId(recordId), BHYT(BH){}
     Patient(Patient &);
     virtual ~Patient() override{}
     virtual string getType() const = 0;
+    bool hasBHYT() const {
+    return (BHYT != "Không");
+}
     string getMedicalRecordId() const;
-    double getInsuranceDiscount() const;
+    string getBHYT() const;
 
     void setMedicalRecordId(string recordId);
-    void setInsuranceDiscount(double discount);
+    void setBHYT(string BH);
 
     void inputData() override;
     void displayData() const override;

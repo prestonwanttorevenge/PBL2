@@ -9,8 +9,8 @@ class Outpatient : public Patient {
         std::string clinicRoom;
     public:
     Outpatient(string id, string name, string dob, string gender, string phone, 
-              string recordId, double discount , string appDate , string clinicroom)
-        : Patient(id, name, dob, gender, phone, recordId, discount),
+              string recordId, string BH , string appDate , string clinicroom)
+        : Patient(id, name, dob, gender, phone, recordId, BH),
           appointmentDate(appDate) , clinicRoom(clinicroom){}
         ~Outpatient() override{}
         std::string getType() const override {

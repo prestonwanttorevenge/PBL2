@@ -4,27 +4,28 @@
 
 Patient::Patient() : Person(){
     this->medicalRecordId = "";
-    this->insuranceDiscount = 0.0;
+    this->BHYT = "";
 }
 string Patient::getMedicalRecordId() const {return medicalRecordId; }
-double Patient::getInsuranceDiscount() const {return insuranceDiscount; }
+string Patient::getBHYT() const {return BHYT; }
 
 void Patient::setMedicalRecordId(string recordId) {this->medicalRecordId = recordId; }
-void Patient::setInsuranceDiscount(double discount) {this->insuranceDiscount = discount; }
+void Patient::setBHYT(string BH) {this->BHYT = BHYT; }
 
 void Patient::inputData(){
     Person::inputData();
     cout << "Nhap Ma benh an: ";
     getline(cin, this->medicalRecordId);
+    cin.ignore();
     cout << "Nhap chiet khau giam gia bao hiem (VD: 0.8): ";
-    cin >> this->insuranceDiscount;
+      getline(cin, this->BHYT);
     cin.ignore();
 }
 
 void Patient::displayData() const {
     Person::displayData();
     cout << left << setw(15) << medicalRecordId 
-         << left << setw(10) << insuranceDiscount;
+         << left << setw(10) << BHYT;
 }
 
 void Patient::viewMedicalHistory() const {
