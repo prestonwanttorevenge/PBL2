@@ -44,8 +44,12 @@ private:
     
     // --- BỘ ĐẾM TỰ ĐỘNG SINH MÃ ---
     std::map<string, int> medicalRecordCounters; 
+    std::map<string, int> userCounters; // MỚI: Đếm user theo Role (ADMIN, RECEP, KHO)
     int patientCounter = 0;                      
-    int appointmentCounter = 0;                  
+    int appointmentCounter = 0;   
+    int doctorCounter = 0;              // MỚI
+    int medicineCounter = 0;            // MỚI
+    int serviceCounter = 0;             // MỚI
     
     void sanitizeInput(string& input);
 
@@ -94,6 +98,10 @@ public:
     string generatePatientId();
     string generateAppointmentId();
     string generateMedicalRecordId(const string& specialty);
+    string generateUserId(const string& role); // MỚI
+    string generateDoctorId();                 // MỚI
+    string generateMedicineId();               // MỚI
+    string generateServiceId();                // MỚI
 
     // ==========================================
     // Hệ thống & Đăng nhập
@@ -110,11 +118,8 @@ public:
     int addServiceFromQT(string id, string name, double price);
     
     bool deleteUserFromQT(const std::string& id);
-    
-    // SỬA ĐỔI: Đổi kiểu trả về thành int để bắt lỗi ràng buộc (1: OK, -1: Ko thấy, -2: Ràng buộc)
     int deleteDoctorFromQT(const std::string& id);
     int deleteMedicineFromQT(const std::string& id);
-    
     bool deleteServiceFromQT(const std::string& id);
 
     // ==========================================

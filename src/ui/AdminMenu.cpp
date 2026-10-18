@@ -42,7 +42,7 @@ AdminMenu::AdminMenu(Database& database, AuthService& authService, QWidget *pare
     };
     ui->cbDocSpecialty->addItems(specialties);
 
-    // --- KẾT NỐI SỰ KIỆN CLICK-TO-FILL CHO 4 BẢNG ---
+    // --- KẾT NỐI SỰ KIỆN CLICK-TO-FILL ---
     connect(ui->tableUsers, &QTableWidget::itemClicked, this, &AdminMenu::on_tableUsers_itemClicked);
     connect(ui->tableDoctors, &QTableWidget::itemClicked, this, &AdminMenu::on_tableDoctors_itemClicked);
     connect(ui->tableMedicines, &QTableWidget::itemClicked, this, &AdminMenu::on_tableMedicines_itemClicked);
@@ -53,8 +53,7 @@ AdminMenu::AdminMenu(Database& database, AuthService& authService, QWidget *pare
         refreshDoctorTable();
         refreshMedicineTable();
         refreshServiceTable();
-    } catch (...) {
-    }
+    } catch (...) {}
     
     ui->stackedWidget->setCurrentIndex(0);
 }
@@ -64,7 +63,7 @@ AdminMenu::~AdminMenu() {
 }
 
 // ==========================================
-// CÁC HÀM CLICK-TO-FILL (TỰ ĐIỀN MÃ KHI CLICK BẢNG)
+// CÁC HÀM CLICK-TO-FILL (DÙNG CHO VIỆC XÓA)
 // ==========================================
 void AdminMenu::on_tableUsers_itemClicked(QTableWidgetItem *item) {
     int row = item->row();
@@ -97,24 +96,31 @@ void AdminMenu::on_btnManageUsers_clicked() {
 }
 
 void AdminMenu::on_btnAddUser_clicked() {
-    string id = ui->txtUserId->text().toStdString();
     string name = ui->txtUserFullName->text().toStdString();
     string username = ui->txtUsername->text().toStdString();
     string password = ui->txtPassword->text().toStdString();
     string role = ui->cbUserRole->currentText().toStdString();
 
-    if (id.empty() || name.empty() || username.empty() || password.empty()) {
+    if (name.empty() || username.empty() || password.empty()) {
         QMessageBox::warning(this, "Lỗi nhập liệu", "Vui lòng nhập đầy đủ thông tin tài khoản!");
         return;
     }
+    
+    // NÂNG CẤP: Chặn Admin tạo acc BS tay ngang
+    if (role == "Doctor") {
+        QMessageBox::warning(this, "Cảnh báo", "Tài khoản Bác sĩ sẽ được tự động cấp phát khi bạn thêm Bác sĩ mới bên thẻ [Bác Sĩ]!");
+        return;
+    }
 
-    int result = db.addUserFromQT(id, username, password, name, role);
+    // NÂNG CẤP: Tự động cấp ID theo Role
+    string generatedId = db.generateUserId(role);
+    int result = db.addUserFromQT(generatedId, username, password, name, role);
 
     if (result == -1) {
-        QMessageBox::critical(this, "Lỗi", "Mã User ID hoặc Tên đăng nhập (Username) đã tồn tại!");
+        QMessageBox::critical(this, "Lỗi", "Tên đăng nhập (Username) đã tồn tại!");
     } else {
         db.saveAllData(); 
-        QMessageBox::information(this, "Thành công", "Đã tạo tài khoản mới thành công!");
+        QMessageBox::information(this, "Thành công", "Đã tạo tài khoản thành công với Mã: " + QString::fromStdString(generatedId));
         refreshUserTable();
         ui->txtUserId->clear();
         ui->txtUserFullName->clear();
@@ -133,7 +139,6 @@ void AdminMenu::on_btnManageDoctors_clicked() {
 }
 
 void AdminMenu::on_btnAddDoctor_clicked() {
-    string id = ui->txtDocId->text().toStdString();
     string name = ui->txtDocName->text().toStdString();
     string dob = ui->txtDob->text().toStdString();
     string gender = ui->cbGender->currentText().toStdString();
@@ -144,23 +149,21 @@ void AdminMenu::on_btnAddDoctor_clicked() {
     string username = ui->txtDocUsername->text().toStdString();
     string password = ui->txtDocPassword->text().toStdString();
 
-    if (id.empty() || name.empty() || dob.empty() || phone.empty() ||
-        spec.empty() || username.empty() || password.empty()) {
+    if (name.empty() || dob.empty() || phone.empty() || spec.empty() || username.empty() || password.empty()) {
         QMessageBox::warning(this, "Lỗi nhập liệu", "Vui lòng điền đầy đủ tất cả các trường thông tin Bác sĩ!");
         return;
     }
 
-    int result = db.addDoctorWithAccount(id, name, dob, gender, phone, spec, expYears, username, password);
+    // NÂNG CẤP: Tự động cấp mã BS
+    string generatedId = db.generateDoctorId();
+    int result = db.addDoctorWithAccount(generatedId, name, dob, gender, phone, spec, expYears, username, password);
 
-    if (result == -1) {
-        QMessageBox::critical(this, "Lỗi", "Mã Bác sĩ (ID) đã tồn tại trong hệ thống!");
-    }
-    else if (result == -2) {
+    if (result == -2) {
         QMessageBox::critical(this, "Lỗi", "Tên đăng nhập (Username) đã bị trùng!");
     }
     else if (result == 1) {
         db.saveAllData(); 
-        QMessageBox::information(this, "Thành công", "Đã thêm Bác sĩ mới và cấp tài khoản đăng nhập!");
+        QMessageBox::information(this, "Thành công", "Đã thêm Bác sĩ thành công!\nMã BS cấp phát: " + QString::fromStdString(generatedId));
 
         refreshDoctorTable();
         refreshUserTable();
@@ -186,32 +189,29 @@ void AdminMenu::on_btnManageMedicines_clicked() {
 }
 
 void AdminMenu::on_btnAddMedicine_clicked() {
-    string id = ui->txtMedId->text().toStdString();
     string name = ui->txtMedName->text().toStdString();
     string dosage = ui->txtDosage->text().toStdString();
     string priceStr = ui->txtMedPrice->text().toStdString();
     int qty = ui->spinMedQty->value();
 
-    if (id.empty() || name.empty() || dosage.empty() || priceStr.empty()) {
+    if (name.empty() || dosage.empty() || priceStr.empty()) {
         QMessageBox::warning(this, "Lỗi nhập liệu", "Vui lòng nhập đầy đủ thông tin thuốc!");
         return;
     }
 
     double price = 0.0;
-    try {
-        price = std::stod(priceStr);
-    } catch (...) {
+    try { price = std::stod(priceStr); } catch (...) {
         QMessageBox::warning(this, "Lỗi", "Đơn giá thuốc không hợp lệ!");
         return;
     }
 
-    int result = db.addMedicineFromQT(id, name, price, dosage, qty);
+    // NÂNG CẤP: Tự động cấp mã Thuốc mới tinh
+    string generatedId = db.generateMedicineId();
+    int result = db.addMedicineFromQT(generatedId, name, price, dosage, qty);
     db.saveAllData(); 
 
     if (result == 1) {
-        QMessageBox::information(this, "Thành công", "Đã thêm loại THUỐC MỚI vào kho!");
-    } else if (result == 2) {
-        QMessageBox::information(this, "Thành công", "Đã CỘNG DỒN số lượng thuốc vào kho!");
+        QMessageBox::information(this, "Thành công", "Đã khởi tạo THUỐC MỚI vào kho!\nMã cấp: " + QString::fromStdString(generatedId));
     }
 
     refreshMedicineTable();
@@ -232,30 +232,29 @@ void AdminMenu::on_btnManageServices_clicked() {
 }
 
 void AdminMenu::on_btnAddService_clicked() {
-    string id = ui->txtServiceId->text().toStdString();
     string name = ui->txtServiceName->text().toStdString();
     string priceStr = ui->txtServicePrice->text().toStdString();
 
-    if (id.empty() || name.empty() || priceStr.empty()) {
+    if (name.empty() || priceStr.empty()) {
         QMessageBox::warning(this, "Lỗi nhập liệu", "Vui lòng nhập đầy đủ thông tin dịch vụ!");
         return;
     }
 
     double price = 0.0;
-    try {
-        price = std::stod(priceStr);
-    } catch (...) {
+    try { price = std::stod(priceStr); } catch (...) {
         QMessageBox::warning(this, "Lỗi", "Phí dịch vụ không hợp lệ!");
         return;
     }
 
-    int result = db.addServiceFromQT(id, name, price);
+    // NÂNG CẤP: Tự động cấp mã Dịch vụ
+    string generatedId = db.generateServiceId();
+    int result = db.addServiceFromQT(generatedId, name, price);
 
     if (result == -1) {
-        QMessageBox::critical(this, "Lỗi", "Mã Dịch vụ đã tồn tại!");
+        QMessageBox::critical(this, "Lỗi", "Tạo dịch vụ thất bại!");
     } else {
         db.saveAllData(); 
-        QMessageBox::information(this, "Thành công", "Đã thêm Dịch vụ y tế mới!");
+        QMessageBox::information(this, "Thành công", "Đã lập Dịch vụ y tế mới với Mã: " + QString::fromStdString(generatedId));
         refreshServiceTable();
         ui->txtServiceId->clear();
         ui->txtServiceName->clear();
@@ -264,127 +263,68 @@ void AdminMenu::on_btnAddService_clicked() {
 }
 
 // ==========================================
-// XÓA TÀI KHOẢN (TRANG SỐ 0)
+// CÁC HÀM XÓA (GIỮ NGUYÊN)
 // ==========================================
 void AdminMenu::on_btnDeleteUser_clicked() {
     string id = ui->txtUserId->text().toStdString();
-
     if (id.empty()) {
-        QMessageBox::warning(this, "Chưa chọn", "Vui lòng click chọn một tài khoản trên bảng (hoặc nhập User ID) để xóa!");
+        QMessageBox::warning(this, "Chưa chọn", "Vui lòng click chọn một tài khoản trên bảng để xóa!");
         return;
     }
-
     if (id == "U01" || id == "ADMIN" || id == "ADMIN01") {
         QMessageBox::critical(this, "Cảnh báo", "Không thể xóa tài khoản Quản trị viên gốc!");
         return;
     }
-
     auto reply = QMessageBox::question(this, "Xác nhận xóa",
-                                       "Bạn có chắc chắn muốn xóa tài khoản có mã [" + QString::fromStdString(id) + "] không?",
+                                       "Xóa tài khoản có mã [" + QString::fromStdString(id) + "]?",
                                        QMessageBox::Yes | QMessageBox::No);
-
     if (reply == QMessageBox::Yes) {
         if (db.deleteUserFromQT(id)) {
-            db.saveAllData(); 
-            QMessageBox::information(this, "Thành công", "Đã xóa tài khoản thành công!");
-            refreshUserTable();
-            ui->txtUserId->clear();
-        } else {
-            QMessageBox::critical(this, "Lỗi", "Không tìm thấy mã tài khoản này trong hệ thống!");
-        }
+            db.saveAllData(); refreshUserTable(); ui->txtUserId->clear();
+        } else QMessageBox::critical(this, "Lỗi", "Không tìm thấy mã tài khoản!");
     }
 }
 
-// ==========================================
-// XÓA BÁC SĨ (CÓ RÀNG BUỘC)
-// ==========================================
 void AdminMenu::on_btnDeleteDoctor_clicked() {
     string id = ui->txtDocId->text().toStdString();
-
     if (id.empty()) {
         QMessageBox::warning(this, "Chưa chọn", "Vui lòng click chọn một Bác sĩ trên bảng để xóa!");
         return;
     }
-
-    auto reply = QMessageBox::question(this, "Xác nhận xóa",
-                                       "Xóa Bác sĩ [" + QString::fromStdString(id) + "] sẽ xóa luôn tài khoản đăng nhập của họ.\nBạn có chắc chắn muốn xóa?",
-                                       QMessageBox::Yes | QMessageBox::No);
-
+    auto reply = QMessageBox::question(this, "Xác nhận", "Xóa Bác sĩ [" + QString::fromStdString(id) + "] sẽ xóa luôn tài khoản liên kết?", QMessageBox::Yes | QMessageBox::No);
     if (reply == QMessageBox::Yes) {
         int result = db.deleteDoctorFromQT(id);
-        
         if (result == 1) {
-            db.saveAllData(); 
-            QMessageBox::information(this, "Thành công", "Đã xóa Bác sĩ và tài khoản liên kết!");
-            refreshDoctorTable();
-            refreshUserTable(); 
-            ui->txtDocId->clear();
+            db.saveAllData(); refreshDoctorTable(); refreshUserTable(); ui->txtDocId->clear();
         } 
-        else if (result == -2) { 
-            QMessageBox::critical(this, "Lỗi Ràng Buộc", "TỪ CHỐI XÓA!\nBác sĩ này đang có Lịch hẹn chờ khám. Việc xóa sẽ làm đứt gãy dữ liệu hệ thống!");
-        } 
-        else {
-            QMessageBox::critical(this, "Lỗi", "Không tìm thấy Mã Bác sĩ này!");
-        }
+        else if (result == -2) QMessageBox::critical(this, "Lỗi Ràng Buộc", "TỪ CHỐI XÓA!\nBác sĩ đang có Lịch hẹn chờ khám.");
     }
 }
 
-// ==========================================
-// XÓA THUỐC (CÓ RÀNG BUỘC)
-// ==========================================
 void AdminMenu::on_btnDeleteMedicine_clicked() {
     string id = ui->txtMedId->text().toStdString();
-
     if (id.empty()) {
-        QMessageBox::warning(this, "Chưa chọn", "Vui lòng click chọn một loại thuốc trên bảng để xóa!");
-        return;
+        QMessageBox::warning(this, "Chưa chọn", "Vui lòng click chọn thuốc trên bảng để xóa!"); return;
     }
-
-    auto reply = QMessageBox::question(this, "Xác nhận xóa",
-                                       "Bạn có chắc chắn muốn xóa thuốc [" + QString::fromStdString(id) + "] khỏi kho?",
-                                       QMessageBox::Yes | QMessageBox::No);
-
+    auto reply = QMessageBox::question(this, "Xác nhận", "Xóa thuốc [" + QString::fromStdString(id) + "] khỏi kho?", QMessageBox::Yes | QMessageBox::No);
     if (reply == QMessageBox::Yes) {
         int result = db.deleteMedicineFromQT(id);
-        
         if (result == 1) {
-            db.saveAllData(); 
-            QMessageBox::information(this, "Thành công", "Đã xóa thuốc khỏi kho!");
-            refreshMedicineTable();
-            ui->txtMedId->clear();
+            db.saveAllData(); refreshMedicineTable(); ui->txtMedId->clear();
         } 
-        else if (result == -2) { 
-            QMessageBox::critical(this, "Lỗi Ràng Buộc", "TỪ CHỐI XÓA!\nLoại thuốc này đã từng được kê trong lịch sử Bệnh án. Xóa thuốc sẽ làm mất lịch sử điều trị của Bệnh nhân!");
-        } 
-        else {
-            QMessageBox::critical(this, "Lỗi", "Không tìm thấy Mã thuốc này!");
-        }
+        else if (result == -2) QMessageBox::critical(this, "Lỗi", "Thuốc đã được kê trong Bệnh án, không thể xóa!");
     }
 }
 
-// ==========================================
-// XÓA DỊCH VỤ Y TẾ
-// ==========================================
 void AdminMenu::on_btnDeleteService_clicked() {
     string id = ui->txtServiceId->text().toStdString();
-
     if (id.empty()) {
-        QMessageBox::warning(this, "Chưa chọn", "Vui lòng click chọn một dịch vụ trên bảng để xóa!");
-        return;
+        QMessageBox::warning(this, "Chưa chọn", "Vui lòng chọn dịch vụ trên bảng!"); return;
     }
-
-    auto reply = QMessageBox::question(this, "Xác nhận xóa",
-                                       "Bạn có chắc chắn muốn xóa dịch vụ [" + QString::fromStdString(id) + "] không?",
-                                       QMessageBox::Yes | QMessageBox::No);
-
+    auto reply = QMessageBox::question(this, "Xác nhận", "Xóa dịch vụ [" + QString::fromStdString(id) + "]?", QMessageBox::Yes | QMessageBox::No);
     if (reply == QMessageBox::Yes) {
         if (db.deleteServiceFromQT(id)) {
-            db.saveAllData(); 
-            QMessageBox::information(this, "Thành công", "Đã xóa dịch vụ y tế!");
-            refreshServiceTable();
-            ui->txtServiceId->clear();
-        } else {
-            QMessageBox::critical(this, "Lỗi", "Không tìm thấy Mã dịch vụ này!");
+            db.saveAllData(); refreshServiceTable(); ui->txtServiceId->clear();
         }
     }
 }

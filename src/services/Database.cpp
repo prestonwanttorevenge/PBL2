@@ -62,6 +62,39 @@ string Database::generateMedicalRecordId(const string& specialty) {
     return ss.str();
 }
 
+string Database::generateUserId(const string& role) {
+    string prefix = "U";
+    if (role == "Admin") prefix = "ADMIN";
+    else if (role == "Receptionist") prefix = "RECEP";
+    else if (role == "QuanLyKho") prefix = "KHO";
+    
+    userCounters[prefix]++;
+    stringstream ss;
+    ss << prefix << setfill('0') << setw(2) << userCounters[prefix];
+    return ss.str();
+}
+
+string Database::generateDoctorId() {
+    doctorCounter++;
+    stringstream ss;
+    ss << "BS" << setfill('0') << setw(2) << doctorCounter;
+    return ss.str();
+}
+
+string Database::generateMedicineId() {
+    medicineCounter++;
+    stringstream ss;
+    ss << "MED" << setfill('0') << setw(2) << medicineCounter;
+    return ss.str();
+}
+
+string Database::generateServiceId() {
+    serviceCounter++;
+    stringstream ss;
+    ss << "DV" << setfill('0') << setw(2) << serviceCounter;
+    return ss.str();
+}
+
 // ==========================================
 // LOAD DATA TỪ CSV 
 // ==========================================
@@ -70,7 +103,11 @@ void Database::loadAllData() {
 
     patientCounter = 0;
     appointmentCounter = 0;
+    doctorCounter = 0;
+    medicineCounter = 0;
+    serviceCounter = 0;
     medicalRecordCounters.clear();
+    userCounters.clear();
 
     ifstream fDoc(doctorFile);
     if (fDoc.is_open()) {
@@ -92,6 +129,13 @@ void Database::loadAllData() {
             int exp = 0;
             try { exp = stoi(tempExp); } catch (...) {}
             
+            // Cập nhật bộ đếm BS
+            if (id.substr(0, 2) == "BS") {
+                int num = 0;
+                try { num = stoi(id.substr(2)); } catch(...) {}
+                if (num > doctorCounter) doctorCounter = num;
+            }
+
             doctors.insert(id, Doctor(id, name, dob, gender, phone, spec, exp));
         }
         fDoc.close();
@@ -234,6 +278,18 @@ void Database::loadAllData() {
             bool isActive = false;
             if (activestr == "1" || activestr == "true") { isActive = true; }
             
+            // Cập nhật bộ đếm User
+            string prefix = ""; string numStr = "";
+            for (char c : id) {
+                if (isalpha(c)) prefix += c;
+                else if (isdigit(c)) numStr += c;
+            }
+            if (!numStr.empty()) {
+                int num = 0;
+                try { num = stoi(numStr); } catch(...) {}
+                if (num > userCounters[prefix]) userCounters[prefix] = num;
+            }
+
             users.insert(id, User(id, Username, pass, fullName, role, isActive));
         }
         fUser.close();
@@ -246,17 +302,28 @@ void Database::loadAllData() {
         while (getline(fMed, line)) {
             if (line.empty()) continue;
             stringstream ss(line);
-            string id, name, priceStr, dosage;
+            string id, name, priceStr, dosage, stockStr;
 
             getline(ss, id, ';');
             getline(ss, name, ';');
             getline(ss, priceStr, ';');
             getline(ss, dosage, ';');
+            getline(ss, stockStr, ';'); // ĐỌC CỘT 5: TỒN KHO
 
             double price = 0.0;
+            int stock = 0;
             try { price = stod(priceStr); } catch (...) {}
+            try { stock = stoi(stockStr); } catch (...) {} // PARSE TỒN KHO
 
-            medicines.insert(id, Medicine(id, name, price, dosage));
+            // Cập nhật bộ đếm Thuốc
+            if (id.substr(0, 3) == "MED") {
+                int num = 0;
+                try { num = stoi(id.substr(3)); } catch(...) {}
+                if (num > medicineCounter) medicineCounter = num;
+            }
+
+            // CHUẨN: Truyền stock vào khi khởi tạo thuốc
+            medicines.insert(id, Medicine(id, name, price, dosage, stock));
         }
         fMed.close();
     }
@@ -276,6 +343,13 @@ void Database::loadAllData() {
 
             double price = 0.0;
             try { price = stod(priceStr); } catch (...) {}
+
+            // Cập nhật bộ đếm DV
+            if (id.substr(0, 2) == "DV") {
+                int num = 0;
+                try { num = stoi(id.substr(2)); } catch(...) {}
+                if (num > serviceCounter) serviceCounter = num;
+            }
 
             services.insert(id, Service(id, name, price));
         }
@@ -408,7 +482,8 @@ void Database::saveAllData() {
             fmed << allMed[i]->getMedicineId() << ";"
                  << allMed[i]->getMedicineName() << ";"
                  << allMed[i]->getUnitPrice() << ";"
-                 << allMed[i]->getDosage() << "\n";
+                 << allMed[i]->getDosage() << ";"
+                 << allMed[i]->getStock() << "\n"; // LƯU CỘT 5: TỒN KHO
         }
         fmed.close();
     }
@@ -594,7 +669,6 @@ int Database::deleteDoctorFromQT(const std::string& id) {
     if (doctors.search(id) == nullptr) return -1;
     
     // TÍNH NĂNG 1: BẢO TOÀN DỮ LIỆU
-    // Chặn xóa nếu Bác sĩ đang có lịch khám Pending
     for (const auto& appt : appointments) {
         if (appt.getDoctorId() == id && appt.getStatus() == "Pending") {
             return -2; // Lỗi ràng buộc
@@ -610,7 +684,6 @@ int Database::deleteMedicineFromQT(const std::string& id) {
     if (medicines.search(id) == nullptr) return -1;
 
     // TÍNH NĂNG 1: BẢO TOÀN DỮ LIỆU
-    // Chặn xóa nếu Thuốc đã từng được kê vào Bệnh án
     for (const auto& record : medicalRecords) {
         for (const auto& rx : record.getPrescriptions()) {
             if (rx.medicineId == id) {
@@ -899,7 +972,6 @@ int Database::cancelAppointmentFromQT(string apptId) {
     return 1; 
 }
 void Database::deleteDoctor(string id) {
-    // Gọi thẳng hàm remove của Cây. Nếu xóa thành công nó sẽ trả về true.
     if (doctors.remove(id)) {
         cout << "=> Da xoa Bac si thanh cong!\n";
     } else {
@@ -916,16 +988,10 @@ void Database::deleteMedicine(string id) {
 }
 
 void Database::deletePatient(string id) {
-    // BƯỚC 1: Phải tìm được con trỏ Patient* đang giữ vùng nhớ (new)
     Patient* pat = findPatientById(id);
-    
     if (pat != nullptr) {
-        // BƯỚC 2: Gọi delete để tiêu hủy vùng nhớ Inpatient/Outpatient
         delete pat; 
-        
-        // BƯỚC 3: Xóa cái Node (lá cây) đang chứa cái con trỏ rỗng đó đi
         patients.remove(id); 
-        
         cout << "=> Da xoa Benh nhan thanh cong!\n";
     } else {
         cout << "Loi: Khong tim thay ID Benh nhan!\n";
@@ -933,17 +999,11 @@ void Database::deletePatient(string id) {
 }
 void Database::updateDoctor(string id) {
     Doctor* doc = findDoctorById(id);
-    
     if (doc == nullptr) {
         cout << "Loi: Khong tim thay Bac si co ID: " << id << "\n";
         return;
     }
-
-    cout << "--- CAP NHAT THONG TIN BAC SI: " << doc->getFullName() << " ---\n";
-    cout << "(Nhan Enter de bo qua neu khong muon doi thong tin do)\n";
-
     string input;
-
     cout << "So dien thoai moi (Hien tai: " << doc->getPhoneNumber() << "): ";
     getline(cin, input);
     sanitizeInput(input);
@@ -954,19 +1014,16 @@ cout << "Ban co muon xep lai lich truc khong? (y/n): ";
     getline(cin, input);
     if (input == "y" || input == "Y") {
         doc->clearSchedule();
-        
         string soCaStr;
         cout << "Nhap so luong ca truc moi: ";
         getline(cin, soCaStr);
         int soCa = 0;
         try { soCa = stoi(soCaStr); } catch (...) {}
-
         for (int i = 0; i < soCa; i++) {
             string day, time;
             cout << "- Ca " << i + 1 << ":\n";
             cout << "  + Thu: "; getline(cin, day); sanitizeInput(day);
             cout << "  + Buoi: "; getline(cin, time); sanitizeInput(time);
-            
             doc->setWorkSchedule(day, time);
         }
     }
@@ -974,17 +1031,14 @@ cout << "Ban co muon xep lai lich truc khong? (y/n): ";
 }
 void Database::updateMedicine(string id) {
     Medicine* med = findMedicineById(id);
-    
     if (med == nullptr) {
         cout << "Loi: Khong tim thay Thuoc!\n";
         return;
     }
-
     string input;
     cout << "Gia moi (Hien tai: " << med->getUnitPrice() << "): ";
     getline(cin, input);
     sanitizeInput(input);
-    
     if (!input.empty()) {
         try {
             double newPrice = stod(input);
@@ -997,128 +1051,53 @@ void Database::updateMedicine(string id) {
 }
 void Database::updatePatient(string id) {
     Patient* pat = findPatientById(id);
-    if (pat == nullptr) {
-        cout << "Loi: Khong tim thay Benh nhan co ID: " << id << "\n";
-        return;
-    }
-    cout << "--- CAP NHAT THONG TIN BENH NHAN: " << pat->getFullName() << " ---\n";
-    cout << "(Nhan Enter de bo qua neu khong muon doi thong tin do)\n";
+    if (pat == nullptr) return;
     string input;
-    // ==========================================
-    // 1. CẬP NHẬT THÔNG TIN CHUNG (Lớp Person / Patient)
-    // ==========================================
     cout << "So dien thoai moi (Hien tai: " << pat->getPhoneNumber() << "): ";
     getline(cin, input);
     sanitizeInput(input);
     if (!input.empty()) {
         pat->setPhoneNumber(input); 
     }
-
     cout << "Ma Bao Hiem Y Te moi (Hien tai: " << pat->getMedicalRecordId() << "): ";
     getline(cin, input);
     sanitizeInput(input);
     if (!input.empty()) {
         pat->setMedicalRecordId(input); 
     }
-    // ==========================================
-    // 2. PHÂN LOẠI VÀ CẬP NHẬT THÔNG TIN RIÊNG (Lớp con)
-    // ==========================================
     if (Inpatient* inpat = dynamic_cast<Inpatient*>(pat)) {
-        cout << "\n[Phat hien he thong: Benh Nhan Noi Tru]\n";
-        cout << "So phong moi (Hien tai: " << inpat->getRoomNumber() << "): ";
-        getline(cin, input);
-        sanitizeInput(input);
-        if (!input.empty()) {
-            inpat->setRoomNumber(input);
-        }
-        cout << "So giuong moi (Hien tai: " << inpat->getBedNumber() << "): ";
-        getline(cin, input);
-        sanitizeInput(input);
-        if (!input.empty()) {
-            inpat->setBedNumber(input);
-        }
+        cout << "So phong moi: ";
+        getline(cin, input); sanitizeInput(input);
+        if (!input.empty()) inpat->setRoomNumber(input);
+        cout << "So giuong moi: ";
+        getline(cin, input); sanitizeInput(input);
+        if (!input.empty()) inpat->setBedNumber(input);
     } 
     else if (Outpatient* outpat = dynamic_cast<Outpatient*>(pat)) {
-        cout << "\n[Phat hien he thong: Benh Nhan Ngoai Tru]\n";
-        
-        cout << "Phong kham moi (Hien tai: " << outpat->getClinicRoom() << "): ";
-        getline(cin, input);
-        sanitizeInput(input);
-        if (!input.empty()) {
-            outpat->setClinicRoom(input);
-        }
-
-        cout << "Ngay tai kham moi (Hien tai: " << outpat->getAppointmentDate() << "): ";
-        getline(cin, input);
-        sanitizeInput(input);
-        if (!input.empty()) {
-            outpat->setAppointmentDate(input);
-        }
+        cout << "Phong kham moi: ";
+        getline(cin, input); sanitizeInput(input);
+        if (!input.empty()) outpat->setClinicRoom(input);
+        cout << "Ngay tai kham moi: ";
+        getline(cin, input); sanitizeInput(input);
+        if (!input.empty()) outpat->setAppointmentDate(input);
     }
-
-    cout << "=> Cap nhat thong tin Benh nhan thanh cong!\n";
 }
 void Database::addDoctor() {
     string id, name, dob, gender, phone, spec, schedule, expStr;
-    
-    cout << "\n--- THEM BAC SI MOI ---\n";
-    cout << "Nhap ID: ";
-    getline(cin, id);
-    sanitizeInput(id);
-
-    if (findDoctorById(id) != nullptr) {
-        cout << "Loi: ID Bac si nay da ton tai trong he thong!\n";
-        return; 
-    }
-
-    cout << "Nhap Ho Ten: ";
-    getline(cin, name); sanitizeInput(name);
-
-    cout << "Nhap Ngay sinh (DD/MM/YYYY): ";
-    getline(cin, dob); sanitizeInput(dob);
-
-    cout << "Nhap Gioi tinh: ";
-    getline(cin, gender); sanitizeInput(gender);
-
-    cout << "Nhap So dien thoai: ";
-    getline(cin, phone); sanitizeInput(phone);
-
-    cout << "Nhap Chuyen khoa: ";
-    getline(cin, spec); sanitizeInput(spec);
-
-    cout << "Nhap So nam kinh nghiem: ";
-    getline(cin, expStr); sanitizeInput(expStr);
-    int exp = 0;
-    try { exp = stoi(expStr); } catch (...) { exp = 0; }
+    cout << "Nhap ID: "; getline(cin, id); sanitizeInput(id);
+    if (findDoctorById(id) != nullptr) return; 
+    cout << "Nhap Ho Ten: "; getline(cin, name); sanitizeInput(name);
+    cout << "Nhap Ngay sinh: "; getline(cin, dob); sanitizeInput(dob);
+    cout << "Nhap Gioi tinh: "; getline(cin, gender); sanitizeInput(gender);
+    cout << "Nhap SĐT: "; getline(cin, phone); sanitizeInput(phone);
+    cout << "Nhap Chuyen khoa: "; getline(cin, spec); sanitizeInput(spec);
+    cout << "Nhap nam kinh nghiem: "; getline(cin, expStr); sanitizeInput(expStr);
+    int exp = 0; try { exp = stoi(expStr); } catch (...) { exp = 0; }
     Doctor newDoctor(id, name, dob, gender, phone, spec, exp);
-    string soCaStr;
-    cout << "Bac si nay lam may ca 1 tuan? : ";
-    getline(cin, soCaStr);
-    int soCa = 0;
-    try { soCa = stoi(soCaStr); } catch (...) { soCa = 0; }
-
-    for (int i = 0; i < soCa; i++) {
-        string day, shift;
-        cout << "- Ca thu " << i + 1 << ":\n";
-        
-        cout << "  + Thu (VD: Thu 2, Thu 3): ";
-        getline(cin, day); sanitizeInput(day);
-        
-        cout << "  + Buoi (VD: Sang, Chieu, Toi): ";
-        getline(cin, shift); sanitizeInput(shift);
-
-        newDoctor.setWorkSchedule(day, shift);
-    }
     doctors.insert(id,newDoctor);
-    cout << "=> Da them Bac si thanh cong!\n";
 }
 
 void Database::showAllDoctors() const {
-    cout << "\n--- DANH SACH BAC SI ---\n";
-    if (doctors.isEmpty()) {
-        cout << "Chua co du lieu!\n";
-        return;
-    }
     vector<Doctor*> allDocs = doctors.getAllPointers();
     for (size_t i = 0; i < allDocs.size(); i++){
         cout << i + 1 << ". ";
@@ -1127,119 +1106,43 @@ void Database::showAllDoctors() const {
 }
 void Database::addMedicine() {
     string id, name, priceStr, dosage;
-
-    cout << "\n--- THEM THUOC MOI ---\n";
-    cout << "Nhap ID Thuoc: ";
-    getline(cin, id);
-    sanitizeInput(id);
-
-   Medicine* existingMed = findMedicineById(id);
-
+    cout << "Nhap ID Thuoc: "; getline(cin, id); sanitizeInput(id);
+    Medicine* existingMed = findMedicineById(id);
     if (existingMed != nullptr) {
-        cout << "Thuoc [" << existingMed->getMedicineName() << "] dang co " 
-             << existingMed->getStock() << " vien trong kho.\n";
-        
-        string addQtyStr;
-        cout << "Nhap so luong muon nhap them: ";
-        getline(cin, addQtyStr);
-        int addQty = 0;
-        try { addQty = stoi(addQtyStr); } catch (...) {}
-
+        string addQtyStr; cout << "So luong: "; getline(cin, addQtyStr);
+        int addQty = 0; try { addQty = stoi(addQtyStr); } catch (...) {}
         existingMed->setStock(existingMed->getStock() + addQty);
-        cout << "=> Da cap nhat so luong ton kho thanh cong!\n";
         return;
     }
-
-    cout << "Nhap Ten thuoc: ";
-    getline(cin, name); sanitizeInput(name);
-
-    cout << "Nhap Don gia: ";
-    getline(cin, priceStr); sanitizeInput(priceStr);
-    double price = 0.0;
-    try { price = stod(priceStr); } catch (...) { price = 0.0; }
-
-    cout << "Nhap Lieu dung / Cach dung: ";
-    getline(cin, dosage); sanitizeInput(dosage);
-
+    cout << "Ten thuoc: "; getline(cin, name); sanitizeInput(name);
+    cout << "Don gia: "; getline(cin, priceStr); sanitizeInput(priceStr);
+    double price = 0.0; try { price = stod(priceStr); } catch (...) { price = 0.0; }
+    cout << "Lieu dung: "; getline(cin, dosage); sanitizeInput(dosage);
     medicines.insert(id,Medicine(id, name, price, dosage));
-    cout << "=> Da them Thuoc thanh cong!\n";
 }
 
 void Database::showAllMedicine() const {
-    cout << "\n--- DANH SACH THUOC ---\n";
-    if (medicines.isEmpty()) {
-        cout << "Chua co du lieu!\n";
-        return;
-    }
     vector<Medicine*> allMeds = medicines.getAllPointers();
     for (size_t i = 0; i < allMeds.size(); i++){
-        cout << i + 1 << ". ";
-        allMeds[i]->displayData(); 
+        cout << i + 1 << ". "; allMeds[i]->displayData(); 
     }
 }
 void Database::addPatient() {
     string id, name, dob, gender, phone, recordId, BHYTStr;
-    
-    cout << "\n--- THEM BENH NHAN MOI ---\n";
-    cout << "Nhap ID: ";
-    getline(cin, id); sanitizeInput(id);
-
-    if (findPatientById(id) != nullptr) {
-        cout << "Loi: ID Benh nhan nay da ton tai!\n";
-        return;
-    }
-
-    cout << "Nhap Ho Ten: ";
-    getline(cin, name); sanitizeInput(name);
-
-    cout << "Nhap Ngay sinh: ";
-    getline(cin, dob); sanitizeInput(dob);
-
-    cout << "Nhap Gioi tinh: ";
-    getline(cin, gender); sanitizeInput(gender);
-
-    cout << "Nhap So dien thoai: ";
-    getline(cin, phone); sanitizeInput(phone);
-
-    cout << "Nhap Ma BHYT (Neu khong co thi de trong): ";
-    getline(cin, recordId); sanitizeInput(recordId);
-
-    cout << "Nhap Phan tram giam gia BHYT (VD: 0.8 cho 80%): ";
-    getline(cin, BHYTStr); sanitizeInput(BHYTStr);
-
-    cout << "\nChon loai Benh nhan:\n1. Noi Tru (Nhap vien)\n2. Ngoai Tru (Kham xong ve)\nLua chon: ";
-    string choice;
-    getline(cin, choice);
-
+    cout << "Nhap ID: "; getline(cin, id); sanitizeInput(id);
+    if (findPatientById(id) != nullptr) return;
+    cout << "Ho Ten: "; getline(cin, name); sanitizeInput(name);
+    cout << "SĐT: "; getline(cin, phone); sanitizeInput(phone);
+    cout << "BHYT: "; getline(cin, BHYTStr); sanitizeInput(BHYTStr);
+    string choice; getline(cin, choice);
     if (choice == "1") {
-        string admDate, disDate, room, bed;
-        cout << "Nhap Ngay nhap vien: "; getline(cin, admDate); sanitizeInput(admDate);
-        cout << "Nhap Ngay xuat vien (De trong neu chua xuat): "; getline(cin, disDate); sanitizeInput(disDate);
-        cout << "Nhap So phong: "; getline(cin, room); sanitizeInput(room);
-        cout << "Nhap So giuong: "; getline(cin, bed); sanitizeInput(bed);
-
-        // Tạo đối tượng Nội trú và đẩy con trỏ vào mảng
-        patients.insert(id,new Inpatient(id, name, dob, gender, phone, recordId, BHYTStr, admDate, disDate, room, bed));
-        cout << "=> Da them Benh nhan Noi tru thanh cong!\n";
-
+        patients.insert(id,new Inpatient(id, name, dob, gender, phone, recordId, BHYTStr, "", "", "", ""));
     } else if (choice == "2") {
-        string apptDate, clinic;
-        cout << "Nhap Ngay hen kham: "; getline(cin, apptDate); sanitizeInput(apptDate);
-        cout << "Nhap Phong kham (VD: Khoa Noi, Phong 102): "; getline(cin, clinic); sanitizeInput(clinic);
-        patients.insert(id,new Outpatient(id, name, dob, gender, phone, recordId, BHYTStr, apptDate, clinic));
-        cout << "=> Da them Benh nhan Ngoai tru thanh cong!\n";
-        
-    } else {
-        cout << "Loi: Lua chon khong hop le. Da huy qua trinh them Benh nhan!\n";
+        patients.insert(id,new Outpatient(id, name, dob, gender, phone, recordId, BHYTStr, "", ""));
     }
 }
 
 void Database::showAllPatients() const {
-    cout << "\n--- DANH SACH BENH NHAN ---\n";
-    if (patients.isEmpty()) {
-        cout << "Chua co du lieu!\n";
-        return;
-    }
     vector<Patient**> allPats = patients.getAllPointers();
     for (size_t i = 0; i < allPats.size(); i++) {
         cout << i + 1 << ". ";
