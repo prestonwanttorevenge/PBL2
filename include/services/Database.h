@@ -70,6 +70,22 @@ public:
     vector<Appointment>& getAppointments() { return appointments; }
     vector<Invoice>& getInvoices() { return invoices; }
     vector<MedicalRecord>& getMedicalRecords() { return medicalRecords; }
+    
+    void deleteDoctor(string id);
+    void deleteMedicine(string id);
+    void deletePatient(string id);
+    
+    void updateDoctor(string id);
+    void updateMedicine(string id);
+    void updatePatient(string id);
+    
+    void addDoctor();
+    void addMedicine();
+    void addPatient();
+
+    void showAllDoctors ()const ;
+    void showAllMedicine() const;
+    void showAllPatients() const;
 
     void loadAllData();
     void saveAllData(); 
