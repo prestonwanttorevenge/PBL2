@@ -15,7 +15,6 @@ ReceptionistMenu::ReceptionistMenu(Database& database, AuthService& authService,
     : QMainWindow(parent), ui(new Ui::ReceptionistMenu), db(database), auth(authService) {
     ui->setupUi(this);
 
-    // --- NÂNG CẤP UX: KHÓA CHỈ CHO NHẬP SỐ ĐIỆN THOẠI (10-11 SỐ) ---
     QRegularExpression rx("^[0-9]{10,11}$");
     QValidator *validator = new QRegularExpressionValidator(rx, this);
     ui->txtPatientPhone->setValidator(validator);
@@ -43,8 +42,6 @@ ReceptionistMenu::ReceptionistMenu(Database& database, AuthService& authService,
     connect(ui->cbShift, &QComboBox::currentTextChanged, this, &ReceptionistMenu::updateAvailableDoctors);
     
     connect(ui->tablePatients, &QTableWidget::itemClicked, this, &ReceptionistMenu::on_tablePatients_itemClicked);
-
-    // --- NÂNG CẤP UX: KẾT NỐI LIVE SEARCH TỰ ĐỘNG ---
     connect(ui->txtSearchPatient, &QLineEdit::textChanged, this, &ReceptionistMenu::on_btnSearchPatient_clicked);
 
     updateAvailableDoctors();
@@ -91,20 +88,15 @@ void ReceptionistMenu::on_btnRegisterPatient_clicked() {
     string phone = qPhone.toStdString();
     bool isNoiTru = ui->radioNoiTru->isChecked();
 
-    // ==========================================
-    // RÚT TRÍCH VÀ XỬ LÝ MÃ BHYT
-    // ==========================================
-    QString qBhyt = ui->txtBHYT->text().trimmed(); // Cắt khoảng trắng thừa 2 đầu
+    QString qBhyt = ui->txtBHYT->text().trimmed(); 
     string bhyt = qBhyt.isEmpty() ? "Không" : qBhyt.toStdString();
 
-    // CHÚ Ý: Truyền thêm biến bhyt vào hàm
     bool success = db.addPatientFromGUI(name, phone, bhyt, isNoiTru);
     
     if (success) {
         db.saveAllData(); 
         QMessageBox::information(this, "Thành công", "Đã thêm Bệnh nhân mới tự động!\nVui lòng xem danh sách bên phải để biết Mã BN.");
         
-        // Xóa trắng các ô nhập liệu để tiện nhập người tiếp theo
         ui->txtPatientName->clear();
         ui->txtPatientPhone->clear();
         ui->txtBHYT->clear(); 
@@ -204,12 +196,11 @@ void ReceptionistMenu::on_btnCreateInvoice_clicked() {
     }
 }
 
-// NÂNG CẤP UX: KẾT HỢP LIVE SEARCH VÀ KHÔI PHỤC BẢNG KHI XÓA TỪ KHÓA
 void ReceptionistMenu::on_btnSearchPatient_clicked() {
     string keyword = ui->txtSearchPatient->text().toStdString();
 
     if (keyword.empty()) {
-        refreshPatientTable(); // Tự động hiển thị lại bảng gốc khi không có từ khóa
+        refreshPatientTable(); 
         return;
     }
     
@@ -223,6 +214,8 @@ void ReceptionistMenu::on_btnSearchPatient_clicked() {
             ui->tablePatients->setItem(i, 1, new QTableWidgetItem(QString::fromStdString(foundPatients[i]->getFullName())));
             ui->tablePatients->setItem(i, 2, new QTableWidgetItem(QString::fromStdString(foundPatients[i]->getPhoneNumber())));
             ui->tablePatients->setItem(i, 3, new QTableWidgetItem(QString::fromStdString(foundPatients[i]->getType())));
+            // NÂNG CẤP: Hiển thị BHYT ở kết quả tìm kiếm
+            ui->tablePatients->setItem(i, 4, new QTableWidgetItem(QString::fromStdString(foundPatients[i]->getBHYT())));
         }
     }
 }
@@ -288,9 +281,10 @@ void ReceptionistMenu::on_cbSpecialty_currentIndexChanged(const QString &special
     updateAvailableDoctors();
 }
 
+// NÂNG CẤP: HIỂN THỊ CỘT BHYT RA BẢNG CHÍNH
 void ReceptionistMenu::refreshPatientTable() {
-    ui->tablePatients->setColumnCount(4);
-    ui->tablePatients->setHorizontalHeaderLabels({"Mã BN", "Họ Tên", "SĐT", "Loại"});
+    ui->tablePatients->setColumnCount(5); // Tăng lên 5 cột
+    ui->tablePatients->setHorizontalHeaderLabels({"Mã BN", "Họ Tên", "SĐT", "Loại", "Mã BHYT"});
     ui->tablePatients->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 
     ui->tablePatients->setRowCount(0);
@@ -304,6 +298,7 @@ void ReceptionistMenu::refreshPatientTable() {
         ui->tablePatients->setItem(row, 1, new QTableWidgetItem(QString::fromStdString(pat->getFullName())));
         ui->tablePatients->setItem(row, 2, new QTableWidgetItem(QString::fromStdString(pat->getPhoneNumber())));
         ui->tablePatients->setItem(row, 3, new QTableWidgetItem(QString::fromStdString(pat->getType())));
+        ui->tablePatients->setItem(row, 4, new QTableWidgetItem(QString::fromStdString(pat->getBHYT()))); // Đổ dữ liệu BHYT
         row++;
     }
 }

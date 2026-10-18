@@ -12,9 +12,10 @@
       <!-- PHẦN ĐĂNG KÝ MỚI -->
       <item>
        <layout class="QHBoxLayout" name="horizontalLayoutPatientInfo">
-        <!-- ĐÃ XÓA Ô txtPatientId Ở ĐÂY VÌ MÃ SẼ TỰ ĐỘNG SINH -->
         <item><widget class="QLineEdit" name="txtPatientName"><property name="placeholderText"><string>Họ và Tên</string></property></widget></item>
         <item><widget class="QLineEdit" name="txtPatientPhone"><property name="placeholderText"><string>Số điện thoại</string></property></widget></item>
+        <!-- NÂNG CẤP: BỔ SUNG Ô NHẬP MÃ BHYT -->
+        <item><widget class="QLineEdit" name="txtBHYT"><property name="placeholderText"><string>Mã BHYT (Để trống nếu ko có)</string></property></widget></item>
        </layout>
       </item>
       <item>
@@ -28,8 +29,10 @@
       
       <!-- PHẦN ĐẶT LỊCH HẸN -->
       <item>
-         <!-- Giữ lại một ô nhập mã để biết đặt lịch cho BN nào (Đổi tên để tránh nhầm) -->
-         <widget class="QLineEdit" name="txtBookPatientId"><property name="placeholderText"><string>Mã Bệnh nhân (Để đặt lịch)</string></property></widget>
+         <widget class="QLineEdit" name="txtBookPatientId">
+            <property name="placeholderText"><string>Mã BN (Chọn từ bảng để đặt lịch)</string></property>
+            <property name="readOnly"><bool>true</bool></property>
+         </widget>
       </item>
       <item>
        <layout class="QHBoxLayout" name="horizontalLayoutAppointment">
@@ -62,7 +65,6 @@
       <item><spacer name="verticalSpacer2"><property name="orientation"><enum>Qt::Vertical</enum></property></spacer></item>
       <item>
        <layout class="QHBoxLayout" name="horizontalLayoutInvoice">
-        <!-- Khóa ô nhập mã hóa đơn, nên làm click chọn trên bảng -->
         <item><widget class="QLineEdit" name="txtPatientId_Invoice">
           <property name="placeholderText"><string>Mã BN (Chọn từ bảng)</string></property>
           <property name="readOnly"><bool>true</bool></property>

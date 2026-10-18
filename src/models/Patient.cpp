@@ -10,7 +10,7 @@ string Patient::getMedicalRecordId() const {return medicalRecordId; }
 string Patient::getBHYT() const {return BHYT; }
 
 void Patient::setMedicalRecordId(string recordId) {this->medicalRecordId = recordId; }
-void Patient::setBHYT(string BH) {this->BHYT = BHYT; }
+void Patient::setBHYT(string BH) {this->BHYT = BH; }
 
 void Patient::inputData(){
     Person::inputData();
