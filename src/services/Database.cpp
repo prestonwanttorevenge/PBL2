@@ -81,20 +81,22 @@ string Database::generateDoctorId() {
     return ss.str();
 }
 
-string Database::generateMedicineId() {
-    medicineCounter++;
+string Database::generateMedicineId(const string& prefix) {
+    // Tự động tăng bộ đếm của nhóm tương ứng lên 1
+    medicineCounters[prefix]++;
+    
     stringstream ss;
-    ss << "MED" << setfill('0') << setw(2) << medicineCounter;
+    // Format: B1_001, DV_012, B3_105...
+    ss << prefix << "_" << setfill('0') << setw(3) << medicineCounters[prefix];
     return ss.str();
 }
 
-string Database::generateServiceId() {
-    serviceCounter++;
+string Database::generateServiceId(const string& prefix) {
+    serviceCounters[prefix]++;
     stringstream ss;
-    ss << "DV" << setfill('0') << setw(2) << serviceCounter;
+    ss << prefix << "_" << setfill('0') << setw(3) << serviceCounters[prefix];
     return ss.str();
 }
-
 // ==========================================
 // LOAD DATA TỪ CSV 
 // ==========================================
@@ -104,8 +106,8 @@ void Database::loadAllData() {
     patientCounter = 0;
     appointmentCounter = 0;
     doctorCounter = 0;
-    medicineCounter = 0;
-    serviceCounter = 0;
+    medicineCounters.clear();
+    serviceCounters.clear();
     medicalRecordCounters.clear();
     userCounters.clear();
 
@@ -316,10 +318,15 @@ void Database::loadAllData() {
             try { stock = stoi(stockStr); } catch (...) {} // PARSE TỒN KHO
 
             // Cập nhật bộ đếm Thuốc
-            if (id.substr(0, 3) == "MED") {
+            if (id.find('_') != string::npos){
+                string prefix = id.substr(0, id.find('_')); // Lấy phần trước dấu "_"
+                string numStr = id.substr(id.find('_') + 1); // Lấy phần số phía sau
+
                 int num = 0;
-                try { num = stoi(id.substr(3)); } catch(...) {}
-                if (num > medicineCounter) medicineCounter = num;
+                try { num = stoi(numStr); } catch(...) {}
+                if (num > medicineCounters[prefix]) {
+                    medicineCounters[prefix] = num;
+                }
             }
 
             // CHUẨN: Truyền stock vào khi khởi tạo thuốc
@@ -341,14 +348,19 @@ void Database::loadAllData() {
             getline(ss, name, ';');
             getline(ss, priceStr, ';');
 
-            double price = 0.0;
+           double price = 0.0;
             try { price = stod(priceStr); } catch (...) {}
 
-            // Cập nhật bộ đếm DV
-            if (id.substr(0, 2) == "DV") {
+            // Cập nhật bộ đếm DV theo Prefix
+            if (id.find('_') != string::npos) {
+                string prefix = id.substr(0, id.find('_'));
+                string numStr = id.substr(id.find('_') + 1);
+
                 int num = 0;
-                try { num = stoi(id.substr(2)); } catch(...) {}
-                if (num > serviceCounter) serviceCounter = num;
+                try { num = stoi(numStr); } catch(...) {}
+                if (num > serviceCounters[prefix]) {
+                    serviceCounters[prefix] = num;
+                }
             }
 
             services.insert(id, Service(id, name, price));
@@ -793,21 +805,42 @@ int Database::addDoctorWithAccount(string id, string name, string dob, string ge
     return 1;
 }
 
-int Database::addMedicineFromQT(string medicineId,string medicineName,double unitPrice,string dosage ,int addQty){
-    Medicine* existingMed = findMedicineById(medicineId);
-    if (existingMed != nullptr){
-        existingMed->setStock(existingMed->getStock() + addQty);
-        return 2;
-    } else {
-        medicines.insert(medicineId,Medicine(medicineId, medicineName, unitPrice, dosage, addQty));
-        return 1;
+int Database::addMedicineFromQT(string prefix, string medicineName, double unitPrice, string dosage, int addQty, string& outId) {
+    
+    // 1. Quét tên thuốc trước
+    vector<Medicine*> allMeds = medicines.getAllPointers();
+    for (auto med : allMeds) {
+        if (med->getMedicineName() == medicineName) {
+            med->setStock(med->getStock() + addQty); // Cộng dồn
+            outId = med->getMedicineId(); // Lấy mã CŨ trả ra ngoài
+            return 2; 
+        }
     }
+
+    // 2. Chắc chắn là thuốc mới -> Bây giờ mới sinh mã để không bị thủng lỗ!
+    string newId = generateMedicineId(prefix);
+    medicines.insert(newId, Medicine(newId, medicineName, unitPrice, dosage, addQty));
+    
+    outId = newId; // Trả mã MỚI ra ngoài
+    return 1; 
 }
 
-int Database::addServiceFromQT(string id, string name, double price){
-    if (services.search(id) != nullptr) return -1;
-    services.insert(id, Service(id, name, price));
-    return 1;
+int Database::addServiceFromQT(string prefix, string name, double price, string& outId) {
+    // 1. Quét xem TÊN DỊCH VỤ này đã tồn tại chưa
+    vector<Service*> allSrv = services.getAllPointers();
+    for (auto srv : allSrv) {
+        if (srv->getServiceName() == name) {
+            outId = srv->getId(); // Trả về mã cũ bị trùng cho giao diện biết
+            return -1; // Trả về lỗi trùng lặp
+        }
+    }
+
+    // 2. Tên chưa tồn tại -> Chắc chắn an toàn -> Tự động sinh mã mới
+    string newId = generateServiceId(prefix);
+    services.insert(newId, Service(newId, name, price));
+    
+    outId = newId; // Trả mã VỪA TẠO ra ngoài
+    return 1; // Thêm thành công
 }
 
 vector<Doctor*> Database::getAvailableDoctors(string day, string shift) {
@@ -874,19 +907,26 @@ int Database::createInvoiceFromQT(string patientId, double& outTotalFee) {
             medFee += rawLinePrice; // Cộng vào sổ gốc
 
             if (isBHYT) {
-                string mId = med->getMedicineId(); // Lấy ID thuốc đang xét
+                string mId = med->getMedicineId(); 
                 
-                if (mId == "MED01" || mId == "MED02" || mId == "MED03") {
-                    // Nhóm thuốc cơ bản: Miễn phí 100%
+                // Rút trích 2 ký tự đầu tiên của ID (VD: Lấy "B1" từ "B1_001")
+                string prefix = (mId.length() >= 2) ? mId.substr(0, 2) : "";
+                
+                if (prefix == "B1") {
+                    // Nhóm B1: Miễn phí 100%
                     finalMedFee += 0; 
                 } 
-                else if (mId == "MED09" || mId == "MED10") {
-                    // Nhóm thuốc đặc trị: BHYT hỗ trợ 50% (Khách trả 50%)
+                else if (prefix == "B2") {
+                    // Nhóm B2: BHYT hỗ trợ 50% (Khách trả 50%)
                     finalMedFee += rawLinePrice * 0.5; 
                 } 
-                else {
-                    // Các loại thuốc còn lại: Khách đồng chi trả 20%
+                else if (prefix == "B3") {
+                    // Nhóm B3: Khách đồng chi trả 20%
                     finalMedFee += rawLinePrice * 0.2; 
+                }
+                else {
+                    // Tiền tố "DV" hoặc các mã khác: BHYT không chi trả (Khách trả 100%)
+                    finalMedFee += rawLinePrice; 
                 }
             } else {
                 // Không có BHYT: Khách trả đủ 100% tiền thuốc này
@@ -901,13 +941,15 @@ int Database::createInvoiceFromQT(string patientId, double& outTotalFee) {
     // ==========================================
     // 3. TÍNH TIỀN DỊCH VỤ (KHÁM / XÉT NGHIỆM)
     // ==========================================
-    string srvId = "SRV01";          
+    // Mặc định luôn thu phí Khám bệnh ban đầu với mã S1_001
+    string srvId = "S1_001";          
     double srvPrice = 100000.0;      
     vector<Service*> srvList = services.getAllPointers();
+    
     if (!srvList.empty()) {
         Service* selectedSrv = srvList[0];
         for (auto s : srvList) {
-            if (s->getId() == "SRV01" || s->getId() == "DV01") {
+            if (s->getId() == "S1_001") {
                 selectedSrv = s;
                 break;
             }
@@ -919,19 +961,27 @@ int Database::createInvoiceFromQT(string patientId, double& outTotalFee) {
     double finalSrvPrice = srvPrice; // Tiền dịch vụ khách thực trả
 
     if (isBHYT) {
-        if (srvId == "SRV01" || srvId == "DV01") {
-            // Khám bệnh cơ bản: Miễn phí hoàn toàn
+        // Rút tiền tố 2 ký tự đầu của Dịch vụ (VD: Lấy "S1" từ "S1_001")
+        string prefix = (srvId.length() >= 2) ? srvId.substr(0, 2) : "";
+
+        if (prefix == "S1") {
+            // S1: Dịch vụ cơ bản (Khám bệnh) - Miễn phí hoàn toàn
             finalSrvPrice = 0; 
         } 
-        else if (srvId == "SRV02" || srvId == "XQUANG") {
-            // Dịch vụ chụp X-Quang: Khách trả 30%
+        else if (prefix == "S2") {
+            // S2: Cận lâm sàng (X-Quang, Siêu âm) - Khách đồng chi trả 30%
             finalSrvPrice = srvPrice * 0.3; 
         } 
-        else {
-            // Các dịch vụ khác (ví dụ MRI, siêu âm màu): Giảm giá 20% (Khách trả 80%)
+        else if (prefix == "S3") {
+            // S3: Kỹ thuật cao (MRI, CT) - Khách đồng chi trả 80%
             finalSrvPrice = srvPrice * 0.8; 
         }
+        else {
+            // SV hoặc các mã khác: Dịch vụ yêu cầu - Khách trả 100%
+            finalSrvPrice = srvPrice; 
+        }
     }
+    
 
     string detailId = newInvId + "_D1";
     InvoiceDetail consultDetail(detailId, srvId, newInvId, 1, srvPrice);

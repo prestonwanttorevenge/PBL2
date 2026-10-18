@@ -48,8 +48,8 @@ private:
     int patientCounter = 0;                      
     int appointmentCounter = 0;   
     int doctorCounter = 0;              // MỚI
-    int medicineCounter = 0;            // MỚI
-    int serviceCounter = 0;             // MỚI
+    std::map<std::string, int> medicineCounters;
+    std::map<std::string, int> serviceCounters;       // MỚI
     
     void sanitizeInput(string& input);
 
@@ -100,8 +100,8 @@ public:
     string generateMedicalRecordId(const string& specialty);
     string generateUserId(const string& role); // MỚI
     string generateDoctorId();                 // MỚI
-    string generateMedicineId();               // MỚI
-    string generateServiceId();                // MỚI
+    string generateMedicineId(const string& prefix);            // MỚI
+    string generateServiceId(const string& prefix);       // MỚI
 
     // ==========================================
     // Hệ thống & Đăng nhập
@@ -115,7 +115,7 @@ public:
     int addDoctorWithAccount(string id, string name, string dob, string gender, string phone, string specialty, int expYears, string username, string plainPassword);
     bool addDoctorFromQT(string id, string fullName, string dob, string gender, string phone, string specialty, int expYears);
     bool addShiftToDoctorFromQT(string doctorId, string day, string time);
-    int addServiceFromQT(string id, string name, double price);
+    int addServiceFromQT(string prefix, string name, double price, string& outId);
     
     bool deleteUserFromQT(const std::string& id);
     int deleteDoctorFromQT(const std::string& id);
@@ -148,7 +148,7 @@ public:
     // ==========================================
     // Quản Lý Kho / Dược Sĩ
     // ==========================================
-    int addMedicineFromQT(string medicineId,string medicineName,double unitPrice,string dosage,int addQty);
+    int addMedicineFromQT(string medicineId,string medicineName,double unitPrice,string dosage,int addQty,string &outId);
 };
 
 #endif

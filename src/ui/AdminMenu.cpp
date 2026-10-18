@@ -234,6 +234,9 @@ void AdminMenu::on_btnManageServices_clicked() {
 void AdminMenu::on_btnAddService_clicked() {
     string name = ui->txtServiceName->text().toStdString();
     string priceStr = ui->txtServicePrice->text().toStdString();
+    
+    // Rút 2 ký tự đầu tiên từ ComboBox (Ví dụ: "S1", "S2")
+    string prefix = ui->cbServicePrefix->currentText().left(2).toStdString();
 
     if (name.empty() || priceStr.empty()) {
         QMessageBox::warning(this, "Lỗi nhập liệu", "Vui lòng nhập đầy đủ thông tin dịch vụ!");
@@ -245,23 +248,21 @@ void AdminMenu::on_btnAddService_clicked() {
         QMessageBox::warning(this, "Lỗi", "Phí dịch vụ không hợp lệ!");
         return;
     }
-
-    // NÂNG CẤP: Tự động cấp mã Dịch vụ
-    string generatedId = db.generateServiceId();
-    int result = db.addServiceFromQT(generatedId, name, price);
+    string finalId = ""; // Biến chứa ID trả về
+    
+    int result = db.addServiceFromQT(prefix, name, price, finalId);
 
     if (result == -1) {
-        QMessageBox::critical(this, "Lỗi", "Tạo dịch vụ thất bại!");
+        QMessageBox::critical(this, "Lỗi", "Dịch vụ này đã tồn tại trong hệ thống!\nMã dịch vụ trùng: " + QString::fromStdString(finalId));
     } else {
         db.saveAllData(); 
-        QMessageBox::information(this, "Thành công", "Đã lập Dịch vụ y tế mới với Mã: " + QString::fromStdString(generatedId));
+        QMessageBox::information(this, "Thành công", "Đã phân loại và thêm Dịch vụ y tế mới!\nMã tự cấp phát: " + QString::fromStdString(finalId));
+        
         refreshServiceTable();
-        ui->txtServiceId->clear();
         ui->txtServiceName->clear();
         ui->txtServicePrice->clear();
     }
 }
-
 // ==========================================
 // CÁC HÀM XÓA (GIỮ NGUYÊN)
 // ==========================================

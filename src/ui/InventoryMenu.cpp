@@ -88,44 +88,31 @@ void InventoryMenu::refreshMedicineTable() {
     }
 }
 
-void InventoryMenu::on_btnImportMedicine_clicked()
-{
-    string medId = ui->txtMedId->text().toStdString();
+void InventoryMenu::on_btnImportMedicine_clicked() {
+    string prefix = ui->cbMedPrefix->currentText().left(2).toStdString();
     string medName = ui->txtMedName->text().toStdString();
     string dosage = ui->txtDosage->text().toStdString();
     string priceStr = ui->txtPrice->text().toStdString();
     int qty = ui->spinBoxQty->value();
 
-    if (medId.empty() || medName.empty() || dosage.empty() || priceStr.empty() || qty <= 0) {
-        QMessageBox::warning(this, "Cảnh báo", "Vui lòng nhập đầy đủ thông tin và số lượng lớn hơn 0!");
-        return;
-    }
+    if (medName.empty() || dosage.empty() || priceStr.empty() || qty <= 0) return;
 
     double price = 0.0;
-    try {
-        price = stod(priceStr);
-        if (price < 0) throw invalid_argument("Giá âm");
-    } catch (...) {
-        QMessageBox::warning(this, "Lỗi nhập liệu", "Giá thuốc không hợp lệ! Vui lòng chỉ nhập số.");
-        return;
-    }
-
-    int result = db.addMedicineFromQT(medId, medName, price, dosage, qty);
+    try { price = stod(priceStr); } catch (...) { return; }
+    string finalId = ""; // Biến hứng ID từ Backend trả về
+    
+    int result = db.addMedicineFromQT(prefix, medName, price, dosage, qty, finalId);
     db.saveAllData(); 
 
     if (result == 1) {
-        QMessageBox::information(this, "Thành công", "Đã thêm THUỐC MỚI vào danh mục!");
+        QMessageBox::information(this, "Thành công", "Đã phân loại và thêm THUỐC MỚI!\nMã ID: " + QString::fromStdString(finalId));
     }
     else if (result == 2) {
-        QMessageBox::information(this, "Thành công", "Thuốc đã tồn tại. Đã CỘNG DỒN số lượng vào kho!");
+        QMessageBox::information(this, "Thành công", "Thuốc đã tồn tại (" + QString::fromStdString(finalId) + "). Đã CỘNG DỒN vào kho!");
     }
 
     refreshMedicineTable(); 
-    ui->txtMedId->clear();
-    ui->txtMedName->clear();
-    ui->txtDosage->clear();
-    ui->txtPrice->clear();
-    ui->spinBoxQty->setValue(1);
+    // ... clear txt ...
 }
 
 void InventoryMenu::on_btnLogout_clicked()
