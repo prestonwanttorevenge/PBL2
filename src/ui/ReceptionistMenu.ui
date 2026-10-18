@@ -8,9 +8,11 @@
    <layout class="QHBoxLayout" name="horizontalLayoutMain">
     <item>
      <layout class="QVBoxLayout" name="verticalLayoutLeftPanel">
+      
+      <!-- PHẦN ĐĂNG KÝ MỚI -->
       <item>
        <layout class="QHBoxLayout" name="horizontalLayoutPatientInfo">
-        <item><widget class="QLineEdit" name="txtPatientId"><property name="placeholderText"><string>Mã Bệnh nhân</string></property></widget></item>
+        <!-- ĐÃ XÓA Ô txtPatientId Ở ĐÂY VÌ MÃ SẼ TỰ ĐỘNG SINH -->
         <item><widget class="QLineEdit" name="txtPatientName"><property name="placeholderText"><string>Họ và Tên</string></property></widget></item>
         <item><widget class="QLineEdit" name="txtPatientPhone"><property name="placeholderText"><string>Số điện thoại</string></property></widget></item>
        </layout>
@@ -23,6 +25,12 @@
        </layout>
       </item>
       <item><spacer name="verticalSpacer1"><property name="orientation"><enum>Qt::Vertical</enum></property></spacer></item>
+      
+      <!-- PHẦN ĐẶT LỊCH HẸN -->
+      <item>
+         <!-- Giữ lại một ô nhập mã để biết đặt lịch cho BN nào (Đổi tên để tránh nhầm) -->
+         <widget class="QLineEdit" name="txtBookPatientId"><property name="placeholderText"><string>Mã Bệnh nhân (Để đặt lịch)</string></property></widget>
+      </item>
       <item>
        <layout class="QHBoxLayout" name="horizontalLayoutAppointment">
         <item><widget class="QComboBox" name="cbSpecialty" /></item>
@@ -41,7 +49,7 @@
       </item>
       <item><widget class="QPushButton" name="btnBookAppointment"><property name="text"><string>Đặt Lịch Hẹn Khám</string></property></widget></item>
       
-      <!-- BẮT ĐẦU: KHU VỰC HỦY LỊCH HẸN BỊ THIẾU ĐÃ ĐƯỢC THÊM VÀO -->
+      <!-- KHU VỰC HỦY LỊCH HẸN -->
       <item><spacer name="verticalSpacerCancel"><property name="orientation"><enum>Qt::Vertical</enum></property></spacer></item>
       <item>
        <layout class="QHBoxLayout" name="horizontalLayoutCancel">
@@ -49,15 +57,21 @@
         <item><widget class="QPushButton" name="btnCancelAppointment"><property name="text"><string>Hủy Lịch Hẹn</string></property></widget></item>
        </layout>
       </item>
-      <!-- KẾT THÚC: KHU VỰC HỦY LỊCH HẸN -->
 
+      <!-- PHẦN HÓA ĐƠN -->
       <item><spacer name="verticalSpacer2"><property name="orientation"><enum>Qt::Vertical</enum></property></spacer></item>
       <item>
        <layout class="QHBoxLayout" name="horizontalLayoutInvoice">
-        <item><widget class="QLineEdit" name="txtPatientId_Invoice"><property name="placeholderText"><string>Mã BN (Hóa đơn)</string></property></widget></item>
+        <!-- Khóa ô nhập mã hóa đơn, nên làm click chọn trên bảng -->
+        <item><widget class="QLineEdit" name="txtPatientId_Invoice">
+          <property name="placeholderText"><string>Mã BN (Chọn từ bảng)</string></property>
+          <property name="readOnly"><bool>true</bool></property>
+        </widget></item>
         <item><widget class="QPushButton" name="btnCreateInvoice"><property name="text"><string>Lập Hóa Đơn &amp;&amp; Thanh Toán</string></property></widget></item>
        </layout>
       </item>
+      
+      <!-- PHẦN TRA CỨU -->
       <item><spacer name="verticalSpacer3"><property name="orientation"><enum>Qt::Vertical</enum></property></spacer></item>
       <item>
        <layout class="QHBoxLayout" name="horizontalLayoutSearch">
@@ -65,10 +79,13 @@
         <item><widget class="QPushButton" name="btnSearchPatient"><property name="text"><string>Tra Cứu</string></property></widget></item>
        </layout>
       </item>
+      
       <item><spacer name="verticalSpacer4"><property name="orientation"><enum>Qt::Vertical</enum></property></spacer></item>
       <item><widget class="QPushButton" name="btnLogout"><property name="text"><string>Đăng Xuất</string></property></widget></item>
      </layout>
     </item>
+    
+    <!-- BẢNG DANH SÁCH BỆNH NHÂN -->
     <item>
      <widget class="QTableWidget" name="tablePatients" />
     </item>

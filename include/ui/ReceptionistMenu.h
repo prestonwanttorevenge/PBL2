@@ -2,6 +2,7 @@
 #define RECEPTIONISTMENU_H
 
 #include <QMainWindow>
+#include <QTableWidgetItem>
 #include "services/Database.h"
 #include "services/AuthService.h"
 
@@ -27,6 +28,9 @@ private slots:
     void on_btnCancelAppointment_clicked();
     void loadPendingAppointments();
     
+    // Bắt sự kiện khi Lễ tân click chọn Bệnh nhân trên bảng
+    void on_tablePatients_itemClicked(QTableWidgetItem *item);
+
 private:
     Ui::ReceptionistMenu *ui;
     Database& db;

@@ -2,6 +2,7 @@
 #define DATABASE_H
 
 #include <vector>
+#include <map>
 #include "BST.h"
 #include <string>
 #include "models/Doctor.h"
@@ -40,9 +41,15 @@ private:
     const std::string serviceFile = "data/data_services.csv";
     const std::string doctorScheduleFile = "data/data_doctor_schedules.csv";
     const std::string prescriptionDetailFile = "data/data_prescription_details.csv";
+    
+    // --- BỘ ĐẾM TỰ ĐỘNG SINH MÃ ---
+    std::map<string, int> medicalRecordCounters; 
+    int patientCounter = 0;                      
+    int appointmentCounter = 0;                  
+    
     void sanitizeInput(string& input);
-public:
 
+public:
     Database();
     Database(Database&);
     ~Database();
@@ -64,42 +71,16 @@ public:
     vector<Invoice>& getInvoices() { return invoices; }
     vector<MedicalRecord>& getMedicalRecords() { return medicalRecords; }
 
-    void deleteDoctor(string id);
-    void deleteMedicine(string id);
-    void deletePatient(string id);
-    void updateDoctor(string id);
-    void updateMedicine(string id);
-    void updatePatient(string id);
-
     void loadAllData();
-    void saveAllData();
+    void saveAllData(); 
 
-    void addDoctor();
-    void showAllDoctors() const;
-
-    void addPatient();
-    void showAllPatients() const;
-
-    void addInvoice(const Invoice& inv);
-    void showAllInvoices() const;
-
-    void addMedicine();
-    void showAllMedicine() const;
-
-    void addUser(const User& user);
-    void showAllUsers() const;
-
-    void addAppointment(const Appointment& appt);
-    void showAllAppointments() const;
-
-    void addMedicalRecord(const MedicalRecord& record);
-    void showAllMedicalRecords() const;
-
-    void addService(const Service& srv);
-    void showAllServices() const;
+    // --- CÁC HÀM TỰ ĐỘNG SINH MÃ ---
+    string generatePatientId();
+    string generateAppointmentId();
+    string generateMedicalRecordId(const string& specialty);
 
     // ==========================================
-    // Hệ thống & Đăng nhập (System / Login)
+    // Hệ thống & Đăng nhập
     // ==========================================
     User* loginFromQT(string username, string password);
 
@@ -113,14 +94,17 @@ public:
     int addServiceFromQT(string id, string name, double price);
     
     bool deleteUserFromQT(const std::string& id);
-    bool deleteDoctorFromQT(const std::string& id);
-    bool deleteMedicineFromQT(const std::string& id);
+    
+    // SỬA ĐỔI: Đổi kiểu trả về thành int để bắt lỗi ràng buộc (1: OK, -1: Ko thấy, -2: Ràng buộc)
+    int deleteDoctorFromQT(const std::string& id);
+    int deleteMedicineFromQT(const std::string& id);
+    
     bool deleteServiceFromQT(const std::string& id);
 
     // ==========================================
     // Lễ Tân (Receptionist)
     // ==========================================
-    bool addPatientFromGUI(string id, string name, string phone, bool isNoiTru);
+    bool addPatientFromGUI(string name, string phone, bool isNoiTru); 
     bool addInpatientFromQT(string id, string name, string dob, string gender, string phone,string recordId, double discount, string admDate, string disDate, string room, string bed);
     bool addOutpatientFromQT(string id, string name, string dob, string gender, string phone, string recordId, double discount, string apptDate, string clinic);
     
@@ -131,17 +115,17 @@ public:
     // ==========================================
     // Bác Sĩ (Doctor)
     // ==========================================
-    int createMedicalRecordFromQT(string apptId, string symp, string diag, string notes);
+    string createMedicalRecordFromQT(string apptId, string symp, string diag, string notes);
     int prescribeMedicineFromQT(string recordId, string medId, string dosage, int qty);
     vector<MedicalRecord*> getPatientHistory(string patientId);
 
     // ==========================================
-    // Dùng chung: Bác Sĩ & Lễ Tân
+    // Dùng chung
     // ==========================================
     int cancelAppointmentFromQT(string apptId);
 
     // ==========================================
-    // Quản Lý Kho / Dược Sĩ (Inventory Menu & Admin Menu)
+    // Quản Lý Kho / Dược Sĩ
     // ==========================================
     int addMedicineFromQT(string medicineId,string medicineName,double unitPrice,string dosage,int addQty);
 };

@@ -4,16 +4,31 @@
 #include "services/Database.h"
 #include <QMessageBox>
 #include <QTableWidgetItem>
+#include <QColor> // Bổ sung thư viện màu sắc
 
 DoctorMenu::DoctorMenu(Database& database, AuthService& authService, QWidget *parent)
     : QMainWindow(parent), ui(new Ui::DoctorMenu), db(database), auth(authService) {
     ui->setupUi(this);
+    
+    connect(ui->tableAppointments, &QTableWidget::itemClicked, this, &DoctorMenu::on_tableAppointments_itemClicked);
+    
     loadPatientQueue();
-    loadMedicineComboBox(); // Nạp thuốc vào ComboBox ngay khi mở
+    loadMedicineComboBox(); 
 }
 
 DoctorMenu::~DoctorMenu() {
     delete ui;
+}
+
+void DoctorMenu::on_tableAppointments_itemClicked(QTableWidgetItem *item) {
+    int row = item->row();
+    if (row >= 0) {
+        QString apptId = ui->tableAppointments->item(row, 0)->text();
+        QString patientId = ui->tableAppointments->item(row, 1)->text();
+        
+        ui->txtAppointmentId->setText(apptId);
+        ui->txtPatientId_History->setText(patientId);
+    }
 }
 
 void DoctorMenu::loadMedicineComboBox() {
@@ -80,22 +95,24 @@ void DoctorMenu::on_btnCreateMedicalRecord_clicked() {
     string notes = ui->txtNotes->text().toStdString();
 
     if (apptId.empty() || diag.empty()) {
-        QMessageBox::warning(this, "Thiếu thông tin", "Mã Lịch hẹn và Chẩn đoán không được để trống!");
+        QMessageBox::warning(this, "Thiếu thông tin", "Vui lòng click chọn Lịch hẹn trên bảng và nhập Chẩn đoán!");
         return;
     }
 
-    int result = db.createMedicalRecordFromQT(apptId, symp, diag, notes);
+    string newRecordId = db.createMedicalRecordFromQT(apptId, symp, diag, notes);
 
-    if (result == 1) {
-        db.saveAllData(); // Lưu CSDL
-        QMessageBox::information(this, "Thành công", "Đã tạo Hồ sơ Bệnh án mới thành công!");
+    if (!newRecordId.empty()) {
+        ui->txtRecordId->setText(QString::fromStdString(newRecordId));
+        QMessageBox::information(this, "Thành công", 
+                                "Đã tạo Bệnh án thành công!\nMã Bệnh Án cấp tự động: " + QString::fromStdString(newRecordId));
+        
         ui->txtAppointmentId->clear();
         ui->txtSymptoms->clear();
         ui->txtDiagnosis->clear();
         ui->txtNotes->clear();
         loadPatientQueue();
-    } else if (result == -1) {
-        QMessageBox::critical(this, "Lỗi", "Mã Lịch hẹn không hợp lệ!");
+    } else {
+        QMessageBox::critical(this, "Lỗi", "Mã Lịch hẹn không hợp lệ hoặc không tồn tại!");
     }
 }
 
@@ -113,11 +130,11 @@ void DoctorMenu::on_btnPrescribeMedicine_clicked() {
     int result = db.prescribeMedicineFromQT(recordId, medId, dosage, qty);
 
     if (result == 1) {
-        db.saveAllData(); // Lưu ngay xuống CSV
-        QMessageBox::information(this, "Kê đơn", "Đã thêm thuốc vào Bệnh án thành công!");
+        db.saveAllData(); 
+        QMessageBox::information(this, "Kê đơn", "Đã thêm thuốc vào Bệnh án [" + QString::fromStdString(recordId) + "] thành công!");
         ui->txtDosage->clear();
         ui->spinBoxQuantity->setValue(1);
-        loadMedicineComboBox(); // Làm mới lại số lượng tồn kho trên ComboBox
+        loadMedicineComboBox(); 
     } 
     else if (result == -1) {
         QMessageBox::critical(this, "Lỗi", "Mã Bệnh án không tồn tại!");
@@ -134,7 +151,7 @@ void DoctorMenu::on_btnViewPatientHistory_clicked() {
     string patientId = ui->txtPatientId_History->text().toStdString();
 
     if (patientId.empty()) {
-        QMessageBox::warning(this, "Cảnh báo", "Vui lòng nhập Mã Bệnh Nhân để tra cứu!");
+        QMessageBox::warning(this, "Cảnh báo", "Vui lòng chọn hoặc nhập Mã Bệnh Nhân để tra cứu!");
         return;
     }
 
@@ -163,7 +180,6 @@ void DoctorMenu::on_btnViewPatientHistory_clicked() {
     }
 
     QMessageBox::information(this, "Lịch Sử Khám Bệnh", msg);
-    ui->txtPatientId_History->clear();
 }
 
 void DoctorMenu::on_btnCancelAppointment_clicked() {
@@ -185,6 +201,8 @@ void DoctorMenu::on_btnCancelAppointment_clicked() {
         if (result == 1) {
             QMessageBox::information(this, "Thành công", "Đã hủy lịch hẹn thành công!");
             loadPatientQueue(); 
+            ui->txtAppointmentId->clear();
+            ui->txtPatientId_History->clear();
         } 
         else if (result == -2) {
             QMessageBox::warning(this, "Lỗi", "Lịch hẹn này đã khám xong, không thể hủy!");
@@ -192,6 +210,7 @@ void DoctorMenu::on_btnCancelAppointment_clicked() {
     }
 }
 
+// NÂNG CẤP UX: TÔ MÀU TRẠNG THÁI
 void DoctorMenu::loadPatientQueue() {
     ui->tableAppointments->setColumnCount(4);
     ui->tableAppointments->setHorizontalHeaderLabels({"Mã Lịch Hẹn", "Mã Bệnh Nhân", "Thời Gian", "Trạng Thái"});
@@ -204,10 +223,26 @@ void DoctorMenu::loadPatientQueue() {
     for (const auto& appt : appts) {
         if (appt.getStatus() == "Pending") {
             ui->tableAppointments->insertRow(row);
-            ui->tableAppointments->setItem(row, 0, new QTableWidgetItem(QString::fromStdString(appt.getAppointmentId())));
-            ui->tableAppointments->setItem(row, 1, new QTableWidgetItem(QString::fromStdString(appt.getPatientId())));
-            ui->tableAppointments->setItem(row, 2, new QTableWidgetItem(QString::fromStdString(appt.getDate())));
-            ui->tableAppointments->setItem(row, 3, new QTableWidgetItem(QString::fromUtf8("Chờ Khám")));
+            
+            QTableWidgetItem *item0 = new QTableWidgetItem(QString::fromStdString(appt.getAppointmentId()));
+            QTableWidgetItem *item1 = new QTableWidgetItem(QString::fromStdString(appt.getPatientId()));
+            QString timeStr = QString::fromStdString(appt.getDayOfWeek() + " - " + appt.getTimeSlot());
+            QTableWidgetItem *item2 = new QTableWidgetItem(timeStr);
+            QTableWidgetItem *item3 = new QTableWidgetItem(QString::fromUtf8("Chờ Khám"));
+            
+            // Thiết lập màu nền Vàng nhạt, chữ Vàng đậm
+            QColor pendingBg(255, 243, 205); 
+            QColor pendingFg(133, 100, 4);   
+            item0->setBackground(pendingBg);
+            item1->setBackground(pendingBg);
+            item2->setBackground(pendingBg);
+            item3->setBackground(pendingBg);
+            item3->setForeground(pendingFg);
+
+            ui->tableAppointments->setItem(row, 0, item0);
+            ui->tableAppointments->setItem(row, 1, item1);
+            ui->tableAppointments->setItem(row, 2, item2);
+            ui->tableAppointments->setItem(row, 3, item3);
             row++;
         }
     }

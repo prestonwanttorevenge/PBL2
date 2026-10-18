@@ -2,6 +2,7 @@
 #define DOCTORMENU_H
 
 #include <QMainWindow>
+#include <QTableWidgetItem>
 #include "services/Database.h"
 #include "services/AuthService.h"
 
@@ -23,6 +24,9 @@ private slots:
     void on_btnPrescribeMedicine_clicked();
     void on_btnViewPatientHistory_clicked();
     void on_btnCancelAppointment_clicked();
+    
+    // Bắt sự kiện khi Bác sĩ click chọn Lịch hẹn trên bảng
+    void on_tableAppointments_itemClicked(QTableWidgetItem *item);
 
 private:
     Ui::DoctorMenu *ui;
@@ -30,7 +34,7 @@ private:
     AuthService& auth;
     
     void loadPatientQueue();
-    void loadMedicineComboBox(); // Bổ sung hàm nạp danh mục thuốc
+    void loadMedicineComboBox();
 };
 
 #endif // DOCTORMENU_H

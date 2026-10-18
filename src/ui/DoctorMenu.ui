@@ -12,18 +12,29 @@
     <item>
      <layout class="QVBoxLayout" name="verticalLayoutRightPanel">
       
-      <!-- BẮT ĐẦU: NÚT HỦY LỊCH BỊ THIẾU ĐÃ ĐƯỢC THÊM VÀO -->
+      <!-- BẮT ĐẦU: NÚT HỦY LỊCH -->
       <item><widget class="QPushButton" name="btnCancelAppointment"><property name="text"><string>Hủy Lịch Hẹn (Đang chọn trên bảng)</string></property></widget></item>
       <item><spacer name="verticalSpacer0"><property name="orientation"><enum>Qt::Vertical</enum></property></spacer></item>
       <!-- KẾT THÚC: NÚT HỦY LỊCH -->
 
-      <item><widget class="QLineEdit" name="txtAppointmentId"><property name="placeholderText"><string>Mã Lịch Hẹn</string></property></widget></item>
+      <!-- Đã khóa ô nhập Mã Lịch Hẹn -->
+      <item><widget class="QLineEdit" name="txtAppointmentId">
+        <property name="placeholderText"><string>Mã Lịch Hẹn (Chọn từ bảng)</string></property>
+        <property name="readOnly"><bool>true</bool></property>
+      </widget></item>
+      
       <item><widget class="QLineEdit" name="txtSymptoms"><property name="placeholderText"><string>Triệu chứng</string></property></widget></item>
       <item><widget class="QLineEdit" name="txtDiagnosis"><property name="placeholderText"><string>Chẩn đoán</string></property></widget></item>
       <item><widget class="QLineEdit" name="txtNotes"><property name="placeholderText"><string>Ghi chú thêm</string></property></widget></item>
       <item><widget class="QPushButton" name="btnCreateMedicalRecord"><property name="text"><string>Tạo Bệnh Án</string></property></widget></item>
       <item><spacer name="verticalSpacer1"><property name="orientation"><enum>Qt::Vertical</enum></property></spacer></item>
-      <item><widget class="QLineEdit" name="txtRecordId"><property name="placeholderText"><string>Mã Bệnh Án</string></property></widget></item>
+      
+      <!-- Đã khóa ô nhập Mã Bệnh Án -->
+      <item><widget class="QLineEdit" name="txtRecordId">
+        <property name="placeholderText"><string>Mã Bệnh Án (Tự động sinh)</string></property>
+        <property name="readOnly"><bool>true</bool></property>
+      </widget></item>
+      
       <item><widget class="QComboBox" name="cbMedicine" /></item>
       <item><widget class="QLineEdit" name="txtDosage"><property name="placeholderText"><string>Liều dùng (VD: 2 viên/ngày)</string></property></widget></item>
       <item>
