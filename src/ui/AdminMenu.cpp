@@ -16,17 +16,14 @@ AdminMenu::AdminMenu(Database& database, AuthService& authService, QWidget *pare
 {
     ui->setupUi(this);
 
-    // --- NÂNG CẤP UX: KIỂM SOÁT ĐẦU VÀO BẰNG REGEX ---
-    // 1. Số điện thoại: Chỉ cho phép 10-11 chữ số
+    // --- KIỂM SOÁT ĐẦU VÀO BẰNG REGEX ---
     QRegularExpression rxPhone("^[0-9]{10,11}$");
     ui->txtPhone->setValidator(new QRegularExpressionValidator(rxPhone, this));
 
-    // 2. Giá tiền: Chỉ cho phép số dương (có thể có dấu thập phân)
     QRegularExpression rxPrice("^[0-9]*\\.?[0-9]+$");
     ui->txtMedPrice->setValidator(new QRegularExpressionValidator(rxPrice, this));
     ui->txtServicePrice->setValidator(new QRegularExpressionValidator(rxPrice, this));
 
-    // --- NẠP 14 CHUYÊN KHOA VÀO DANH SÁCH BÁC SĨ ---
     QStringList specialties = {
         QString::fromUtf8("Khoa Khám bệnh"),
         QString::fromUtf8("Khoa Hồi sức cấp cứu"),
@@ -45,6 +42,12 @@ AdminMenu::AdminMenu(Database& database, AuthService& authService, QWidget *pare
     };
     ui->cbDocSpecialty->addItems(specialties);
 
+    // --- KẾT NỐI SỰ KIỆN CLICK-TO-FILL CHO 4 BẢNG ---
+    connect(ui->tableUsers, &QTableWidget::itemClicked, this, &AdminMenu::on_tableUsers_itemClicked);
+    connect(ui->tableDoctors, &QTableWidget::itemClicked, this, &AdminMenu::on_tableDoctors_itemClicked);
+    connect(ui->tableMedicines, &QTableWidget::itemClicked, this, &AdminMenu::on_tableMedicines_itemClicked);
+    connect(ui->tableServices, &QTableWidget::itemClicked, this, &AdminMenu::on_tableServices_itemClicked);
+
     try {
         refreshUserTable();
         refreshDoctorTable();
@@ -59,6 +62,30 @@ AdminMenu::AdminMenu(Database& database, AuthService& authService, QWidget *pare
 AdminMenu::~AdminMenu() {
     delete ui;
 }
+
+// ==========================================
+// CÁC HÀM CLICK-TO-FILL (TỰ ĐIỀN MÃ KHI CLICK BẢNG)
+// ==========================================
+void AdminMenu::on_tableUsers_itemClicked(QTableWidgetItem *item) {
+    int row = item->row();
+    if (row >= 0) ui->txtUserId->setText(ui->tableUsers->item(row, 0)->text());
+}
+
+void AdminMenu::on_tableDoctors_itemClicked(QTableWidgetItem *item) {
+    int row = item->row();
+    if (row >= 0) ui->txtDocId->setText(ui->tableDoctors->item(row, 0)->text());
+}
+
+void AdminMenu::on_tableMedicines_itemClicked(QTableWidgetItem *item) {
+    int row = item->row();
+    if (row >= 0) ui->txtMedId->setText(ui->tableMedicines->item(row, 0)->text());
+}
+
+void AdminMenu::on_tableServices_itemClicked(QTableWidgetItem *item) {
+    int row = item->row();
+    if (row >= 0) ui->txtServiceId->setText(ui->tableServices->item(row, 0)->text());
+}
+
 
 // ==========================================
 // 1. QUẢN LÝ TÀI KHOẢN (TRANG SỐ 0)
@@ -240,14 +267,7 @@ void AdminMenu::on_btnAddService_clicked() {
 // XÓA TÀI KHOẢN (TRANG SỐ 0)
 // ==========================================
 void AdminMenu::on_btnDeleteUser_clicked() {
-    string id = "";
-    int row = ui->tableUsers->currentRow();
-
-    if (row >= 0) {
-        id = ui->tableUsers->item(row, 0)->text().toStdString();
-    } else {
-        id = ui->txtUserId->text().toStdString();
-    }
+    string id = ui->txtUserId->text().toStdString();
 
     if (id.empty()) {
         QMessageBox::warning(this, "Chưa chọn", "Vui lòng click chọn một tài khoản trên bảng (hoặc nhập User ID) để xóa!");
@@ -279,13 +299,7 @@ void AdminMenu::on_btnDeleteUser_clicked() {
 // XÓA BÁC SĨ (CÓ RÀNG BUỘC)
 // ==========================================
 void AdminMenu::on_btnDeleteDoctor_clicked() {
-    string id = "";
-    int row = ui->tableDoctors->currentRow();
-    if (row >= 0) {
-        id = ui->tableDoctors->item(row, 0)->text().toStdString();
-    } else {
-        id = ui->txtDocId->text().toStdString();
-    }
+    string id = ui->txtDocId->text().toStdString();
 
     if (id.empty()) {
         QMessageBox::warning(this, "Chưa chọn", "Vui lòng click chọn một Bác sĩ trên bảng để xóa!");
@@ -306,7 +320,7 @@ void AdminMenu::on_btnDeleteDoctor_clicked() {
             refreshUserTable(); 
             ui->txtDocId->clear();
         } 
-        else if (result == -2) { // NÂNG CẤP: CHỐT CHẶN BẢO VỆ DỮ LIỆU
+        else if (result == -2) { 
             QMessageBox::critical(this, "Lỗi Ràng Buộc", "TỪ CHỐI XÓA!\nBác sĩ này đang có Lịch hẹn chờ khám. Việc xóa sẽ làm đứt gãy dữ liệu hệ thống!");
         } 
         else {
@@ -319,13 +333,7 @@ void AdminMenu::on_btnDeleteDoctor_clicked() {
 // XÓA THUỐC (CÓ RÀNG BUỘC)
 // ==========================================
 void AdminMenu::on_btnDeleteMedicine_clicked() {
-    string id = "";
-    int row = ui->tableMedicines->currentRow();
-    if (row >= 0) {
-        id = ui->tableMedicines->item(row, 0)->text().toStdString();
-    } else {
-        id = ui->txtMedId->text().toStdString();
-    }
+    string id = ui->txtMedId->text().toStdString();
 
     if (id.empty()) {
         QMessageBox::warning(this, "Chưa chọn", "Vui lòng click chọn một loại thuốc trên bảng để xóa!");
@@ -345,7 +353,7 @@ void AdminMenu::on_btnDeleteMedicine_clicked() {
             refreshMedicineTable();
             ui->txtMedId->clear();
         } 
-        else if (result == -2) { // NÂNG CẤP: CHỐT CHẶN BẢO VỆ DỮ LIỆU
+        else if (result == -2) { 
             QMessageBox::critical(this, "Lỗi Ràng Buộc", "TỪ CHỐI XÓA!\nLoại thuốc này đã từng được kê trong lịch sử Bệnh án. Xóa thuốc sẽ làm mất lịch sử điều trị của Bệnh nhân!");
         } 
         else {
@@ -358,13 +366,7 @@ void AdminMenu::on_btnDeleteMedicine_clicked() {
 // XÓA DỊCH VỤ Y TẾ
 // ==========================================
 void AdminMenu::on_btnDeleteService_clicked() {
-    string id = "";
-    int row = ui->tableServices->currentRow();
-    if (row >= 0) {
-        id = ui->tableServices->item(row, 0)->text().toStdString();
-    } else {
-        id = ui->txtServiceId->text().toStdString();
-    }
+    string id = ui->txtServiceId->text().toStdString();
 
     if (id.empty()) {
         QMessageBox::warning(this, "Chưa chọn", "Vui lòng click chọn một dịch vụ trên bảng để xóa!");

@@ -19,12 +19,13 @@ public:
 private slots:
     void on_btnImportMedicine_clicked();
     void on_btnLogout_clicked();
+    void on_txtSearchMed_textChanged(const QString &arg1); // MỚI: Tự tìm kiếm khi gõ
 
 private:
     Ui::InventoryMenu *ui;
     Database& db;
     
-    void refreshMedicineTable(); // Bổ sung hàm cập nhật bảng kho thuốc
+    void refreshMedicineTable(); 
 };
 
 #endif // INVENTORYMENU_H

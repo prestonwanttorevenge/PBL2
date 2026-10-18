@@ -16,6 +16,15 @@
       <item><widget class="QPushButton" name="btnImportMedicine"><property name="text"><string>Nhập Thuốc Vào Kho</string></property></widget></item>
      </layout>
     </item>
+    
+    <!-- MỚI: BỔ SUNG Ô TÌM KIẾM NHANH (LIVE SEARCH) -->
+    <item>
+     <layout class="QHBoxLayout" name="horizontalLayoutSearch">
+      <item><widget class="QLabel" name="lblSearchIcon"><property name="text"><string>🔍 Tra cứu:</string></property></widget></item>
+      <item><widget class="QLineEdit" name="txtSearchMed"><property name="placeholderText"><string>Gõ Mã Thuốc hoặc Tên Thuốc để tìm kiếm nhanh...</string></property></widget></item>
+     </layout>
+    </item>
+    
     <item><widget class="QTableWidget" name="tableMedicines" /></item>
     <item>
      <layout class="QHBoxLayout" name="horizontalLayoutBottom">

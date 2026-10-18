@@ -23,7 +23,11 @@
        <layout class="QVBoxLayout" name="verticalLayoutUsers">
         <item>
          <layout class="QHBoxLayout" name="horizontalLayoutUserInputs">
-          <item><widget class="QLineEdit" name="txtUserId"><property name="placeholderText"><string>User ID</string></property></widget></item>
+          <!-- Đã khóa readOnly ô User ID -->
+          <item><widget class="QLineEdit" name="txtUserId">
+            <property name="placeholderText"><string>User ID (Tự cấp/Nhấp bảng)</string></property>
+            <property name="readOnly"><bool>true</bool></property>
+          </widget></item>
           <item><widget class="QLineEdit" name="txtUserFullName"><property name="placeholderText"><string>Họ và Tên</string></property></widget></item>
           <item><widget class="QLineEdit" name="txtUsername"><property name="placeholderText"><string>Username</string></property></widget></item>
           <item><widget class="QLineEdit" name="txtPassword"><property name="placeholderText"><string>Mật khẩu</string></property></widget></item>
@@ -44,7 +48,11 @@
        <layout class="QVBoxLayout" name="verticalLayoutDoctors">
         <item>
          <layout class="QGridLayout" name="gridLayoutDocInputs">
-          <item row="0" column="0"><widget class="QLineEdit" name="txtDocId"><property name="placeholderText"><string>Mã BS</string></property></widget></item>
+          <!-- Đã khóa readOnly ô Mã BS -->
+          <item row="0" column="0"><widget class="QLineEdit" name="txtDocId">
+            <property name="placeholderText"><string>Mã BS (Nhấp bảng)</string></property>
+            <property name="readOnly"><bool>true</bool></property>
+          </widget></item>
           <item row="0" column="1"><widget class="QLineEdit" name="txtDocName"><property name="placeholderText"><string>Họ Tên BS</string></property></widget></item>
           <item row="0" column="2"><widget class="QLineEdit" name="txtDob"><property name="placeholderText"><string>Ngày sinh</string></property></widget></item>
           <item row="0" column="3"><widget class="QComboBox" name="cbGender"><item><property name="text"><string>Nam</string></property></item><item><property name="text"><string>Nữ</string></property></item></widget></item>
@@ -64,7 +72,11 @@
        <layout class="QVBoxLayout" name="verticalLayoutMed">
         <item>
          <layout class="QHBoxLayout" name="horizontalLayoutMedInputs">
-          <item><widget class="QLineEdit" name="txtMedId"><property name="placeholderText"><string>Mã Thuốc</string></property></widget></item>
+          <!-- Đã khóa readOnly ô Mã Thuốc -->
+          <item><widget class="QLineEdit" name="txtMedId">
+            <property name="placeholderText"><string>Mã Thuốc (Nhấp bảng)</string></property>
+            <property name="readOnly"><bool>true</bool></property>
+          </widget></item>
           <item><widget class="QLineEdit" name="txtMedName"><property name="placeholderText"><string>Tên Thuốc</string></property></widget></item>
           <item><widget class="QLineEdit" name="txtDosage"><property name="placeholderText"><string>Liều lượng</string></property></widget></item>
           <item><widget class="QLineEdit" name="txtMedPrice"><property name="placeholderText"><string>Đơn giá</string></property></widget></item>
@@ -80,7 +92,11 @@
        <layout class="QVBoxLayout" name="verticalLayoutServices">
         <item>
          <layout class="QHBoxLayout" name="horizontalLayoutServiceInputs">
-          <item><widget class="QLineEdit" name="txtServiceId"><property name="placeholderText"><string>Mã Dịch Vụ</string></property></widget></item>
+          <!-- Đã khóa readOnly ô Mã Dịch vụ -->
+          <item><widget class="QLineEdit" name="txtServiceId">
+            <property name="placeholderText"><string>Mã DV (Nhấp bảng)</string></property>
+            <property name="readOnly"><bool>true</bool></property>
+          </widget></item>
           <item><widget class="QLineEdit" name="txtServiceName"><property name="placeholderText"><string>Tên Dịch Vụ Y Tế</string></property></widget></item>
           <item><widget class="QLineEdit" name="txtServicePrice"><property name="placeholderText"><string>Giá Dịch Vụ</string></property></widget></item>
           <item><widget class="QPushButton" name="btnAddService"><property name="text"><string>Thêm Dịch Vụ</string></property></widget></item>

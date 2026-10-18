@@ -2,6 +2,7 @@
 #define ADMINMENU_H
 
 #include <QMainWindow>
+#include <QTableWidgetItem>
 #include "services/Database.h"
 #include "services/AuthService.h"
 
@@ -22,18 +23,22 @@ private slots:
     void on_btnManageDoctors_clicked();
     void on_btnAddDoctor_clicked();
     void on_btnDeleteDoctor_clicked();
+    void on_tableDoctors_itemClicked(QTableWidgetItem *item); // MỚI: Click bảng Bác Sĩ
 
     void on_btnManageMedicines_clicked();
     void on_btnAddMedicine_clicked();
     void on_btnDeleteMedicine_clicked();
+    void on_tableMedicines_itemClicked(QTableWidgetItem *item); // MỚI: Click bảng Thuốc
 
     void on_btnManageServices_clicked();
     void on_btnAddService_clicked();
     void on_btnDeleteService_clicked();
+    void on_tableServices_itemClicked(QTableWidgetItem *item); // MỚI: Click bảng Dịch vụ
 
     void on_btnManageUsers_clicked();
     void on_btnAddUser_clicked();
     void on_btnDeleteUser_clicked();
+    void on_tableUsers_itemClicked(QTableWidgetItem *item); // MỚI: Click bảng User
 
 private:
     Ui::AdminMenu *ui;
