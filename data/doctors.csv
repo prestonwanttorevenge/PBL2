@@ -1,13 +1,40 @@
-BACSI01;LONG;07/02/2007;Nam;0898249452;Thần kinh;0
-BS02;Nguyễn Hữu tRINg;01/01/2001;Nữ;0779454683;Khoa Truyền nhiễm;1
-BS03;Lê Thị Hoa;15/04/1985;Nữ;0901234567;Khoa Nội tổng hợp;10
-BS04;Trần Văn Nam;22/08/1980;Nam;0912345678;Khoa Hồi sức cấp cứu;15
-BS05;Phạm Minh Tuấn;05/11/1975;Nam;0923456789;Khoa Ngoại tổng hợp;20
-BS06;Nguyễn Thị Lan;14/02/1990;Nữ;0934567890;Khoa Nhi;8
-BS07;Hoàng Ngọc Hải;30/07/1982;Nam;0945678901;Khoa Truyền nhiễm;12
-BS08;Vũ Thị Mai;19/09/1988;Nữ;0956789012;Khoa Phụ sản;9
-BS09;Đặng Quang Vinh;25/12/1979;Nam;0967890123;Liên chuyên khoa (Tai - Mũi - Họng, Răng - Hàm - Mặt, Mắt);18
-BS10;Bùi Thu Hà;08/04/1992;Nữ;0978901234;Khoa Chẩn đoán hình ảnh;6
-BS11;Đỗ Xuân Bách;17/06/1986;Nam;0989012345;Khoa Xét nghiệm (Huyết học, Hóa sinh, Vi sinh);11
-BS12;Ngô Thị Duyên;02/01/1984;Nữ;0990123456;Khoa Dinh dưỡng;14
-BS13;Trương Công Huy;1/1/1978;Nam;012345678;Liên chuyên khoa (Tai - Mũi - Họng, Răng - Hàm - Mặt, Mắt);10
+BS01;Nguyễn Thanh Châu;03/07/1989;Nữ;0969362688;Khoa Giải phẫu bệnh;4
+BS02;Đặng Như Nhi;28/05/1991;Nữ;0969039473;Khoa Xét nghiệm (Huyết học, Hóa sinh, Vi sinh);3
+BS03;Ngô Minh Dũng;22/09/1997;Nam;0918204296;Khoa Nội tổng hợp;4
+BS04;Võ Quang Hùng;15/12/1995;Nam;0975211189;Khoa Xét nghiệm (Huyết học, Hóa sinh, Vi sinh);6
+BS05;Đặng Kim Mai;14/07/1990;Nữ;0935938778;Khoa Dinh dưỡng;7
+BS06;Nguyễn Minh Huy;12/08/1991;Nam;0935363930;Khoa Giải phẫu bệnh;10
+BS07;Đặng Như Lan;22/09/1988;Nữ;0905866552;Khoa Nhi;8
+BS08;Lý Ngọc Thảo;26/12/1997;Nữ;0985342466;Khoa Chống nhiễm khuẩn;4
+BS09;Vũ Ngọc Thắng;09/11/1977;Nam;0977209730;Khoa Dinh dưỡng;6
+BS10;Hồ Đình Tấn;03/01/1989;Nam;0908570388;Khoa Hồi sức cấp cứu;12
+BS11;Bùi Quang Long;02/10/1978;Nam;0985505293;Khoa Nội tổng hợp;23
+BS12;Lê Thị Châu;19/10/1996;Nữ;0973262652;Khoa Nhi;5
+BS13;Võ Bảo Tấn;17/12/1994;Nam;0942416554;Khoa Truyền nhiễm;6
+BS14;Lý Minh Tuấn;13/07/1991;Nam;0929724671;Khoa Ngoại tổng hợp;6
+BS15;Nguyễn Ngọc Nhi;27/01/1977;Nữ;0956929115;Khoa Chẩn đoán hình ảnh;3
+BS16;Đặng Tuấn Trung;15/05/1996;Nam;0953036298;Khoa Chống nhiễm khuẩn;4
+BS17;Bùi Thảo Anh;07/09/1993;Nữ;0966644171;Khoa Xét nghiệm (Huyết học, Hóa sinh, Vi sinh);6
+BS18;Đỗ Ngọc Sơn;02/07/1992;Nam;0933908563;Khoa Dược;3
+BS19;Võ Công Nam;22/12/1990;Nam;0903166605;Liên chuyên khoa (Tai - Mũi - Họng, Răng - Hàm - Mặt, Mắt);11
+BS20;Ngô Hoàng Tấn;28/11/1980;Nam;0927542635;Khoa Giải phẫu bệnh;11
+BS21;Đặng Mai Duyên;10/07/1977;Nữ;0926772469;Khoa Hồi sức cấp cứu;8
+BS22;Võ Như Lan;15/05/1988;Nữ;0926465836;Liên chuyên khoa (Tai - Mũi - Họng, Răng - Hàm - Mặt, Mắt);11
+BS23;Võ Ngọc Vy;27/05/1991;Nữ;0914595877;Khoa Hồi sức cấp cứu;6
+BS24;Trần Tuấn Trung;26/09/1988;Nam;0921456084;Khoa Phụ sản;8
+BS25;Huỳnh Hoàng Nam;23/10/1978;Nam;0944597623;Khoa Ngoại tổng hợp;21
+BS26;Bùi Khánh Yến;04/03/1992;Nữ;0942617839;Khoa Chẩn đoán hình ảnh;6
+BS27;Trần Công Dũng;26/12/1986;Nam;0922783754;Khoa Truyền nhiễm;11
+BS28;Hoàng Ngọc Hương;09/03/1985;Nữ;0942054935;Khoa Nội tổng hợp;3
+BS29;Dương Khánh Nhi;04/01/1975;Nữ;0931385501;Khoa Ngoại tổng hợp;12
+BS30;Trần Công Khánh;20/08/1985;Nam;0991637716;Khoa Khám bệnh;9
+BS31;Bùi Phương Hà;22/07/1989;Nữ;0917277142;Khoa Chống nhiễm khuẩn;11
+BS32;Vũ Khánh Duyên;24/01/1986;Nữ;0961397004;Khoa Khám bệnh;7
+BS33;Hoàng Ngọc Hương;19/06/1988;Nữ;0906745925;Khoa Truyền nhiễm;6
+BS34;Hồ Đức Phát;04/02/1994;Nam;0903108593;Khoa Dược;7
+BS35;Bùi Khánh Linh;05/10/1988;Nữ;0957967545;Khoa Khám bệnh;9
+BS36;Phạm Mai Yến;06/03/1982;Nữ;0981476760;Khoa Phụ sản;15
+BS37;Ngô Thảo Quỳnh;09/01/1975;Nữ;0989033657;Khoa Chẩn đoán hình ảnh;16
+BS38;Huỳnh Thảo Yến;27/02/1993;Nữ;0921637682;Khoa Nhi;8
+BS39;Huỳnh Kim Lan;02/06/1998;Nữ;0905073617;Khoa Phụ sản;3
+BS40;Phạm Công Bình;28/12/1979;Nam;0967038642;Liên chuyên khoa (Tai - Mũi - Họng, Răng - Hàm - Mặt, Mắt);10

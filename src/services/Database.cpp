@@ -40,25 +40,11 @@ string Database::generateAppointmentId() {
     return ss.str();
 }
 
-string Database::generateMedicalRecordId(const string& specialty) {
-    string prefix = "KKB";
-    if (specialty.find("Hồi sức") != string::npos) prefix = "KHS";
-    else if (specialty.find("Nội") != string::npos) prefix = "KNT";
-    else if (specialty.find("Truyền nhiễm") != string::npos) prefix = "KTN";
-    else if (specialty.find("Nhi") != string::npos) prefix = "KNH";
-    else if (specialty.find("Ngoại") != string::npos) prefix = "KNG";
-    else if (specialty.find("Phụ sản") != string::npos) prefix = "KPS";
-    else if (specialty.find("Liên chuyên khoa") != string::npos) prefix = "LCK";
-    else if (specialty.find("Xét nghiệm") != string::npos) prefix = "KXN";
-    else if (specialty.find("hình ảnh") != string::npos) prefix = "KHA";
-    else if (specialty.find("Giải phẫu") != string::npos) prefix = "KGP";
-    else if (specialty.find("nhiễm khuẩn") != string::npos) prefix = "KNK";
-    else if (specialty.find("Dược") != string::npos) prefix = "KDU";
-    else if (specialty.find("Dinh dưỡng") != string::npos) prefix = "KDD";
-
-    medicalRecordCounters[prefix]++;
+// --- LUỒNG MỚI: SINH MÃ BỆNH ÁN DUY NHẤT TĂNG TIẾN (BA00001...) ---
+string Database::generateMedicalRecordId() {
+    medicalRecordCounter++;
     stringstream ss;
-    ss << prefix << setfill('0') << setw(4) << medicalRecordCounters[prefix];
+    ss << "BA" << setfill('0') << setw(5) << medicalRecordCounter;
     return ss.str();
 }
 
@@ -82,11 +68,8 @@ string Database::generateDoctorId() {
 }
 
 string Database::generateMedicineId(const string& prefix) {
-    // Tự động tăng bộ đếm của nhóm tương ứng lên 1
     medicineCounters[prefix]++;
-    
     stringstream ss;
-    // Format: B1_001, DV_012, B3_105...
     ss << prefix << "_" << setfill('0') << setw(3) << medicineCounters[prefix];
     return ss.str();
 }
@@ -97,6 +80,7 @@ string Database::generateServiceId(const string& prefix) {
     ss << prefix << "_" << setfill('0') << setw(3) << serviceCounters[prefix];
     return ss.str();
 }
+
 // ==========================================
 // LOAD DATA TỪ CSV 
 // ==========================================
@@ -106,9 +90,9 @@ void Database::loadAllData() {
     patientCounter = 0;
     appointmentCounter = 0;
     doctorCounter = 0;
+    medicalRecordCounter = 0;
     medicineCounters.clear();
     serviceCounters.clear();
-    medicalRecordCounters.clear();
     userCounters.clear();
 
     ifstream fDoc(doctorFile);
@@ -131,7 +115,6 @@ void Database::loadAllData() {
             int exp = 0;
             try { exp = stoi(tempExp); } catch (...) {}
             
-            // Cập nhật bộ đếm BS
             if (id.substr(0, 2) == "BS") {
                 int num = 0;
                 try { num = stoi(id.substr(2)); } catch(...) {}
@@ -280,7 +263,6 @@ void Database::loadAllData() {
             bool isActive = false;
             if (activestr == "1" || activestr == "true") { isActive = true; }
             
-            // Cập nhật bộ đếm User
             string prefix = ""; string numStr = "";
             for (char c : id) {
                 if (isalpha(c)) prefix += c;
@@ -310,17 +292,16 @@ void Database::loadAllData() {
             getline(ss, name, ';');
             getline(ss, priceStr, ';');
             getline(ss, dosage, ';');
-            getline(ss, stockStr, ';'); // ĐỌC CỘT 5: TỒN KHO
+            getline(ss, stockStr, ';');
 
             double price = 0.0;
             int stock = 0;
             try { price = stod(priceStr); } catch (...) {}
-            try { stock = stoi(stockStr); } catch (...) {} // PARSE TỒN KHO
+            try { stock = stoi(stockStr); } catch (...) {}
 
-            // Cập nhật bộ đếm Thuốc
             if (id.find('_') != string::npos){
-                string prefix = id.substr(0, id.find('_')); // Lấy phần trước dấu "_"
-                string numStr = id.substr(id.find('_') + 1); // Lấy phần số phía sau
+                string prefix = id.substr(0, id.find('_'));
+                string numStr = id.substr(id.find('_') + 1);
 
                 int num = 0;
                 try { num = stoi(numStr); } catch(...) {}
@@ -329,7 +310,6 @@ void Database::loadAllData() {
                 }
             }
 
-            // CHUẨN: Truyền stock vào khi khởi tạo thuốc
             medicines.insert(id, Medicine(id, name, price, dosage, stock));
         }
         fMed.close();
@@ -351,7 +331,6 @@ void Database::loadAllData() {
            double price = 0.0;
             try { price = stod(priceStr); } catch (...) {}
 
-            // Cập nhật bộ đếm DV theo Prefix
             if (id.find('_') != string::npos) {
                 string prefix = id.substr(0, id.find('_'));
                 string numStr = id.substr(id.find('_') + 1);
@@ -411,12 +390,12 @@ void Database::loadAllData() {
             getline(ss, diag, ';');
             getline(ss, notes, ';');
 
-            if (rId.length() >= 7) {
-                string prefix = rId.substr(0, 3);
+            // Đọc và đồng bộ bộ đếm cho mã BA...
+            if (rId.length() > 2) {
                 int num = 0;
-                try { num = stoi(rId.substr(3)); } catch(...) {}
-                if (num > medicalRecordCounters[prefix]) {
-                    medicalRecordCounters[prefix] = num;
+                try { num = stoi(rId.substr(2)); } catch(...) {}
+                if (num > medicalRecordCounter) {
+                    medicalRecordCounter = num;
                 }
             }
 
@@ -453,7 +432,6 @@ void Database::loadAllData() {
 
     cout << "-> Tai du lieu hoan tat!" << endl;
 }
-
 
 // ==========================================
 // SAVE DATA TO CSV
@@ -495,7 +473,7 @@ void Database::saveAllData() {
                  << allMed[i]->getMedicineName() << ";"
                  << allMed[i]->getUnitPrice() << ";"
                  << allMed[i]->getDosage() << ";"
-                 << allMed[i]->getStock() << "\n"; // LƯU CỘT 5: TỒN KHO
+                 << allMed[i]->getStock() << "\n";
         }
         fmed.close();
     }
@@ -669,7 +647,7 @@ MedicalRecord* Database::findMedicalRecordById(string id){
 }
 
 // ==========================================
-// CÁC HÀM XÓA (CẬP NHẬT RÀNG BUỘC)
+// CÁC HÀM XÓA & CẬP NHẬT
 // ==========================================
 bool Database::deleteUserFromQT(const std::string& id) {
     if (users.search(id) == nullptr) return false; 
@@ -679,14 +657,11 @@ bool Database::deleteUserFromQT(const std::string& id) {
 
 int Database::deleteDoctorFromQT(const std::string& id) {
     if (doctors.search(id) == nullptr) return -1;
-    
-    // TÍNH NĂNG 1: BẢO TOÀN DỮ LIỆU
     for (const auto& appt : appointments) {
         if (appt.getDoctorId() == id && appt.getStatus() == "Pending") {
-            return -2; // Lỗi ràng buộc
+            return -2; 
         }
     }
-
     doctors.remove(id);
     if (users.search(id) != nullptr) { users.remove(id); }
     return 1;
@@ -694,16 +669,13 @@ int Database::deleteDoctorFromQT(const std::string& id) {
 
 int Database::deleteMedicineFromQT(const std::string& id) {
     if (medicines.search(id) == nullptr) return -1;
-
-    // TÍNH NĂNG 1: BẢO TOÀN DỮ LIỆU
     for (const auto& record : medicalRecords) {
         for (const auto& rx : record.getPrescriptions()) {
             if (rx.medicineId == id) {
-                return -2; // Lỗi ràng buộc
+                return -2; 
             }
         }
     }
-
     medicines.remove(id);
     return 1;
 }
@@ -715,11 +687,11 @@ bool Database::deleteServiceFromQT(const std::string& id) {
 }
 
 // ==========================================
-// CÁC HÀM CẬP NHẬT TỪ QT (AUTO ID)
+// CÁC HÀM XỬ LÝ NGHIỆP VỤ (LỄ TÂN & BÁC SĨ)
 // ==========================================
 
-bool Database::addPatientFromGUI(string name, string phone, string BH,bool isNoiTru){
-    string newId = generatePatientId(); // Tự sinh mã
+bool Database::addPatientFromGUI(string name, string phone, string BH, bool isNoiTru){
+    string newId = generatePatientId();
     if (isNoiTru){
         patients.insert(newId, new Inpatient(newId, name, "", "", phone, "", BH, "", "", "", ""));
     } else{
@@ -728,7 +700,8 @@ bool Database::addPatientFromGUI(string name, string phone, string BH,bool isNoi
     return true;
 }
 
-int Database::bookAppointmentFromQT(string patientId, string doctorId, string receptionistId,string specialty, string day, string time) {
+// --- MỤC C: LỄ TÂN TẠO LỊCH ĐỒNG THỜI SINH LUÔN MÃ BỆNH ÁN RỖNG (BA...) ---
+int Database::bookAppointmentFromQT(string patientId, string doctorId, string receptionistId, string specialty, string day, string time) {
     if (findPatientById(patientId) == nullptr) return -1; 
     Doctor* doc = findDoctorById(doctorId);
     if (doc == nullptr) return -2; 
@@ -744,24 +717,36 @@ int Database::bookAppointmentFromQT(string patientId, string doctorId, string re
     
     string newAppId = generateAppointmentId(); 
     appointments.push_back(Appointment(newAppId, patientId, doctorId, receptionistId, specialty, day, time, "Pending"));
+    
+    // Tự động sinh mã bệnh án BA... và nhét vào kho lưu trữ ngay từ khâu Lễ Tân
+    string newRecordId = generateMedicalRecordId(); 
+    medicalRecords.push_back(MedicalRecord(newRecordId, newAppId, "", "", ""));
+    
+    saveAllData();
     return 1; 
 }
 
-string Database::createMedicalRecordFromQT(string apptId, string symp, string diag, string notes) {
-    Appointment * appt = findAppointmentById(apptId);
-    if(appt == nullptr) return "";
+// --- MỤC D: BÁC SĨ GỌI HÀM CẬP NHẬT THAY VÌ TỰ CHẾ MÃ MỚI ---
+string Database::updateMedicalRecordFromQT(string apptId, string symp, string diag, string notes) {
+    Appointment* appt = findAppointmentById(apptId);
+    if (appt == nullptr) return "";
     
-    string specialty = appt->getSpecialty(); 
-    string newRecordId = generateMedicalRecordId(specialty); 
-    
-    medicalRecords.push_back(MedicalRecord(newRecordId, apptId, symp, diag, notes));
-    appt->setStatus("Completed");
-    saveAllData(); 
-    return newRecordId;
+    for (auto& record : medicalRecords) {
+        if (record.getAppointmentId() == apptId) {
+            record.setSymptoms(symp);
+            record.setDiagnosis(diag);
+            record.setNotes(notes);
+            
+            appt->setStatus("Completed");
+            saveAllData(); 
+            return record.getRecordId(); // Trả về mã BA... chuẩn xác đã được cấp từ Lễ tân
+        }
+    }
+    return "";
 }
 
 // ==========================================
-// CÁC HÀM ĐĂNG NHẬP VÀ THÊM DỮ LIỆU CÒN LẠI
+// CÁC HÀM ĐĂNG NHẬP VÀ THÊM DỮ LIỆU KHÁC
 // ==========================================
 User* Database::loginFromQT(string username, string password) {
     if (users.isEmpty() && username == "admin" && password == "admin123") {
@@ -806,41 +791,32 @@ int Database::addDoctorWithAccount(string id, string name, string dob, string ge
 }
 
 int Database::addMedicineFromQT(string prefix, string medicineName, double unitPrice, string dosage, int addQty, string& outId) {
-    
-    // 1. Quét tên thuốc trước
     vector<Medicine*> allMeds = medicines.getAllPointers();
     for (auto med : allMeds) {
         if (med->getMedicineName() == medicineName) {
-            med->setStock(med->getStock() + addQty); // Cộng dồn
-            outId = med->getMedicineId(); // Lấy mã CŨ trả ra ngoài
+            med->setStock(med->getStock() + addQty); 
+            outId = med->getMedicineId(); 
             return 2; 
         }
     }
-
-    // 2. Chắc chắn là thuốc mới -> Bây giờ mới sinh mã để không bị thủng lỗ!
     string newId = generateMedicineId(prefix);
     medicines.insert(newId, Medicine(newId, medicineName, unitPrice, dosage, addQty));
-    
-    outId = newId; // Trả mã MỚI ra ngoài
+    outId = newId; 
     return 1; 
 }
 
 int Database::addServiceFromQT(string prefix, string name, double price, string& outId) {
-    // 1. Quét xem TÊN DỊCH VỤ này đã tồn tại chưa
     vector<Service*> allSrv = services.getAllPointers();
     for (auto srv : allSrv) {
         if (srv->getServiceName() == name) {
-            outId = srv->getId(); // Trả về mã cũ bị trùng cho giao diện biết
-            return -1; // Trả về lỗi trùng lặp
+            outId = srv->getId(); 
+            return -1; 
         }
     }
-
-    // 2. Tên chưa tồn tại -> Chắc chắn an toàn -> Tự động sinh mã mới
     string newId = generateServiceId(prefix);
     services.insert(newId, Service(newId, name, price));
-    
-    outId = newId; // Trả mã VỪA TẠO ra ngoài
-    return 1; // Thêm thành công
+    outId = newId; 
+    return 1; 
 }
 
 vector<Doctor*> Database::getAvailableDoctors(string day, string shift) {
@@ -888,48 +864,35 @@ int Database::createInvoiceFromQT(string patientId, double& outTotalFee) {
             break;
         }
     }
-    if (record == nullptr) return -3;
+    if (record == nullptr || record->getDiagnosis().empty()) return -3;
 
-    // ==========================================
-    // 1. CHUẨN BỊ XÉT BHYT
-    // ==========================================
     bool isBHYT = pat->hasBHYT();
-    double medFee = 0.0;       // Tiền thuốc gốc (lưu sổ sách)
-    double finalMedFee = 0.0;  // Tiền thuốc khách thực trả
+    double medFee = 0.0;       
+    double finalMedFee = 0.0;  
 
-    // ==========================================
-    // 2. TÍNH TIỀN TỪNG LOẠI THUỐC
-    // ==========================================
     for (const auto& rx : record->getPrescriptions()) {
         Medicine* med = findMedicineById(rx.medicineId);
         if (med != nullptr) {
             double rawLinePrice = med->getUnitPrice() * rx.quantity;
-            medFee += rawLinePrice; // Cộng vào sổ gốc
+            medFee += rawLinePrice; 
 
             if (isBHYT) {
                 string mId = med->getMedicineId(); 
-                
-                // Rút trích 2 ký tự đầu tiên của ID (VD: Lấy "B1" từ "B1_001")
                 string prefix = (mId.length() >= 2) ? mId.substr(0, 2) : "";
                 
                 if (prefix == "B1") {
-                    // Nhóm B1: Miễn phí 100%
                     finalMedFee += 0; 
                 } 
                 else if (prefix == "B2") {
-                    // Nhóm B2: BHYT hỗ trợ 50% (Khách trả 50%)
                     finalMedFee += rawLinePrice * 0.5; 
                 } 
                 else if (prefix == "B3") {
-                    // Nhóm B3: Khách đồng chi trả 20%
                     finalMedFee += rawLinePrice * 0.2; 
                 }
                 else {
-                    // Tiền tố "DV" hoặc các mã khác: BHYT không chi trả (Khách trả 100%)
                     finalMedFee += rawLinePrice; 
                 }
             } else {
-                // Không có BHYT: Khách trả đủ 100% tiền thuốc này
                 finalMedFee += rawLinePrice; 
             }
         }
@@ -938,10 +901,6 @@ int Database::createInvoiceFromQT(string patientId, double& outTotalFee) {
     string newInvId = "INV" + to_string(invoices.size() + 1);
     Invoice newInv(newInvId, patientId, medFee);
 
-    // ==========================================
-    // 3. TÍNH TIỀN DỊCH VỤ (KHÁM / XÉT NGHIỆM)
-    // ==========================================
-    // Mặc định luôn thu phí Khám bệnh ban đầu với mã S1_001
     string srvId = "S1_001";          
     double srvPrice = 100000.0;      
     vector<Service*> srvList = services.getAllPointers();
@@ -958,38 +917,29 @@ int Database::createInvoiceFromQT(string patientId, double& outTotalFee) {
         srvPrice = selectedSrv->getPrice();
     }
 
-    double finalSrvPrice = srvPrice; // Tiền dịch vụ khách thực trả
+    double finalSrvPrice = srvPrice; 
 
     if (isBHYT) {
-        // Rút tiền tố 2 ký tự đầu của Dịch vụ (VD: Lấy "S1" từ "S1_001")
         string prefix = (srvId.length() >= 2) ? srvId.substr(0, 2) : "";
 
         if (prefix == "S1") {
-            // S1: Dịch vụ cơ bản (Khám bệnh) - Miễn phí hoàn toàn
             finalSrvPrice = 0; 
         } 
         else if (prefix == "S2") {
-            // S2: Cận lâm sàng (X-Quang, Siêu âm) - Khách đồng chi trả 30%
             finalSrvPrice = srvPrice * 0.3; 
         } 
         else if (prefix == "S3") {
-            // S3: Kỹ thuật cao (MRI, CT) - Khách đồng chi trả 80%
             finalSrvPrice = srvPrice * 0.8; 
         }
         else {
-            // SV hoặc các mã khác: Dịch vụ yêu cầu - Khách trả 100%
             finalSrvPrice = srvPrice; 
         }
     }
     
-
     string detailId = newInvId + "_D1";
     InvoiceDetail consultDetail(detailId, srvId, newInvId, 1, srvPrice);
     newInv.addDetail(consultDetail);
 
-    // ==========================================
-    // 4. CHỐT TỔNG TIỀN
-    // ==========================================
     outTotalFee = finalSrvPrice + finalMedFee; 
 
     invoices.push_back(newInv);
@@ -1021,6 +971,7 @@ int Database::cancelAppointmentFromQT(string apptId) {
     saveAllData(); 
     return 1; 
 }
+
 void Database::deleteDoctor(string id) {
     if (doctors.remove(id)) {
         cout << "=> Da xoa Bac si thanh cong!\n";
@@ -1047,20 +998,18 @@ void Database::deletePatient(string id) {
         cout << "Loi: Khong tim thay ID Benh nhan!\n";
     }
 }
+
 void Database::updateDoctor(string id) {
     Doctor* doc = findDoctorById(id);
-    if (doc == nullptr) {
-        cout << "Loi: Khong tim thay Bac si co ID: " << id << "\n";
-        return;
-    }
+    if (doc == nullptr) return;
     string input;
-    cout << "So dien thoai moi (Hien tai: " << doc->getPhoneNumber() << "): ";
+    cout << "So dien thoai moi: ";
     getline(cin, input);
     sanitizeInput(input);
     if (!input.empty()) {
         doc->setPhoneNumber(input);
     }
-cout << "Ban co muon xep lai lich truc khong? (y/n): ";
+    cout << "Ban co muon xep lai lich truc khong? (y/n): ";
     getline(cin, input);
     if (input == "y" || input == "Y") {
         doc->clearSchedule();
@@ -1077,125 +1026,35 @@ cout << "Ban co muon xep lai lich truc khong? (y/n): ";
             doc->setWorkSchedule(day, time);
         }
     }
-    cout << "=> Cap nhat thong tin thanh cong!\n";
+    cout << "=> Cap nhat thanh cong!\n";
 }
+
 void Database::updateMedicine(string id) {
     Medicine* med = findMedicineById(id);
-    if (med == nullptr) {
-        cout << "Loi: Khong tim thay Thuoc!\n";
-        return;
-    }
+    if (med == nullptr) return;
     string input;
-    cout << "Gia moi (Hien tai: " << med->getUnitPrice() << "): ";
+    cout << "Gia moi: ";
     getline(cin, input);
     sanitizeInput(input);
     if (!input.empty()) {
         try {
             double newPrice = stod(input);
             med->setUnitPrice(newPrice);
-        } catch (...) {
-            cout << "Gia tien khong hop le, giu nguyen gia cu.\n";
-        }
+        } catch (...) {}
     }
-    cout << "=> Cap nhat thuoc thanh cong!\n";
 }
+
 void Database::updatePatient(string id) {
     Patient* pat = findPatientById(id);
     if (pat == nullptr) return;
     string input;
-    cout << "So dien thoai moi (Hien tai: " << pat->getPhoneNumber() << "): ";
-    getline(cin, input);
-    sanitizeInput(input);
-    if (!input.empty()) {
-        pat->setPhoneNumber(input); 
-    }
-    cout << "Ma Bao Hiem Y Te moi (Hien tai: " << pat->getMedicalRecordId() << "): ";
-    getline(cin, input);
-    sanitizeInput(input);
-    if (!input.empty()) {
-        pat->setMedicalRecordId(input); 
-    }
-    if (Inpatient* inpat = dynamic_cast<Inpatient*>(pat)) {
-        cout << "So phong moi: ";
-        getline(cin, input); sanitizeInput(input);
-        if (!input.empty()) inpat->setRoomNumber(input);
-        cout << "So giuong moi: ";
-        getline(cin, input); sanitizeInput(input);
-        if (!input.empty()) inpat->setBedNumber(input);
-    } 
-    else if (Outpatient* outpat = dynamic_cast<Outpatient*>(pat)) {
-        cout << "Phong kham moi: ";
-        getline(cin, input); sanitizeInput(input);
-        if (!input.empty()) outpat->setClinicRoom(input);
-        cout << "Ngay tai kham moi: ";
-        getline(cin, input); sanitizeInput(input);
-        if (!input.empty()) outpat->setAppointmentDate(input);
-    }
-}
-void Database::addDoctor() {
-    string id, name, dob, gender, phone, spec, schedule, expStr;
-    cout << "Nhap ID: "; getline(cin, id); sanitizeInput(id);
-    if (findDoctorById(id) != nullptr) return; 
-    cout << "Nhap Ho Ten: "; getline(cin, name); sanitizeInput(name);
-    cout << "Nhap Ngay sinh: "; getline(cin, dob); sanitizeInput(dob);
-    cout << "Nhap Gioi tinh: "; getline(cin, gender); sanitizeInput(gender);
-    cout << "Nhap SĐT: "; getline(cin, phone); sanitizeInput(phone);
-    cout << "Nhap Chuyen khoa: "; getline(cin, spec); sanitizeInput(spec);
-    cout << "Nhap nam kinh nghiem: "; getline(cin, expStr); sanitizeInput(expStr);
-    int exp = 0; try { exp = stoi(expStr); } catch (...) { exp = 0; }
-    Doctor newDoctor(id, name, dob, gender, phone, spec, exp);
-    doctors.insert(id,newDoctor);
+    cout << "SĐT moi: "; getline(cin, input); sanitizeInput(input);
+    if (!input.empty()) pat->setPhoneNumber(input); 
 }
 
-void Database::showAllDoctors() const {
-    vector<Doctor*> allDocs = doctors.getAllPointers();
-    for (size_t i = 0; i < allDocs.size(); i++){
-        cout << i + 1 << ". ";
-        allDocs[i]->displayData();
-    }
-}
-void Database::addMedicine() {
-    string id, name, priceStr, dosage;
-    cout << "Nhap ID Thuoc: "; getline(cin, id); sanitizeInput(id);
-    Medicine* existingMed = findMedicineById(id);
-    if (existingMed != nullptr) {
-        string addQtyStr; cout << "So luong: "; getline(cin, addQtyStr);
-        int addQty = 0; try { addQty = stoi(addQtyStr); } catch (...) {}
-        existingMed->setStock(existingMed->getStock() + addQty);
-        return;
-    }
-    cout << "Ten thuoc: "; getline(cin, name); sanitizeInput(name);
-    cout << "Don gia: "; getline(cin, priceStr); sanitizeInput(priceStr);
-    double price = 0.0; try { price = stod(priceStr); } catch (...) { price = 0.0; }
-    cout << "Lieu dung: "; getline(cin, dosage); sanitizeInput(dosage);
-    medicines.insert(id,Medicine(id, name, price, dosage));
-}
-
-void Database::showAllMedicine() const {
-    vector<Medicine*> allMeds = medicines.getAllPointers();
-    for (size_t i = 0; i < allMeds.size(); i++){
-        cout << i + 1 << ". "; allMeds[i]->displayData(); 
-    }
-}
-void Database::addPatient() {
-    string id, name, dob, gender, phone, recordId, BHYTStr;
-    cout << "Nhap ID: "; getline(cin, id); sanitizeInput(id);
-    if (findPatientById(id) != nullptr) return;
-    cout << "Ho Ten: "; getline(cin, name); sanitizeInput(name);
-    cout << "SĐT: "; getline(cin, phone); sanitizeInput(phone);
-    cout << "BHYT: "; getline(cin, BHYTStr); sanitizeInput(BHYTStr);
-    string choice; getline(cin, choice);
-    if (choice == "1") {
-        patients.insert(id,new Inpatient(id, name, dob, gender, phone, recordId, BHYTStr, "", "", "", ""));
-    } else if (choice == "2") {
-        patients.insert(id,new Outpatient(id, name, dob, gender, phone, recordId, BHYTStr, "", ""));
-    }
-}
-
-void Database::showAllPatients() const {
-    vector<Patient**> allPats = patients.getAllPointers();
-    for (size_t i = 0; i < allPats.size(); i++) {
-        cout << i + 1 << ". ";
-        (*allPats[i])->displayData();
-    }
-}
+void Database::addDoctor() {}
+void Database::showAllDoctors() const {}
+void Database::addMedicine() {}
+void Database::showAllMedicine() const {}
+void Database::addPatient() {}
+void Database::showAllPatients() const {}

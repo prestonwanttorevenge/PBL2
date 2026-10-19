@@ -43,7 +43,7 @@ private:
     const std::string prescriptionDetailFile = "data/data_prescription_details.csv";
     
     // --- BỘ ĐẾM TỰ ĐỘNG SINH MÃ ---
-    std::map<string, int> medicalRecordCounters; 
+    int medicalRecordCounter = 0;
     std::map<string, int> userCounters; // MỚI: Đếm user theo Role (ADMIN, RECEP, KHO)
     int patientCounter = 0;                      
     int appointmentCounter = 0;   
@@ -97,7 +97,7 @@ public:
     // --- CÁC HÀM TỰ ĐỘNG SINH MÃ ---
     string generatePatientId();
     string generateAppointmentId();
-    string generateMedicalRecordId(const string& specialty);
+    string generateMedicalRecordId();
     string generateUserId(const string& role); // MỚI
     string generateDoctorId();                 // MỚI
     string generateMedicineId(const string& prefix);            // MỚI
@@ -136,7 +136,7 @@ public:
     // ==========================================
     // Bác Sĩ (Doctor)
     // ==========================================
-    string createMedicalRecordFromQT(string apptId, string symp, string diag, string notes);
+    string updateMedicalRecordFromQT(string apptId, string symp, string diag, string notes);
     int prescribeMedicineFromQT(string recordId, string medId, string dosage, int qty);
     vector<MedicalRecord*> getPatientHistory(string patientId);
 

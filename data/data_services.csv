@@ -1,66 +1,23 @@
-S1_001;Khám bệnh lâm sàng chung;100000
-S1_002;Khám chuyên khoa Nội;150000
-S1_003;Khám chuyên khoa Ngoại;150000
-S1_004;Khám chuyên khoa Nhi;150000
-S1_005;Khám chuyên khoa Phụ Sản;150000
-S1_006;Khám chuyên khoa Mắt;150000
-S1_007;Khám chuyên khoa Tai Mũi Họng;150000
-S1_008;Khám chuyên khoa Răng Hàm Mặt;150000
-S1_009;Khám chuyên khoa Da liễu;150000
-S1_010;Khám chuyên khoa Thần kinh;150000
-S1_011;Khám chuyên khoa Tim mạch;150000
-S1_012;Hội chẩn ca bệnh khó;500000
-S1_013;Khám cấp cứu;200000
-S2_001;Tổng phân tích tế bào máu ngoại vi;80000
-S2_002;Xét nghiệm đường huyết (Glucose);40000
-S2_003;Định lượng HbA1c;120000
-S2_004;Đo chức năng gan (AST, ALT);80000
-S2_005;Đo chức năng thận (Ure, Creatinin);80000
-S2_006;Bộ mỡ máu (Cholesterol, Triglyceride);100000
-S2_007;Xét nghiệm nước tiểu 10 thông số;50000
-S2_008;Định lượng hormone tuyến giáp (TSH, FT4);250000
-S2_009;Xét nghiệm viêm gan B (HBsAg);150000
-S2_010;Xét nghiệm viêm gan C (Anti-HCV);200000
-S2_011;Chụp X-Quang ngực thẳng;150000
-S2_012;Chụp X-Quang xương khớp (1 tư thế);120000
-S2_013;Chụp X-Quang cột sống thắt lưng;200000
-S2_014;Siêu âm ổ bụng tổng quát;200000
-S2_015;Siêu âm tuyến giáp;150000
-S2_016;Siêu âm tuyến vú 2 bên;200000
-S2_017;Siêu âm thai nhi 2D;200000
-S2_018;Điện tâm đồ (ECG);100000
-S2_019;Điện não đồ (EEG);250000
-S2_020;Nội soi Tai Mũi Họng;300000
-S2_021;Nội soi thực quản - dạ dày (Không gây mê);600000
-S2_022;Nội soi đại trực tràng (Không gây mê);800000
-S2_023;Đo chức năng hô hấp;150000
-S3_001;Chụp MRI sọ脑;2.5e+06
-S3_002;Chụp MRI cột sống thắt lưng;2.5e+06
-S3_003;Chụp MRI khớp gối;2.5e+06
-S3_004;Chụp CT Scanner toàn thân;3.5e+06
-S3_005;Chụp CT Scanner sọ não (Có cản quang);1.8e+06
-S3_006;Chụp CT Scanner lồng ngực;1.5e+06
-S3_007;Nội soi dạ dày (Có gây mê);1.5e+06
-S3_008;Nội soi đại tràng (Có gây mê);2e+06
-S3_009;Đo loãng xương DXA (Toàn thân);600000
-S3_010;Tán sỏi thận ngoài cơ thể;4e+06
-S3_011;Phẫu thuật nội soi cắt ruột thừa;6e+06
-S3_012;Phẫu thuật thay khớp háng bán phần;4.5e+07
-S3_013;Siêu âm Doppler tim màu;600000
-S3_014;Siêu âm thai 4D/5D;500000
-S3_015;Xét nghiệm Marker Ung Thư (CEA, AFP, PSA);800000
-SV_001;Khám bệnh theo yêu cầu (Chọn bác sĩ);300000
-SV_002;Khám bệnh với Giáo sư/Phó Giáo sư;500000
-SV_003;Khám bệnh VIP (Phòng khám riêng);1e+06
-SV_004;Gói khám sức khỏe tổng quát cơ bản;2.5e+06
-SV_005;Gói khám sức khỏe tổng quát nâng cao;4.5e+06
-SV_006;Gói tầm soát ung thư toàn diện nam;6e+06
-SV_007;Gói tầm soát ung thư toàn diện nữ;7e+06
-SV_008;Giường bệnh nội trú dịch vụ VIP (1 ngày);1.5e+06
-SV_009;Giường bệnh nội trú phòng 2 người (1 ngày);800000
-SV_010;Dịch vụ chăm sóc mẹ và bé sau sinh (1 ngày);1e+06
-SV_011;Tắm bé sơ sinh tại viện;200000
-SV_012;Dịch vụ xe cứu thương (Nội thành);500000
-SV_013;Nhổ răng khôn (Răng số 8) mọc ngầm;2.5e+06
-SV_014;Tẩy trắng răng tại phòng khám;3e+06
-SV_015;Cạo vôi răng và đánh bóng;300000
+S1_001;Khám bệnh Nội khoa tổng quát;100000
+S1_002;Khám bệnh Ngoại khoa;100000
+S1_003;Khám bệnh Nhi khoa;100000
+S1_004;Khám bệnh Sản phụ khoa;100000
+S1_005;Khám Tai Mũi Họng;100000
+S1_006;Khám Răng Hàm Mặt;100000
+S1_007;Khám Mắt;100000
+S1_008;Khám Cấp cứu ban đầu;150000
+S2_001;Siêu âm ổ bụng tổng quát;150000
+S2_002;Chụp X-quang Ngực thẳng;120000
+S2_003;Xét nghiệm Công thức máu;80000
+S2_004;Xét nghiệm Sinh hóa máu tổng quát;150000
+S2_005;Siêu âm Tim Doppler màu;250000
+S2_006;Điện tâm đồ (ECG);100000
+S2_007;Nội soi Tai Mũi Họng;180000
+S2_008;Xét nghiệm Vi sinh / Kháng sinh đồ;200000
+S3_001;Chụp Cắt lớp vi tính (CT Scanner) 128 dãy;1.2e+06
+S3_002;Chụp Cộng hưởng từ (MRI) 1.5 Tesla;2.2e+06
+S3_003;Nội soi dạ dày - đại tràng không đau;1.5e+06
+S3_004;Chụp X-quang Kỹ thuật số;300000
+SV_001;Khám bệnh theo yêu cầu Chuyên gia / PGS / TS;300000
+SV_002;Chăm sóc và theo dõi y tế đặc biệt;500000
+SV_003;Dịch vụ tiêm chủng ngừa vắc-xin;250000

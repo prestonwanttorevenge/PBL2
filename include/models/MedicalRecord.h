@@ -32,6 +32,9 @@ public:
     std::string getDiagnosis() const;
     std::string getNotes() const;
     const std::vector<PrescriptionDetail>& getPrescriptions() const { return prescriptions; }
+    void setSymptoms(const std::string& symp) { symptoms = symp; }
+    void setDiagnosis(const std::string& diag) { diagnosis = diag; }
+    void setNotes(const std::string& n) { notes = n; }
     
     void inputData();
     void displayData() const;

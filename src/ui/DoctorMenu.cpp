@@ -4,16 +4,17 @@
 #include "services/Database.h"
 #include <QMessageBox>
 #include <QTableWidgetItem>
-#include <QColor> // Bổ sung thư viện màu sắc
+#include <QColor> 
 
 DoctorMenu::DoctorMenu(Database& database, AuthService& authService, QWidget *parent)
     : QMainWindow(parent), ui(new Ui::DoctorMenu), db(database), auth(authService) {
     ui->setupUi(this);
     
     connect(ui->tableAppointments, &QTableWidget::itemClicked, this, &DoctorMenu::on_tableAppointments_itemClicked);
+    connect(ui->cbMedPrefixFilter, &QComboBox::currentTextChanged, this, &DoctorMenu::on_cbMedPrefixFilter_currentTextChanged);
     
     loadPatientQueue();
-    loadMedicineComboBox(); 
+    loadMedicineComboBox("Tất cả"); 
 }
 
 DoctorMenu::~DoctorMenu() {
@@ -28,20 +29,57 @@ void DoctorMenu::on_tableAppointments_itemClicked(QTableWidgetItem *item) {
         
         ui->txtAppointmentId->setText(apptId);
         ui->txtPatientId_History->setText(patientId);
+
+        // --- NÂNG CẤP: TỰ ĐỘNG LẤY MÃ BỆNH ÁN TỪ LỄ TÂN ĐỂ HIỂN THỊ ---
+        ui->txtRecordId->clear();
+        vector<MedicalRecord>& records = db.getMedicalRecords();
+        for (auto& rec : records) {
+            if (rec.getAppointmentId() == apptId.toStdString()) {
+                ui->txtRecordId->setText(QString::fromStdString(rec.getRecordId()));
+                break;
+            }
+        }
+        // -------------------------------------------------------------
     }
 }
 
-void DoctorMenu::loadMedicineComboBox() {
+void DoctorMenu::on_cbMedPrefixFilter_currentTextChanged(const QString &text) {
+    QString prefix = "Tất cả";
+    if(text.startsWith("B1")) prefix = "B1";
+    else if(text.startsWith("B2")) prefix = "B2";
+    else if(text.startsWith("B3")) prefix = "B3";
+    else if(text.startsWith("DV")) prefix = "DV";
+    
+    loadMedicineComboBox(prefix);
+}
+
+void DoctorMenu::loadMedicineComboBox(const QString& filterPrefix) {
     ui->cbMedicine->clear();
     vector<Medicine*> meds = db.getMedicines().getAllPointers();
+    bool foundAny = false;
+
     if (meds.empty()) {
         ui->cbMedicine->addItem("Không có thuốc trong kho");
         ui->cbMedicine->setEnabled(false);
-    } else {
-        for (auto med : meds) {
-            QString displayText = QString::fromStdString(med->getMedicineId() + " - " + med->getMedicineName() + " (Tồn: " + std::to_string(med->getStock()) + ")");
-            ui->cbMedicine->addItem(displayText, QString::fromStdString(med->getMedicineId()));
+        return;
+    } 
+
+    for (auto med : meds) {
+        QString medId = QString::fromStdString(med->getMedicineId());
+        
+        if (filterPrefix != "Tất cả" && !medId.startsWith(filterPrefix)) {
+            continue; 
         }
+        
+        foundAny = true;
+        QString displayText = medId + " - " + QString::fromStdString(med->getMedicineName()) + " (Tồn: " + QString::number(med->getStock()) + ")";
+        ui->cbMedicine->addItem(displayText, medId);
+    }
+
+    if (!foundAny) {
+        ui->cbMedicine->addItem("Không có thuốc thuộc nhóm này");
+        ui->cbMedicine->setEnabled(false);
+    } else {
         ui->cbMedicine->setEnabled(true);
     }
 }
@@ -99,12 +137,12 @@ void DoctorMenu::on_btnCreateMedicalRecord_clicked() {
         return;
     }
 
-    string newRecordId = db.createMedicalRecordFromQT(apptId, symp, diag, notes);
+    string updatedRecordId = db.updateMedicalRecordFromQT(apptId, symp, diag, notes);
 
-    if (!newRecordId.empty()) {
-        ui->txtRecordId->setText(QString::fromStdString(newRecordId));
+    if (!updatedRecordId.empty()) {
+        ui->txtRecordId->setText(QString::fromStdString(updatedRecordId));
         QMessageBox::information(this, "Thành công", 
-                                "Đã tạo Bệnh án thành công!\nMã Bệnh Án cấp tự động: " + QString::fromStdString(newRecordId));
+                                "Đã cập nhật Bệnh án thành công!\nMã Bệnh Án: " + QString::fromStdString(updatedRecordId));
         
         ui->txtAppointmentId->clear();
         ui->txtSymptoms->clear();
@@ -112,7 +150,7 @@ void DoctorMenu::on_btnCreateMedicalRecord_clicked() {
         ui->txtNotes->clear();
         loadPatientQueue();
     } else {
-        QMessageBox::critical(this, "Lỗi", "Mã Lịch hẹn không hợp lệ hoặc không tồn tại!");
+        QMessageBox::critical(this, "Lỗi", "Không tìm thấy Lịch hẹn hoặc Bệnh án bị lỗi hệ thống!");
     }
 }
 
@@ -123,27 +161,44 @@ void DoctorMenu::on_btnPrescribeMedicine_clicked() {
     int qty = ui->spinBoxQuantity->value();
 
     if (recordId.empty() || medId.empty() || qty <= 0) {
-        QMessageBox::warning(this, "Lỗi", "Vui lòng nhập đủ thông tin và số lượng lớn hơn 0.");
+        QMessageBox::warning(this, QString::fromUtf8("Lỗi"), QString::fromUtf8("Vui lòng nhập đủ thông tin và số lượng lớn hơn 0."));
         return;
     }
+
+    // --- LỚP KHIÊN BẢO VỆ UX: ÉP BÁC SĨ PHẢI LƯU BỆNH ÁN TRƯỚC ---
+    MedicalRecord* record = db.findMedicalRecordById(recordId);
+    if (record != nullptr && record->getDiagnosis().empty()) {
+        QMessageBox::warning(this, QString::fromUtf8("Quy trình sai"), 
+                             QString::fromUtf8("Bác sĩ vui lòng nhập [Chẩn đoán] và bấm [Lưu Bệnh Án] ở phía trên để chốt hồ sơ trước khi kê đơn thuốc!"));
+        return;
+    }
+    // -------------------------------------------------------------
 
     int result = db.prescribeMedicineFromQT(recordId, medId, dosage, qty);
 
     if (result == 1) {
         db.saveAllData(); 
-        QMessageBox::information(this, "Kê đơn", "Đã thêm thuốc vào Bệnh án [" + QString::fromStdString(recordId) + "] thành công!");
+        QMessageBox::information(this, QString::fromUtf8("Kê đơn"), QString::fromUtf8("Đã thêm thuốc vào Bệnh án [") + QString::fromStdString(recordId) + QString::fromUtf8("] thành công!"));
         ui->txtDosage->clear();
         ui->spinBoxQuantity->setValue(1);
-        loadMedicineComboBox(); 
+        
+        QString currentFilter = QString::fromUtf8("Tất cả");
+        QString filterText = ui->cbMedPrefixFilter->currentText();
+        if(filterText.startsWith("B1")) currentFilter = "B1";
+        else if(filterText.startsWith("B2")) currentFilter = "B2";
+        else if(filterText.startsWith("B3")) currentFilter = "B3";
+        else if(filterText.startsWith("DV")) currentFilter = "DV";
+        
+        loadMedicineComboBox(currentFilter); 
     } 
     else if (result == -1) {
-        QMessageBox::critical(this, "Lỗi", "Mã Bệnh án không tồn tại!");
+        QMessageBox::critical(this, QString::fromUtf8("Lỗi"), QString::fromUtf8("Mã Bệnh án không tồn tại!"));
     } 
     else if (result == -2) {
-        QMessageBox::critical(this, "Lỗi", "Thuốc không tồn tại trên hệ thống!");
+        QMessageBox::critical(this, QString::fromUtf8("Lỗi"), QString::fromUtf8("Thuốc không tồn tại trên hệ thống!"));
     } 
     else if (result == -3) {
-        QMessageBox::critical(this, "Hết hàng", "Số lượng thuốc trong kho không đủ để kê đơn này!");
+        QMessageBox::critical(this, QString::fromUtf8("Hết hàng"), QString::fromUtf8("Số lượng thuốc trong kho không đủ để kê đơn này!"));
     }
 }
 
@@ -210,7 +265,6 @@ void DoctorMenu::on_btnCancelAppointment_clicked() {
     }
 }
 
-// NÂNG CẤP UX: TÔ MÀU TRẠNG THÁI
 void DoctorMenu::loadPatientQueue() {
     ui->tableAppointments->setColumnCount(4);
     ui->tableAppointments->setHorizontalHeaderLabels({"Mã Lịch Hẹn", "Mã Bệnh Nhân", "Thời Gian", "Trạng Thái"});
@@ -230,7 +284,6 @@ void DoctorMenu::loadPatientQueue() {
             QTableWidgetItem *item2 = new QTableWidgetItem(timeStr);
             QTableWidgetItem *item3 = new QTableWidgetItem(QString::fromUtf8("Chờ Khám"));
             
-            // Thiết lập màu nền Vàng nhạt, chữ Vàng đậm
             QColor pendingBg(255, 243, 205); 
             QColor pendingFg(133, 100, 4);   
             item0->setBackground(pendingBg);

@@ -25,8 +25,11 @@ private slots:
     void on_btnViewPatientHistory_clicked();
     void on_btnCancelAppointment_clicked();
     
-    // Bắt sự kiện khi Bác sĩ click chọn Lịch hẹn trên bảng
+    // Bắt sự kiện click trên bảng
     void on_tableAppointments_itemClicked(QTableWidgetItem *item);
+    
+    // MỚI: Bắt sự kiện khi Bác sĩ đổi nhóm thuốc BHYT
+    void on_cbMedPrefixFilter_currentTextChanged(const QString &arg1);
 
 private:
     Ui::DoctorMenu *ui;
@@ -34,7 +37,8 @@ private:
     AuthService& auth;
     
     void loadPatientQueue();
-    void loadMedicineComboBox();
+    // MỚI: Thêm tham số lọc (mặc định là hiển thị tất cả)
+    void loadMedicineComboBox(const QString& filterPrefix = "Tất cả");
 };
 
 #endif // DOCTORMENU_H

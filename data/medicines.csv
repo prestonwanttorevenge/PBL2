@@ -1,100 +1,200 @@
-B1_001;Paracetamol 500mg;2000;1 viên/lần, 2-3 lần/ngày;1000
-B1_002;Ibuprofen 400mg;3000;1 viên/lần sau ăn;800
-B1_003;Aspirin 81mg;1500;1 viên/ngày;500
-B1_004;Adrenaline 1mg/1ml;15000;Tiêm tĩnh mạch theo y lệnh;200
-B1_005;Atropine 0.25mg/1ml;8000;Tiêm tĩnh mạch theo y lệnh;150
-B1_006;Lidocaine 2%;12000;Tiêm tại chỗ/Tĩnh mạch;250
-B1_007;Paracetamol Sirô 150mg/5ml;25000;10-15mg/kg/lần;350
-B1_008;Oresol vị cam;3000;Pha 1 gói/200ml nước;1000
-B1_009;Povidone Iodine 10%;15000;Sát khuẩn vết thương ngoài da;400
-B1_010;Oxytocin 5 IU;12000;Tiêm bắp/truyền tĩnh mạch;150
-B1_011;Nước muối sinh lý 0.9% 10ml;5000;Nhỏ mắt/mũi 3-4 lần/ngày;1000
-B1_012;Glucose 75g (Test dung nạp);25000;Uống 1 lần theo y lệnh;200
-B1_013;Nước cất pha tiêm 5ml;2000;Dùng để pha thuốc tiêm;1500
-B1_014;Dung dịch Formol 10%;100000;Bảo quản bệnh phẩm;50
-B1_015;Cồn y tế tuyệt đối (Ethanol 99%);45000;Dùng trong phòng lab;100
-B1_016;Cồn 70 độ 500ml;25000;Sát khuẩn ngoài da;400
-B1_017;Chlorhexidine 4%;85000;Rửa tay phẫu thuật;150
-B1_018;Noradrenaline 1mg/1ml;25000;Truyền tĩnh mạch theo y lệnh;149
-B1_019;Diazepam 10mg/2ml;12000;Tiêm bắp/tĩnh mạch;200
-B1_020;Ibuprofen Sirô 100mg/5ml;35000;Theo cân nặng (5-10mg/kg);300
-B1_021;Oxi già 3% 500ml;15000;Rửa vết thương;400
-B1_022;Misoprostol 200mcg;5000;Theo y lệnh bác sĩ sản;200
-B1_023;Dung dịch đệm Buffer 500ml;85000;Dùng trong máy xét nghiệm;50
-B1_024;NaCl 0.9% 500ml (Chai lớn);15000;Dùng rửa dụng cụ/Pha hóa chất;300
-B1_025;Gel siêu âm 5 lít;150000;Dùng bôi trơn đầu dò;30
-B1_026;Paraffin y tế tinh khiết;90000;Đúc khối bệnh phẩm;50
-B1_027;Dung dịch nhuộm H&E;200000;Nhuộm tiêu bản mô;20
-B1_028;Betadine 10% 500ml;120000;Sát khuẩn phẫu thuật;150
-B1_029;Presept 2.5g (Viên sủi);15000;Pha dung dịch khử khuẩn;400
-B1_030;Cidezyme 5 lít;850000;Ngâm rửa dụng cụ nội soi;15
-B1_031;Glucose 5% 500ml;20000;Truyền tĩnh mạch;200
-B2_001;Dopamine 200mg/5ml;35000;Truyền tĩnh mạch;100
-B2_002;Morphine 10mg/1ml;50000;Tiêm bắp/tĩnh mạch theo y lệnh;100
-B2_003;Iohexol 300mgI/ml;350000;Tiêm tĩnh mạch trước chụp CT;50
-B2_004;Bari Sulfate;120000;Uống trước chụp X-Quang DD;80
-B2_005;Gadolinium;450000;Tiêm tĩnh mạch trước chụp MRI;30
-B2_006;Dịch truyền Amino Acid 5%;120000;Truyền tĩnh mạch theo y lệnh;150
-B2_007;Lipofundin 20% 250ml;180000;Truyền tĩnh mạch chậm;80
-B2_008;Amiodarone 150mg/3ml;45000;Tiêm tĩnh mạch chậm;100
-B2_009;Dobutamine 250mg;55000;Truyền tĩnh mạch;80
-B2_010;Oseltamivir 75mg (Tamiflu);45000;1 viên/lần, 2 lần/ngày;150
-B2_011;Ultravist 300 (Cản quang);420000;Tiêm tĩnh mạch chụp CT;40
-B2_012;Telebrix 300;250000;Dùng trong X-Quang hệ niệu;60
-B2_013;Nutriflex Lipid (Túi 3 ngăn);350000;Truyền tĩnh mạch nuôi dưỡng;40
-B3_001;Amlodipine 5mg;4000;1 viên/ngày;600
-B3_002;Metformin 500mg;3500;1 viên/lần, 2 lần/ngày;700
-B3_003;Omeprazole 20mg;4500;1 viên/ngày trước ăn;500
-B3_004;Atorvastatin 20mg;6000;1 viên/ngày buổi tối;450
-B3_005;Amoxicillin 500mg;5000;1 viên/lần, 2 lần/ngày;800
-B3_006;Cefuroxime 500mg;12000;1 viên/lần, 2 lần/ngày;600
-B3_007;Acyclovir 400mg;8000;1 viên/lần, 3 lần/ngày;300
-B3_008;Azithromycin 500mg;15000;1 viên/ngày;400
-B3_009;Cefixime Sirô;55000;Theo chỉ định bác sĩ;150
-B3_010;Diclofenac 75mg/3ml (Tiêm);20000;Tiêm bắp 1 ống/ngày;200
-B3_011;Cefazolin 1g (Tiêm);35000;Tiêm tĩnh mạch theo y lệnh;300
-B3_012;Sắt + Folic acid;4000;1 viên/ngày;600
-B3_013;Clotrimazole 100mg;8000;Đặt âm đạo 1 viên/tối;250
-B3_014;Tobramycin 0.3% 5ml;15000;Nhỏ mắt 2 giọt/lần, 4 lần/ngày;300
-B3_015;Otrivin 0.1% 10ml;45000;Nhỏ mũi 2-3 lần/ngày;250
-B3_016;Meloxicam 7.5mg;4000;1 viên/lần, 1-2 lần/ngày;600
-B3_017;Betahistine 16mg;3500;1 viên/lần, 2 lần/ngày;400
-B3_018;Alverine 40mg;2000;1-2 viên/lần khi đau bụng;500
-B3_019;Gliclazide 30mg;4500;1 viên/ngày (sáng);600
-B3_020;Valsartan 80mg;6500;1 viên/ngày;450
-B3_021;Esomeprazole 40mg;8000;1 viên/ngày trước ăn 30p;500
-B3_022;Rosuvastatin 10mg;7000;1 viên/ngày buổi tối;400
-B3_023;Levofloxacin 500mg;15000;1 viên/ngày;350
-B3_024;Ciprofloxacin 500mg;6000;1 viên/lần, 2 lần/ngày;500
-B3_025;Fluconazole 150mg;22000;1 viên duy nhất/tuần;200
-B3_026;Tramadol 50mg;5000;1 viên/lần khi đau nhiều;300
-B3_027;Ketorolac 30mg/ml;18000;Tiêm bắp/tĩnh mạch;150
-B3_028;Cefotaxime 1g (Tiêm);40000;Tiêm tĩnh mạch theo y lệnh;250
-B3_029;Progesterone 200mg;15000;1 viên/ngày (đặt hoặc uống);300
-DV_001;Vitamin C 500mg;1000;1 viên/ngày;1200
-DV_002;Vitamin D3 Drop;45000;2 giọt/ngày;200
-DV_003;Calcium D3;3500;1 viên/lần, 2 lần/ngày;500
-DV_004;Fluoride Gel;80000;Thoa răng theo chỉ định RHM;100
-DV_005;Nước rửa tay nhanh (Gel);55000;Sát khuẩn tay nhanh;300
-DV_006;Vitamin B1 B6 B12;2500;1 viên/ngày;800
-DV_007;Magne-B6;3500;1 viên/lần, 2 lần/ngày;600
-DV_008;Kẽm Gluconate;4000;1 viên/ngày;500
-DV_009;Ginkgo Biloba 120mg;6000;1 viên/ngày;450
-DV_010;Sữa Ensure Gold 400g;350000;Pha 6 muỗng/195ml nước;99
-DV_011;Men vi sinh Probiotic;8000;1 gói/lần, 2 lần/ngày;500
-DV_012;Vitamin B-Complex;1500;1 viên/ngày;800
-DV_013;Kẽm Gluconat Sirô;40000;5ml/ngày;250
-DV_014;Bioflora 250mg (Men vi sinh);12000;1 gói/lần, 2 lần/ngày;400
-DV_015;Prospan Sirô ho 100ml;75000;2.5 - 5ml/lần, 3 lần/ngày;200
-DV_016;Acid Folic 5mg;2000;1 viên/ngày;800
-DV_017;Dung dịch vệ sinh Lactacyd;60000;Dùng rửa ngoài;150
-DV_018;Hapacol sủi 500mg;3500;Pha 1 viên/150ml nước;500
-DV_019;Nước súc miệng Kin Gingival;120000;Súc miệng 2 lần/ngày;100
-DV_020;Systane Ultra 5ml;75000;Nhỏ mắt khi khô/mỏi;150
-DV_021;Xisat xịt mũi 75ml;30000;Xịt 2-3 lần/ngày;250
-DV_022;Omega 3 Fish Oil 1000mg;5000;1 viên/ngày sau ăn;600
-DV_023;Vitamin E 400 IU;4000;1 viên/ngày;500
-DV_024;Glucosamine 1500mg;8000;1 viên/ngày;450
-DV_025;Collagen Type 2;9000;1 viên/ngày;300
-DV_026;Sữa Peptamen 400g;450000;Dành cho BN tiêu hóa kém;50
-DV_027;Bột pha đạm Whey Protein;550000;Bổ sung đạm theo chỉ định;30
+B1_001;Paracetamol 500mg;1500;1-2 viên/lần, ngày 3 lần;407
+B1_002;Paracetamol 650mg;2000;1 viên/lần, cách 4-6 giờ;157
+B1_003;Amoxicillin 500mg;3000;1 viên/lần, ngày 2-3 lần;112
+B1_004;Ibuprofen 400mg;2500;1 viên/lần, ngày 2 lần sau ăn;479
+B1_005;Berberin 50mg;1000;2-4 viên/lần, ngày 2 lần;240
+B1_006;Vitamin C 500mg;1200;1 viên/ngày sau ăn sáng;436
+B1_007;Cetirizine 10mg;2000;1 viên/ngày buổi tối;199
+B1_008;Loratadine 10mg;2200;1 viên/ngày;196
+B1_009;Omeprazole 20mg;3500;1 viên/ngày trước ăn sáng 30 phút;186
+B1_010;Metformin 500mg;2800;1-2 viên/ngày trong bữa ăn;221
+B1_011;Amlodipine 5mg;3000;1 viên/ngày buổi sáng;413
+B1_012;Amlodipine 10mg;4500;1 viên/ngày buổi sáng;121
+B1_013;Enalapril 5mg;2500;1 viên/ngày;352
+B1_014;Loperamide 2mg;1800;1-2 viên sau mỗi lần đi ngoài phân lỏng;435
+B1_015;Simeco Gel;5000;1 gói/lần sau bữa ăn;478
+B1_016;Oresol 27.9g;3000;Pha 1 gói vào 1 lít nước sôi nguội;206
+B1_017;Men tiêu hóa Bio-acimin;4000;1-2 gói/ngày sau ăn;151
+B1_018;Salbutamol 2mg;1500;1-2 viên/lần, ngày 3-4 lần;288
+B1_019;Prednisolone 5mg;2000;1-4 viên/ngày sau ăn sáng;120
+B1_020;Dexamethasone 0.5mg;1200;1-2 viên/ngày;202
+B1_021;Alpha Chymotrypsin;3500;2 viên/lần, ngày 3-4 lần;221
+B1_022;Eugica đỏ;2500;1-2 viên/lần, ngày 3 lần;314
+B1_023;B Complex;1500;1-2 viên/ngày;432
+B1_024;Vitamin 3B (B1-B6-B12);2000;1-2 viên/ngày;187
+B1_025;Smecta 3g;4500;1 gói/lần, ngày 2-3 lần;199
+B1_026;Captopril 25mg;2000;1 viên/lần, ngày 2 lần;465
+B1_027;Gliclazide 80mg;3500;1-2 viên/ngày vào bữa sáng;152
+B1_028;Metoclopramide 10mg;2000;1 viên/lần trước bữa ăn;230
+B1_029;Domperidone 10mg;2500;1 viên/lần trước bữa ăn 15-30 phút;152
+B1_030;Alverine Citrate 40mg;3000;1-2 viên/lần, ngày 1-3 lần;393
+B1_031;Drotaverine 40mg (No-spa);3500;1-2 viên/lần, ngày 2-3 lần;314
+B1_032;Acid Folic 5mg;1500;1 viên/ngày;187
+B1_033;Sắt Fumarat + Acid Folic;2500;1 viên/ngày sau ăn;472
+B1_034;Calcium Lactate 500mg;3000;1-2 viên/ngày;444
+B1_035;Magne B6;2500;1-2 viên/lần, ngày 2 lần;230
+B1_036;Paracetamol 250mg gói;2500;1 gói/lần khi sốt > 38.5 độ C;132
+B1_037;Clorpheniramin 4mg;1000;1 viên/lần, ngày 2-3 lần;180
+B1_038;Promethazine 25mg;1800;1 viên buổi tối trước khi đi ngủ;232
+B1_039;Terpin Hydrat + Codein;3000;1-2 viên/lần, ngày 2-3 lần;408
+B1_040;Acetylcystein 200mg;3500;1 gói/lần, ngày 3 lần;202
+B1_041;Ambroxol 30mg;2800;1 viên/lần, ngày 3 lần;480
+B1_042;Bromhexin 8mg;2000;1 viên/lần, ngày 3 lần;471
+B1_043;Cefalexin 500mg;4000;1-2 viên/lần, ngày 2 lần;187
+B1_044;Erythromycin 500mg;4500;1 viên/lần, ngày 3-4 lần;471
+B1_045;Cotrimoxazol 480mg;2500;2 viên/lần, ngày 2 lần;307
+B1_046;Metronidazole 250mg;2000;2 viên/lần, ngày 2 lần trong bữa ăn;476
+B1_047;Nystatin 500.000IU;3000;1 viên/lần, ngày 3-4 lần;470
+B1_048;Acyclovir 200mg;3500;1 viên/lần, ngày 5 lần cách nhau 4 giờ;216
+B1_049;Mebendazole 500mg;15000;1 viên duy nhất;165
+B1_050;Albendazole 400mg;18000;1 viên duy nhất;421
+B2_001;Atorvastatin 10mg;8000;1 viên buổi tối;173
+B2_002;Atorvastatin 20mg;12000;1 viên buổi tối;174
+B2_003;Losartan 50mg;6500;1 viên/ngày buổi sáng;172
+B2_004;Valsartan 80mg;9000;1 viên/ngày;291
+B2_005;Telmisartan 40mg;8500;1 viên/ngày buổi sáng;224
+B2_006;Bisoprolol 2.5mg;5000;1 viên/ngày buổi sáng;217
+B2_007;Bisoprolol 5mg;7000;1 viên/ngày buổi sáng;224
+B2_008;Gliclazide MR 60mg;9500;1 viên/ngày vào buổi sáng;260
+B2_009;Glimepiride 2mg;6000;1 viên/ngày trước hoặc trong bữa sáng;170
+B2_010;Glimepiride 4mg;9000;1 viên/ngày trước bữa sáng;124
+B2_011;Esomeprazole 20mg;11000;1 viên/ngày trước ăn sáng 30 phút;219
+B2_012;Esomeprazole 40mg;18000;1 viên/ngày trước ăn sáng 30 phút;117
+B2_013;Rabeprazole 20mg;14000;1 viên/ngày trước bữa ăn;160
+B2_014;Pantoprazole 40mg;12000;1 viên/ngày trước bữa sáng 30 phút;159
+B2_015;Ciprofloxacin 500mg;9000;1 viên/lần, ngày 2 lần sau ăn;233
+B2_016;Levofloxacin 500mg;18000;1 viên/ngày;246
+B2_017;Cefuroxime Axetil 500mg;15000;1 viên/lần, ngày 2 lần sau ăn;226
+B2_018;Cefdinir 300mg;22000;1 viên/lần, ngày 2 lần;252
+B2_019;Cefpodoxime 200mg;20000;1 viên/lần, ngày 2 lần;246
+B2_020;Azithromycin 500mg;18000;1 viên/ngày, uống trong 3 ngày;258
+B2_021;Clarithromycin 500mg;25000;1 viên/lần, ngày 2 lần;198
+B2_022;Augmentin 625mg;22000;1 viên/lần, ngày 2 lần đầu bữa ăn;126
+B2_023;Augmentin 1g;32000;1 viên/lần, ngày 2 lần đầu bữa ăn;172
+B2_024;Clopidogrel 75mg;16000;1 viên/ngày;182
+B2_025;Rosuvastatin 10mg;14000;1 viên buổi tối;292
+B2_026;Rosuvastatin 20mg;22000;1 viên buổi tối;135
+B2_027;Montelukast 10mg;15000;1 viên/ngày vào buổi tối;135
+B2_028;Symbicort Turbuhaler 160/4.5mcg;380000;1-2 hít/lần, ngày 2 lần;233
+B2_029;Seretide Evohaler 25/125mcg;340000;2 xịt/lần, ngày 2 lần;290
+B2_030;Spiriva Respimat 2.5mcg;750000;2 xịt/lần, 1 lần/ngày;89
+B2_031;Sitagliptin 50mg (Januvia);24000;1 viên/ngày;108
+B2_032;Sitagliptin 100mg;38000;1 viên/ngày;248
+B2_033;Galvus Met 50/850mg;19000;1 viên/lần, ngày 2 lần;267
+B2_034;Jardiance 10mg;28000;1 viên/ngày buổi sáng;217
+B2_035;Forxiga 10mg;29000;1 viên/ngày;153
+B2_036;Betaserc 16mg;8000;1 viên/lần, ngày 2-3 lần;122
+B2_037;Betaserc 24mg;12000;1 viên/lần, ngày 2 lần;210
+B2_038;Tanakan 40mg;6500;1 viên/lần, ngày 3 lần trong bữa ăn;268
+B2_039;Stresam 50mg;7000;2-3 viên/ngày chia làm 2-3 lần;201
+B2_040;Dogmatil 50mg;4000;1-2 viên/ngày;222
+B2_041;Piracetam 800mg;5500;1 viên/lần, ngày 2-3 lần;237
+B2_042;Cerebrolysin 5ml;85000;1 ống/ngày tiêm bắp hoặc truyền;81
+B2_043;Nootropil 1200mg;11000;1 viên/lần, ngày 2 lần;87
+B2_044;Allopurinol 300mg;6000;1 viên/ngày sau ăn;215
+B2_045;Febuxostat 40mg;18000;1 viên/ngày;291
+B2_046;Colchicine 1mg;4500;1 viên/ngày hoặc theo đợt cấp;260
+B2_047;Meloxicam 15mg;7500;1 viên/ngày sau ăn;134
+B2_048;Celecoxib 200mg;12000;1 viên/lần, ngày 1-2 lần sau ăn;289
+B2_049;Etoricoxib 60mg (Arcoxia);16000;1 viên/ngày;272
+B2_050;Etoricoxib 90mg;21000;1 viên/ngày;155
+B3_001;Rivaroxaban 15mg (Xarelto);68000;1 viên/ngày cùng thức ăn;85
+B3_002;Rivaroxaban 20mg;72000;1 viên/ngày cùng thức ăn;47
+B3_003;Apixaban 5mg (Eliquis);42000;1 viên/lần, ngày 2 lần;127
+B3_004;Ticagrelor 90mg (Brilinta);35000;1 viên/lần, ngày 2 lần;42
+B3_005;Entresto 50mg (Sacubitril/Valsartan);45000;1 viên/lần, ngày 2 lần;102
+B3_006;Entresto 100mg;52000;1 viên/lần, ngày 2 lần;38
+B3_007;Insulin Glargine (Lantus SoloStar);280000;Tiêm dưới da 1 lần/ngày cố định giờ;31
+B3_008;Insulin Novorapid Flexpen;210000;Tiêm dưới da ngay trước bữa ăn;92
+B3_009;Insulin Mixtard 30 Flexpen;195000;Tiêm dưới da trước bữa ăn 30 phút;138
+B3_010;Liraglutide (Victoza 6mg/ml);1.85e+06;Tiêm dưới da 1 lần/ngày;81
+B3_011;Tradjenta 5mg (Linagliptin);32000;1 viên/ngày;94
+B3_012;Janumet 50/1000mg;22000;1 viên/lần, ngày 2 lần;91
+B3_013;Nexium 40mg lọ tiêm truyền;210000;Tiêm tĩnh mạch chậm hoặc truyền;106
+B3_014;Meropenem 1g lọ tiêm truyền;240000;Truyền tĩnh mạch mỗi 8 giờ;144
+B3_015;Imipenem + Cilastatin 500mg;260000;Truyền tĩnh mạch mỗi 6-8 giờ;146
+B3_016;Vancomycin 500mg lọ tiêm truyền;180000;Truyền tĩnh mạch chậm;129
+B3_017;Linezolid 600mg viên nén;420000;1 viên/lần, ngày 2 lần;122
+B3_018;Linezolid 600mg/300ml túi truyền;680000;Truyền tĩnh mạch mỗi 12 giờ;92
+B3_019;Colistin 1 MIU lọ tiêm;220000;Truyền tĩnh mạch theo liều tải;129
+B3_020;Tigecycline 50mg lọ tiêm;850000;Truyền tĩnh mạch mỗi 12 giờ;122
+B3_021;Caspofungin 50mg lọ tiêm;1.95e+06;Truyền tĩnh mạch 1 lần/ngày;126
+B3_022;Voriconazole 200mg viên nén;380000;1 viên/lần, ngày 2 lần trước ăn;64
+B3_023;Enoxaparin 4000IU/0.4ml (Lovenox);145000;Tiêm dưới da 1 lần/ngày;89
+B3_024;Enoxaparin 6000IU/0.6ml;185000;Tiêm dưới da 1 lần/ngày;142
+B3_025;Albumin Human 20% 50ml;850000;Truyền tĩnh mạch chậm;40
+B3_026;Immunglobulin VIG 5g;3.2e+06;Truyền tĩnh mạch theo chỉ định;86
+B3_027;Somatostatin 3mg lọ tiêm;450000;Truyền tĩnh mạch liên tục;121
+B3_028;Octreotide 0.1mg lọ tiêm;180000;Tiêm dưới da mỗi 8 giờ;83
+B3_029;Tacrolimus 1mg (Prograf);65000;1 viên/lần, ngày 2 lần cách 12h;145
+B3_030;Cyclosporine 50mg (Neoral);58000;1 viên/lần, ngày 2 lần;130
+B3_031;Mycophenolate Mofetil 500mg (Cellcept);42000;2 viên/lần, ngày 2 lần;72
+B3_032;Erlotinib 150mg (Tarceva);1.25e+06;1 viên/ngày trước ăn 1h hoặc sau 2h;21
+B3_033;Gefitinib 250mg (Iressa);980000;1 viên/ngày;108
+B3_034;Imatinib 400mg (Glivec);1.1e+06;1 viên/ngày trong bữa ăn;68
+B3_035;Capecitabine 500mg (Xeloda);48000;2-3 viên/lần, ngày 2 lần sau ăn;69
+B3_036;Lenvatinib 10mg (Lenvima);1.65e+06;1 viên/ngày;117
+B3_037;Osimertinib 80mg (Tagrisso);2.4e+06;1 viên/ngày;143
+B3_038;Pembrolizumab 100mg/4ml (Keytruda);6.2e+07;Truyền tĩnh mạch mỗi 3 tuần;41
+B3_039;Rituximab 500mg/50ml (MabThera);2.85e+07;Truyền tĩnh mạch;118
+B3_040;Trastuzumab 440mg (Herceptin);2.2e+07;Truyền tĩnh mạch mỗi 3 tuần;97
+B3_041;Infliximab 100mg (Remicade);1.45e+07;Truyền tĩnh mạch;82
+B3_042;Adalimumab 40mg/0.8ml (Humira);1.12e+07;Tiêm dưới da mỗi 2 tuần;122
+B3_043;Ustekinumab 45mg (Stelara);4.8e+07;Tiêm dưới da;128
+B3_044;Pirfenidone 200mg (Esbriet);120000;1-3 viên/lần, ngày 3 lần cùng thức ăn;99
+B3_045;Nintedanib 150mg (Ofev);450000;1 viên/lần, ngày 2 lần cùng thức ăn;84
+B3_046;Sofosbuvir + Velpatasvir (Epclusa);280000;1 viên/ngày cùng hoặc không cùng thức ăn;122
+B3_047;Tenofovir Alafenamide 25mg (Vemlidy);85000;1 viên/ngày cùng thức ăn;109
+B3_048;Entecavir 0.5mg (Baraclude);42000;1 viên/ngày khi bụng trống;61
+B3_049;Valganciclovir 450mg (Valcyte);380000;2 viên/lần, ngày 2 lần cùng thức ăn;113
+B3_050;Amphotericin B 50mg lọ tiêm;620000;Truyền tĩnh mạch chậm;68
+DV_001;Collagen Youtheory Type 1 2 & 3;650000;2 viên/lần, ngày 2 lần trước ăn;172
+DV_002;Glucosamine Sulfate 1500mg Kirkland;580000;1-2 viên/ngày sau bữa ăn;76
+DV_003;Omega 3 Fish Oil 1000mg Blackmores;420000;1 viên/lần, ngày 2 lần sau ăn;196
+DV_004;Blackmores Multivitamin For Women;390000;1 viên/ngày cùng bữa ăn;101
+DV_005;Blackmores Multivitamin For Men;390000;1 viên/ngày cùng bữa ăn;130
+DV_006;Silymarin Milk Thistle 1000mg Puritan;350000;1 viên/ngày sau ăn;135
+DV_007;Men vi sinh OptiBac Probiotics;480000;1-2 viên/ngày buổi sáng;177
+DV_008;Bio-Oil 125ml trị sẹo rạn da;320000;Thoa 2 lần/ngày lên vùng da cần điều trị;147
+DV_009;Kem trị mụn Klenzit MS 15g;125000;Thoa 1 lớp mỏng mụn mủ buổi tối;173
+DV_010;Kem trị mụn Megaduo Gel 15g;115000;Thoa 2 lần/ngày lên vùng da mụn;128
+DV_011;Sữa rửa mặt Cetaphil Gentle Cleanser 500ml;380000;Dùng rửa mặt 2 lần/ngày sáng và tối;162
+DV_012;Sữa rửa mặt La Roche-Posay Effaclar 400ml;450000;Dùng rửa mặt 2 lần/ngày;108
+DV_013;Nước tẩy trang Bioderma Sensibio H2O 500ml;420000;Thấm ra bông tẩy trang lau sạch mặt;164
+DV_014;Kem chống nắng Anessa Perfect UV 60ml;520000;Thoa trước khi ra nắng 20 phút;127
+DV_015;Kem chống nắng La Roche-Posay Anthelios 50ml;480000;Thoa đều trước khi ra ngoài 20 phút;119
+DV_016;Xịt khoáng Avene Thermal Spring Water 300ml;340000;Xịt đều lên mặt khi da khô mệt mỏi;172
+DV_017;Dung dịch vệ sinh Lactacyd Soft & Silky 250ml;85000;Dùng vệ sinh hàng ngày 1-2 lần;198
+DV_018;Dung dịch vệ sinh Betadine Vaginal Wash 250ml;145000;Dùng vệ sinh phụ nữ hàng ngày;141
+DV_019;Nước nhỏ mắt Systane Ultra 10ml;110000;Nhỏ 1-2 giọt khi mắt khô mỏi;148
+DV_020;Nước nhỏ mắt Refresh Tears 15ml;95000;Nhỏ 1-2 giọt mỗi mắt khi cần;185
+DV_021;Nước nhỏ mắt Rohto Vita 40g Nhật Bản;85000;Nhỏ 2-3 giọt/lần, 5-6 lần/ngày;126
+DV_022;Xịt mũi Xisat người lớn 75ml;35000;Xịt 2-3 lần/ngày vào mỗi bên mũi;175
+DV_023;Xịt mũi Sterimar Sea Water 100ml;195000;Xịt vệ sinh mũi 2-6 lần/ngày;110
+DV_024;Siro ho Prospan 100ml Đức;210000;5ml/lần, ngày 3 lần;147
+DV_025;Siro ho Astex 90ml;50000;5-10ml/lần, ngày 3 lần;153
+DV_026;Keo xịt họng Propobee 15ml;120000;Xịt 2-4 lần/ngày trực tiếp vào họng;135
+DV_027;Xịt họng Mật ong Chanh đào VinaMa;85000;Xịt 3-5 lần/ngày;106
+DV_028;Dầu gió xanh Con O 24ml Singapore;130000;Thoa ngoài da hoặc ngửi khi chóng mặt;154
+DV_029;Dầu khuynh diệp OPC 30ml;45000;Thoa trán, ngực, bụng khi nhiễm lạnh;134
+DV_030;Cao dán Salonpas Hộp 20 miếng;35000;Dán trực tiếp lên chỗ đau không quá 3 lần/ngày;133
+DV_031;Miếng dán hạ sốt Pigeon Nhật Bản;140000;Dán lên trán khi trẻ sốt;163
+DV_032;Kem bôi trĩ Cotripro Gel 25g;290000;Thoa trực tiếp lên vùng bị trĩ 2 lần/ngày;138
+DV_033;Kem bôi trĩ Anusol Ointment 25g;220000;Thoa vùng tổn thương sáng và tối;190
+DV_034;Bao cao su Durex Performa Hộp 12 cái;230000;Sử dụng 1 lần trước khi quan hệ;130
+DV_035;Bao cao su Durex Invisible Hộp 10 cái;250000;Sử dụng 1 lần trước khi quan hệ;119
+DV_036;Gel bôi trôi Durex Play Aloe Vera 50ml;140000;Thoa gel lên vùng sinh dục khi cần;82
+DV_037;Que thử thai Quickstrip Hộp 1 cái;15000;Thử với nước tiểu đầu nguồn buổi sáng;133
+DV_038;Que thử đường huyết Accu-Chek Instant 25 que;280000;Dùng kèm máy đo đường huyết Accu-Chek;169
+DV_039;Kim lấy máu Accu-Chek FastClix Hộp 24 kim;120000;Dùng lấy máu thử đường huyết;128
+DV_040;Khẩu trang y tế 4 lớp 4U Mask Hộp 50 cái;45000;Sử dụng 1 lần khi ra ngoài;114
+DV_041;Nước rửa tay khô Lifebuoy 100ml;30000;Xoa đều 3ml dung dịch trong lòng bàn tay;163
+DV_042;Cồn y tế 70 độ 500ml;20000;Dùng sát trùng vết thương nhẹ ngoài da;185
+DV_043;Nước muối sinh lý NaCl 0.9% 500ml;10000;Súc miệng hoặc rửa vết thương;193
+DV_044;Băng cá nhân Urgo Transparent Hộp 100 miếng;75000;Dán bảo vệ vết thương nhỏ;119
+DV_045;Băng gạc tiệt trùng Đông Tín 10x10cm;15000;Đắp lên vết thương trước khi quấn băng;130
+DV_046;Kẹo ngậm Strepsils Cool Hộp 100 viên;180000;Ngậm 1 viên cách mỗi 2-3 giờ;161
+DV_047;Kẹo ngậm Bảo Thanh Hộp 100 viên;140000;Ngậm 1 viên khi bị ho, đau họng;170
+DV_048;Sữa bột Ensure Gold 850g;820000;Pha 6 muỗng gạt vào 195ml nước ấm;177
+DV_049;Sữa bột Glucerna 850g cho người tiểu đường;890000;Pha 5 muỗng gạt vào 200ml nước ấm;69
+DV_050;Yến chưng sẵn Sanest Khánh Hòa Hộp 6 lọ;290000;Uống 1-2 lọ/ngày bổ dưỡng;189

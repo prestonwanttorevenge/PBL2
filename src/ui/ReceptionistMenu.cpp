@@ -95,14 +95,14 @@ void ReceptionistMenu::on_btnRegisterPatient_clicked() {
     
     if (success) {
         db.saveAllData(); 
-        QMessageBox::information(this, "Thành công", "Đã thêm Bệnh nhân mới tự động!\nVui lòng xem danh sách bên phải để biết Mã BN.");
+        QMessageBox::information(this, QString::fromUtf8("Thành công"), QString::fromUtf8("Đã thêm Bệnh nhân mới tự động!\nVui lòng xem danh sách bên phải để biết Mã BN."));
         
         ui->txtPatientName->clear();
         ui->txtPatientPhone->clear();
         ui->txtBHYT->clear(); 
         refreshPatientTable();
     } else {
-        QMessageBox::critical(this, "Lỗi", "Hệ thống gặp sự cố khi tạo mã Bệnh nhân!");
+        QMessageBox::critical(this, QString::fromUtf8("Lỗi"), QString::fromUtf8("Hệ thống gặp sự cố khi tạo mã Bệnh nhân!"));
     }
 }
 
@@ -122,7 +122,7 @@ void ReceptionistMenu::updateAvailableDoctors() {
     }
 
     if (filteredDocs.empty()) {
-        ui->cbDoctor->addItem("Không có Bác sĩ rảnh");
+        ui->cbDoctor->addItem(QString::fromUtf8("Không có Bác sĩ rảnh"));
         ui->cbDoctor->setEnabled(false);
     } else {
         for (Doctor* doc : filteredDocs) {
@@ -137,18 +137,28 @@ void ReceptionistMenu::on_btnBookAppointment_clicked() {
     string patientId = ui->txtBookPatientId->text().toStdString();
     string day = ui->cbDay->currentText().toStdString();
     string time = ui->cbShift->currentText().toStdString();
+
+    // --- LỚP KHIÊN NGĂN CHẶN std::bad_alloc ---
+    // Kiểm tra trực tiếp trạng thái của Combobox trước khi cố ép kiểu dữ liệu rỗng (Invalid QVariant)
+    if (!ui->cbDoctor->isEnabled() || ui->cbDoctor->currentText() == QString::fromUtf8("Không có Bác sĩ rảnh")) {
+        QMessageBox::warning(this, QString::fromUtf8("Cảnh báo"), QString::fromUtf8("Ca khám này hiện không có Bác sĩ rảnh!\nVui lòng chọn ca khác."));
+        return; // Dừng lại ngay lập tức, không cho mã độc chạy tiếp!
+    }
+    // ------------------------------------------
+
+    // Nếu lọt qua được lớp khiên trên, nghĩa là chắc chắn có dữ liệu Bác sĩ hợp lệ
     string doctorId = ui->cbDoctor->currentData().toString().toStdString();
     string selectedSpecialty = ui->cbSpecialty->currentText().toStdString();
     User* currentUser = auth.getCurrentUser(); 
     
     if (currentUser == nullptr) {
-        QMessageBox::critical(this, "Lỗi", "Phiên đăng nhập đã hết hạn hoặc không hợp lệ!");
+        QMessageBox::critical(this, QString::fromUtf8("Lỗi"), QString::fromUtf8("Phiên đăng nhập đã hết hạn hoặc không hợp lệ!"));
         return;
     }
     string receptionistId = currentUser->getId();
 
     if (patientId.empty() || doctorId.empty() || day.empty() || time.empty()) {
-        QMessageBox::warning(this, "Cảnh báo", "Vui lòng chọn Bệnh nhân trên bảng và Bác sĩ hợp lệ!");
+        QMessageBox::warning(this, QString::fromUtf8("Cảnh báo"), QString::fromUtf8("Vui lòng chọn Bệnh nhân trên bảng và Bác sĩ hợp lệ!"));
         return;
     }
 
@@ -156,15 +166,15 @@ void ReceptionistMenu::on_btnBookAppointment_clicked() {
 
     if (result == 1) {
         db.saveAllData(); 
-        QMessageBox::information(this, "Thành công", "Đã chốt lịch hẹn thành công!\nHệ thống tự động cấp Mã Lịch Hẹn (APP).");
+        QMessageBox::information(this, QString::fromUtf8("Thành công"), QString::fromUtf8("Đã chốt lịch hẹn thành công!\nHệ thống tự động cấp Mã Lịch Hẹn (APP)."));
         ui->txtBookPatientId->clear();
         loadPendingAppointments(); 
     }
     else if (result == -1) {
-        QMessageBox::critical(this, "Lỗi", "Mã Bệnh Nhân không tồn tại!");
+        QMessageBox::critical(this, QString::fromUtf8("Lỗi"), QString::fromUtf8("Mã Bệnh Nhân không tồn tại!"));
     }
     else {
-        QMessageBox::critical(this, "Lỗi Xếp Lịch", "Có lỗi xảy ra, Bác sĩ không hợp lệ!");
+        QMessageBox::critical(this, QString::fromUtf8("Lỗi Xếp Lịch"), QString::fromUtf8("Có lỗi xảy ra, Bác sĩ không hợp lệ!"));
     }
 }
 
@@ -172,7 +182,7 @@ void ReceptionistMenu::on_btnCreateInvoice_clicked() {
     string patientId = ui->txtPatientId_Invoice->text().toStdString();
 
     if (patientId.empty()) {
-        QMessageBox::warning(this, "Cảnh báo", "Vui lòng chọn Mã Bệnh Nhân trên bảng để thanh toán!");
+        QMessageBox::warning(this, QString::fromUtf8("Cảnh báo"), QString::fromUtf8("Vui lòng chọn Mã Bệnh Nhân trên bảng để thanh toán!"));
         return;
     }
 
@@ -180,19 +190,19 @@ void ReceptionistMenu::on_btnCreateInvoice_clicked() {
     int result = db.createInvoiceFromQT(patientId, finalFeeToPay);
 
     if (result == 1) {
-        QString msg = "Lập Hóa đơn thành công!\n\nSố tiền Bệnh nhân cần thanh toán: "
+        QString msg = QString::fromUtf8("Lập Hóa đơn thành công!\n\nSố tiền Bệnh nhân cần thanh toán: ")
                       + QString::number(finalFeeToPay, 'f', 0) + " VNĐ";
-        QMessageBox::information(this, "Thanh Toán Thành Công", msg);
+        QMessageBox::information(this, QString::fromUtf8("Thanh Toán Thành Công"), msg);
         ui->txtPatientId_Invoice->clear();
     }
     else if (result == -1) {
-        QMessageBox::critical(this, "Lỗi", "Mã Bệnh Nhân không tồn tại!");
+        QMessageBox::critical(this, QString::fromUtf8("Lỗi"), QString::fromUtf8("Mã Bệnh Nhân không tồn tại!"));
     }
     else if (result == -2) {
-        QMessageBox::critical(this, "Lỗi", "Bệnh nhân này chưa có Lịch hẹn khám nào!");
+        QMessageBox::critical(this, QString::fromUtf8("Lỗi"), QString::fromUtf8("Bệnh nhân này chưa có Lịch hẹn khám nào!"));
     }
     else if (result == -3) {
-        QMessageBox::critical(this, "Cảnh báo", "Bác sĩ chưa tạo Hồ sơ Bệnh án. Chưa thể tính tiền!");
+        QMessageBox::critical(this, QString::fromUtf8("Cảnh báo"), QString::fromUtf8("Bác sĩ chưa điền Hồ sơ Bệnh án. Chưa thể tính tiền!"));
     }
 }
 
@@ -214,7 +224,6 @@ void ReceptionistMenu::on_btnSearchPatient_clicked() {
             ui->tablePatients->setItem(i, 1, new QTableWidgetItem(QString::fromStdString(foundPatients[i]->getFullName())));
             ui->tablePatients->setItem(i, 2, new QTableWidgetItem(QString::fromStdString(foundPatients[i]->getPhoneNumber())));
             ui->tablePatients->setItem(i, 3, new QTableWidgetItem(QString::fromStdString(foundPatients[i]->getType())));
-            // NÂNG CẤP: Hiển thị BHYT ở kết quả tìm kiếm
             ui->tablePatients->setItem(i, 4, new QTableWidgetItem(QString::fromStdString(foundPatients[i]->getBHYT())));
         }
     }
@@ -243,7 +252,7 @@ void ReceptionistMenu::loadPendingAppointments() {
     }
 
     if (!hasPending) {
-        ui->cbPendingAppointments->addItem("Không có lịch chờ khám");
+        ui->cbPendingAppointments->addItem(QString::fromUtf8("Không có lịch chờ khám"));
         ui->cbPendingAppointments->setEnabled(false);
         ui->btnCancelAppointment->setEnabled(false);
     } else {
@@ -253,26 +262,29 @@ void ReceptionistMenu::loadPendingAppointments() {
 }
 
 void ReceptionistMenu::on_btnCancelAppointment_clicked() {
+    // Thêm khiên bảo vệ cho nút Hủy luôn để an toàn tuyệt đối
+    if (!ui->cbPendingAppointments->isEnabled()) return;
+
     string apptId = ui->cbPendingAppointments->currentData().toString().toStdString();
 
     if (apptId.empty()) {
-        QMessageBox::warning(this, "Lỗi", "Không có lịch hẹn nào được chọn!");
+        QMessageBox::warning(this, QString::fromUtf8("Lỗi"), QString::fromUtf8("Không có lịch hẹn nào được chọn!"));
         return;
     }
 
-    auto reply = QMessageBox::question(this, "Xác nhận Hủy", 
-                                       "Bạn có chắc chắn muốn hủy lịch hẹn [" + QString::fromStdString(apptId) + "] không?", 
+    auto reply = QMessageBox::question(this, QString::fromUtf8("Xác nhận Hủy"), 
+                                       QString::fromUtf8("Bạn có chắc chắn muốn hủy lịch hẹn [") + QString::fromStdString(apptId) + "] không?", 
                                        QMessageBox::Yes | QMessageBox::No);
                                        
     if (reply == QMessageBox::Yes) {
         int result = db.cancelAppointmentFromQT(apptId);
         
         if (result == 1) {
-            QMessageBox::information(this, "Thành công", "Đã hủy lịch hẹn thành công!");
+            QMessageBox::information(this, QString::fromUtf8("Thành công"), QString::fromUtf8("Đã hủy lịch hẹn thành công!"));
             loadPendingAppointments(); 
         } 
         else {
-            QMessageBox::critical(this, "Lỗi", "Không thể hủy lịch hẹn này!");
+            QMessageBox::critical(this, QString::fromUtf8("Lỗi"), QString::fromUtf8("Không thể hủy lịch hẹn này!"));
         }
     }
 }
@@ -281,9 +293,8 @@ void ReceptionistMenu::on_cbSpecialty_currentIndexChanged(const QString &special
     updateAvailableDoctors();
 }
 
-// NÂNG CẤP: HIỂN THỊ CỘT BHYT RA BẢNG CHÍNH
 void ReceptionistMenu::refreshPatientTable() {
-    ui->tablePatients->setColumnCount(5); // Tăng lên 5 cột
+    ui->tablePatients->setColumnCount(5); 
     ui->tablePatients->setHorizontalHeaderLabels({"Mã BN", "Họ Tên", "SĐT", "Loại", "Mã BHYT"});
     ui->tablePatients->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 
@@ -298,7 +309,7 @@ void ReceptionistMenu::refreshPatientTable() {
         ui->tablePatients->setItem(row, 1, new QTableWidgetItem(QString::fromStdString(pat->getFullName())));
         ui->tablePatients->setItem(row, 2, new QTableWidgetItem(QString::fromStdString(pat->getPhoneNumber())));
         ui->tablePatients->setItem(row, 3, new QTableWidgetItem(QString::fromStdString(pat->getType())));
-        ui->tablePatients->setItem(row, 4, new QTableWidgetItem(QString::fromStdString(pat->getBHYT()))); // Đổ dữ liệu BHYT
+        ui->tablePatients->setItem(row, 4, new QTableWidgetItem(QString::fromStdString(pat->getBHYT())));
         row++;
     }
 }
