@@ -189,6 +189,9 @@ void AdminMenu::on_btnManageMedicines_clicked() {
 }
 
 void AdminMenu::on_btnAddMedicine_clicked() {
+    // Rút 2 ký tự đầu tiên từ ComboBox (VD: "B1", "B2")
+    string prefix = ui->cbMedPrefix->currentText().left(2).toStdString();
+    
     string name = ui->txtMedName->text().toStdString();
     string dosage = ui->txtDosage->text().toStdString();
     string priceStr = ui->txtMedPrice->text().toStdString();
@@ -205,13 +208,15 @@ void AdminMenu::on_btnAddMedicine_clicked() {
         return;
     }
 
-    // NÂNG CẤP: Tự động cấp mã Thuốc mới tinh
-    string generatedId = db.generateMedicineId();
-    int result = db.addMedicineFromQT(generatedId, name, price, dosage, qty);
+    // NÂNG CẤP: Dùng chuẩn 6 tham số của hệ thống mới
+    string finalId = ""; // Hứng ID do Backend cấp phát trả về
+    int result = db.addMedicineFromQT(prefix, name, price, dosage, qty, finalId);
     db.saveAllData(); 
 
     if (result == 1) {
-        QMessageBox::information(this, "Thành công", "Đã khởi tạo THUỐC MỚI vào kho!\nMã cấp: " + QString::fromStdString(generatedId));
+        QMessageBox::information(this, "Thành công", "Đã khởi tạo THUỐC MỚI vào kho!\nMã cấp: " + QString::fromStdString(finalId));
+    } else if (result == 2) {
+        QMessageBox::information(this, "Thành công", "Thuốc đã tồn tại (" + QString::fromStdString(finalId) + "). Đã CỘNG DỒN vào kho!");
     }
 
     refreshMedicineTable();

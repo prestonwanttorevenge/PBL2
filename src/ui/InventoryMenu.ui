@@ -8,7 +8,20 @@
    <layout class="QVBoxLayout" name="verticalLayoutMain">
     <item>
      <layout class="QHBoxLayout" name="horizontalLayoutInputs">
-      <item><widget class="QLineEdit" name="txtMedId"><property name="placeholderText"><string>Mã Thuốc</string></property></widget></item>
+      <!-- MỚI: Thêm cbMedPrefix để chọn nhóm thuốc BHYT -->
+      <item><widget class="QComboBox" name="cbMedPrefix">
+        <item><property name="text"><string>B1 - Thuốc cơ bản (BHYT trả 100%)</string></property></item>
+        <item><property name="text"><string>B2 - Thuốc đặc trị (BHYT trả 50%)</string></property></item>
+        <item><property name="text"><string>B3 - Thuốc khác (BHYT trả 80%)</string></property></item>
+        <item><property name="text"><string>DV - Thuốc ngoài danh mục BHYT</string></property></item>
+      </widget></item>
+      
+      <!-- Giữ lại ô txtMedId chỉ để bấm xóa/cập nhật -->
+      <item><widget class="QLineEdit" name="txtMedId">
+         <property name="placeholderText"><string>Mã Thuốc</string></property>
+         <property name="readOnly"><bool>true</bool></property>
+      </widget></item>
+      
       <item><widget class="QLineEdit" name="txtMedName"><property name="placeholderText"><string>Tên Thuốc</string></property></widget></item>
       <item><widget class="QLineEdit" name="txtDosage"><property name="placeholderText"><string>Liều lượng / Dạng</string></property></widget></item>
       <item><widget class="QLineEdit" name="txtPrice"><property name="placeholderText"><string>Đơn giá</string></property></widget></item>
@@ -17,7 +30,6 @@
      </layout>
     </item>
     
-    <!-- MỚI: BỔ SUNG Ô TÌM KIẾM NHANH (LIVE SEARCH) -->
     <item>
      <layout class="QHBoxLayout" name="horizontalLayoutSearch">
       <item><widget class="QLabel" name="lblSearchIcon"><property name="text"><string>🔍 Tra cứu:</string></property></widget></item>

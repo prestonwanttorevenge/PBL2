@@ -1,11 +1,47 @@
 B1_001;Paracetamol 500mg;2000;1 viên/lần, 2-3 lần/ngày;1000
 B1_002;Ibuprofen 400mg;3000;1 viên/lần sau ăn;800
 B1_003;Aspirin 81mg;1500;1 viên/ngày;500
-DV_001;Vitamin C 500mg;1000;1 viên/ngày;1200
 B1_004;Adrenaline 1mg/1ml;15000;Tiêm tĩnh mạch theo y lệnh;200
 B1_005;Atropine 0.25mg/1ml;8000;Tiêm tĩnh mạch theo y lệnh;150
-B2_001;Dopamine 200mg/5ml;35000;Truyền tĩnh mạch;100
 B1_006;Lidocaine 2%;12000;Tiêm tại chỗ/Tĩnh mạch;250
+B1_007;Paracetamol Sirô 150mg/5ml;25000;10-15mg/kg/lần;350
+B1_008;Oresol vị cam;3000;Pha 1 gói/200ml nước;1000
+B1_009;Povidone Iodine 10%;15000;Sát khuẩn vết thương ngoài da;400
+B1_010;Oxytocin 5 IU;12000;Tiêm bắp/truyền tĩnh mạch;150
+B1_011;Nước muối sinh lý 0.9% 10ml;5000;Nhỏ mắt/mũi 3-4 lần/ngày;1000
+B1_012;Glucose 75g (Test dung nạp);25000;Uống 1 lần theo y lệnh;200
+B1_013;Nước cất pha tiêm 5ml;2000;Dùng để pha thuốc tiêm;1500
+B1_014;Dung dịch Formol 10%;100000;Bảo quản bệnh phẩm;50
+B1_015;Cồn y tế tuyệt đối (Ethanol 99%);45000;Dùng trong phòng lab;100
+B1_016;Cồn 70 độ 500ml;25000;Sát khuẩn ngoài da;400
+B1_017;Chlorhexidine 4%;85000;Rửa tay phẫu thuật;150
+B1_018;Noradrenaline 1mg/1ml;25000;Truyền tĩnh mạch theo y lệnh;149
+B1_019;Diazepam 10mg/2ml;12000;Tiêm bắp/tĩnh mạch;200
+B1_020;Ibuprofen Sirô 100mg/5ml;35000;Theo cân nặng (5-10mg/kg);300
+B1_021;Oxi già 3% 500ml;15000;Rửa vết thương;400
+B1_022;Misoprostol 200mcg;5000;Theo y lệnh bác sĩ sản;200
+B1_023;Dung dịch đệm Buffer 500ml;85000;Dùng trong máy xét nghiệm;50
+B1_024;NaCl 0.9% 500ml (Chai lớn);15000;Dùng rửa dụng cụ/Pha hóa chất;300
+B1_025;Gel siêu âm 5 lít;150000;Dùng bôi trơn đầu dò;30
+B1_026;Paraffin y tế tinh khiết;90000;Đúc khối bệnh phẩm;50
+B1_027;Dung dịch nhuộm H&E;200000;Nhuộm tiêu bản mô;20
+B1_028;Betadine 10% 500ml;120000;Sát khuẩn phẫu thuật;150
+B1_029;Presept 2.5g (Viên sủi);15000;Pha dung dịch khử khuẩn;400
+B1_030;Cidezyme 5 lít;850000;Ngâm rửa dụng cụ nội soi;15
+B1_031;Glucose 5% 500ml;20000;Truyền tĩnh mạch;200
+B2_001;Dopamine 200mg/5ml;35000;Truyền tĩnh mạch;100
+B2_002;Morphine 10mg/1ml;50000;Tiêm bắp/tĩnh mạch theo y lệnh;100
+B2_003;Iohexol 300mgI/ml;350000;Tiêm tĩnh mạch trước chụp CT;50
+B2_004;Bari Sulfate;120000;Uống trước chụp X-Quang DD;80
+B2_005;Gadolinium;450000;Tiêm tĩnh mạch trước chụp MRI;30
+B2_006;Dịch truyền Amino Acid 5%;120000;Truyền tĩnh mạch theo y lệnh;150
+B2_007;Lipofundin 20% 250ml;180000;Truyền tĩnh mạch chậm;80
+B2_008;Amiodarone 150mg/3ml;45000;Tiêm tĩnh mạch chậm;100
+B2_009;Dobutamine 250mg;55000;Truyền tĩnh mạch;80
+B2_010;Oseltamivir 75mg (Tamiflu);45000;1 viên/lần, 2 lần/ngày;150
+B2_011;Ultravist 300 (Cản quang);420000;Tiêm tĩnh mạch chụp CT;40
+B2_012;Telebrix 300;250000;Dùng trong X-Quang hệ niệu;60
+B2_013;Nutriflex Lipid (Túi 3 ngăn);350000;Truyền tĩnh mạch nuôi dưỡng;40
 B3_001;Amlodipine 5mg;4000;1 viên/ngày;600
 B3_002;Metformin 500mg;3500;1 viên/lần, 2 lần/ngày;700
 B3_003;Omeprazole 20mg;4500;1 viên/ngày trước ăn;500
@@ -14,87 +50,51 @@ B3_005;Amoxicillin 500mg;5000;1 viên/lần, 2 lần/ngày;800
 B3_006;Cefuroxime 500mg;12000;1 viên/lần, 2 lần/ngày;600
 B3_007;Acyclovir 400mg;8000;1 viên/lần, 3 lần/ngày;300
 B3_008;Azithromycin 500mg;15000;1 viên/ngày;400
-B1_007;Paracetamol Sirô 150mg/5ml;25000;10-15mg/kg/lần;350
-B1_008;Oresol vị cam;3000;Pha 1 gói/200ml nước;1000
-DV_002;Vitamin D3 Drop;45000;2 giọt/ngày;200
 B3_009;Cefixime Sirô;55000;Theo chỉ định bác sĩ;150
-B2_002;Morphine 10mg/1ml;50000;Tiêm bắp/tĩnh mạch theo y lệnh;100
-B1_009;Povidone Iodine 10%;15000;Sát khuẩn vết thương ngoài da;400
 B3_010;Diclofenac 75mg/3ml (Tiêm);20000;Tiêm bắp 1 ống/ngày;200
 B3_011;Cefazolin 1g (Tiêm);35000;Tiêm tĩnh mạch theo y lệnh;300
 B3_012;Sắt + Folic acid;4000;1 viên/ngày;600
-B1_010;Oxytocin 5 IU;12000;Tiêm bắp/truyền tĩnh mạch;150
-DV_003;Calcium D3;3500;1 viên/lần, 2 lần/ngày;500
 B3_013;Clotrimazole 100mg;8000;Đặt âm đạo 1 viên/tối;250
-B1_011;Nước muối sinh lý 0.9% 10ml;5000;Nhỏ mắt/mũi 3-4 lần/ngày;1000
 B3_014;Tobramycin 0.3% 5ml;15000;Nhỏ mắt 2 giọt/lần, 4 lần/ngày;300
 B3_015;Otrivin 0.1% 10ml;45000;Nhỏ mũi 2-3 lần/ngày;250
-DV_004;Fluoride Gel;80000;Thoa răng theo chỉ định RHM;100
-B1_012;Glucose 75g (Test dung nạp);25000;Uống 1 lần theo y lệnh;200
-B1_013;Nước cất pha tiêm 5ml;2000;Dùng để pha thuốc tiêm;1500
-B2_003;Iohexol 300mgI/ml;350000;Tiêm tĩnh mạch trước chụp CT;50
-B2_004;Bari Sulfate;120000;Uống trước chụp X-Quang DD;80
-B2_005;Gadolinium;450000;Tiêm tĩnh mạch trước chụp MRI;30
-B1_014;Dung dịch Formol 10%;100000;Bảo quản bệnh phẩm;50
-B1_015;Cồn y tế tuyệt đối (Ethanol 99%);45000;Dùng trong phòng lab;100
-B1_016;Cồn 70 độ 500ml;25000;Sát khuẩn ngoài da;400
-B1_017;Chlorhexidine 4%;85000;Rửa tay phẫu thuật;150
-DV_005;Nước rửa tay nhanh (Gel);55000;Sát khuẩn tay nhanh;300
-DV_006;Vitamin B1 B6 B12;2500;1 viên/ngày;800
-DV_007;Magne-B6;3500;1 viên/lần, 2 lần/ngày;600
-DV_008;Kẽm Gluconate;4000;1 viên/ngày;500
-DV_009;Ginkgo Biloba 120mg;6000;1 viên/ngày;450
-DV_010;Sữa Ensure Gold 400g;350000;Pha 6 muỗng/195ml nước;100
-B2_006;Dịch truyền Amino Acid 5%;120000;Truyền tĩnh mạch theo y lệnh;150
-B2_007;Lipofundin 20% 250ml;180000;Truyền tĩnh mạch chậm;80
-DV_011;Men vi sinh Probiotic;8000;1 gói/lần, 2 lần/ngày;500
 B3_016;Meloxicam 7.5mg;4000;1 viên/lần, 1-2 lần/ngày;600
 B3_017;Betahistine 16mg;3500;1 viên/lần, 2 lần/ngày;400
 B3_018;Alverine 40mg;2000;1-2 viên/lần khi đau bụng;500
-DV_012;Vitamin B-Complex;1500;1 viên/ngày;800
-B1_018;Noradrenaline 1mg/1ml;25000;Truyền tĩnh mạch theo y lệnh;150
-B2_008;Amiodarone 150mg/3ml;45000;Tiêm tĩnh mạch chậm;100
-B1_019;Diazepam 10mg/2ml;12000;Tiêm bắp/tĩnh mạch;200
-B2_009;Dobutamine 250mg;55000;Truyền tĩnh mạch;80
 B3_019;Gliclazide 30mg;4500;1 viên/ngày (sáng);600
 B3_020;Valsartan 80mg;6500;1 viên/ngày;450
 B3_021;Esomeprazole 40mg;8000;1 viên/ngày trước ăn 30p;500
 B3_022;Rosuvastatin 10mg;7000;1 viên/ngày buổi tối;400
 B3_023;Levofloxacin 500mg;15000;1 viên/ngày;350
 B3_024;Ciprofloxacin 500mg;6000;1 viên/lần, 2 lần/ngày;500
-B2_010;Oseltamivir 75mg (Tamiflu);45000;1 viên/lần, 2 lần/ngày;150
 B3_025;Fluconazole 150mg;22000;1 viên duy nhất/tuần;200
-B1_020;Ibuprofen Sirô 100mg/5ml;35000;Theo cân nặng (5-10mg/kg);300
+B3_026;Tramadol 50mg;5000;1 viên/lần khi đau nhiều;300
+B3_027;Ketorolac 30mg/ml;18000;Tiêm bắp/tĩnh mạch;150
+B3_028;Cefotaxime 1g (Tiêm);40000;Tiêm tĩnh mạch theo y lệnh;250
+B3_029;Progesterone 200mg;15000;1 viên/ngày (đặt hoặc uống);300
+DV_001;Vitamin C 500mg;1000;1 viên/ngày;1200
+DV_002;Vitamin D3 Drop;45000;2 giọt/ngày;200
+DV_003;Calcium D3;3500;1 viên/lần, 2 lần/ngày;500
+DV_004;Fluoride Gel;80000;Thoa răng theo chỉ định RHM;100
+DV_005;Nước rửa tay nhanh (Gel);55000;Sát khuẩn tay nhanh;300
+DV_006;Vitamin B1 B6 B12;2500;1 viên/ngày;800
+DV_007;Magne-B6;3500;1 viên/lần, 2 lần/ngày;600
+DV_008;Kẽm Gluconate;4000;1 viên/ngày;500
+DV_009;Ginkgo Biloba 120mg;6000;1 viên/ngày;450
+DV_010;Sữa Ensure Gold 400g;350000;Pha 6 muỗng/195ml nước;99
+DV_011;Men vi sinh Probiotic;8000;1 gói/lần, 2 lần/ngày;500
+DV_012;Vitamin B-Complex;1500;1 viên/ngày;800
 DV_013;Kẽm Gluconat Sirô;40000;5ml/ngày;250
 DV_014;Bioflora 250mg (Men vi sinh);12000;1 gói/lần, 2 lần/ngày;400
 DV_015;Prospan Sirô ho 100ml;75000;2.5 - 5ml/lần, 3 lần/ngày;200
-B3_026;Tramadol 50mg;5000;1 viên/lần khi đau nhiều;300
-B3_027;Ketorolac 30mg/ml;18000;Tiêm bắp/tĩnh mạch;150
-B1_021;Oxi già 3% 500ml;15000;Rửa vết thương;400
-B3_028;Cefotaxime 1g (Tiêm);40000;Tiêm tĩnh mạch theo y lệnh;250
 DV_016;Acid Folic 5mg;2000;1 viên/ngày;800
-B3_029;Progesterone 200mg;15000;1 viên/ngày (đặt hoặc uống);300
-B1_022;Misoprostol 200mcg;5000;Theo y lệnh bác sĩ sản;200
 DV_017;Dung dịch vệ sinh Lactacyd;60000;Dùng rửa ngoài;150
 DV_018;Hapacol sủi 500mg;3500;Pha 1 viên/150ml nước;500
 DV_019;Nước súc miệng Kin Gingival;120000;Súc miệng 2 lần/ngày;100
 DV_020;Systane Ultra 5ml;75000;Nhỏ mắt khi khô/mỏi;150
 DV_021;Xisat xịt mũi 75ml;30000;Xịt 2-3 lần/ngày;250
-B1_023;Dung dịch đệm Buffer 500ml;85000;Dùng trong máy xét nghiệm;50
-B1_024;NaCl 0.9% 500ml (Chai lớn);15000;Dùng rửa dụng cụ/Pha hóa chất;300
-B2_011;Ultravist 300 (Cản quang);420000;Tiêm tĩnh mạch chụp CT;40
-B2_012;Telebrix 300;250000;Dùng trong X-Quang hệ niệu;60
-B1_025;Gel siêu âm 5 lít;150000;Dùng bôi trơn đầu dò;30
-B1_026;Paraffin y tế tinh khiết;90000;Đúc khối bệnh phẩm;50
-B1_027;Dung dịch nhuộm H&E;200000;Nhuộm tiêu bản mô;20
-B1_028;Betadine 10% 500ml;120000;Sát khuẩn phẫu thuật;150
-B1_029;Presept 2.5g (Viên sủi);15000;Pha dung dịch khử khuẩn;400
-B1_030;Cidezyme 5 lít;850000;Ngâm rửa dụng cụ nội soi;15
 DV_022;Omega 3 Fish Oil 1000mg;5000;1 viên/ngày sau ăn;600
 DV_023;Vitamin E 400 IU;4000;1 viên/ngày;500
 DV_024;Glucosamine 1500mg;8000;1 viên/ngày;450
 DV_025;Collagen Type 2;9000;1 viên/ngày;300
 DV_026;Sữa Peptamen 400g;450000;Dành cho BN tiêu hóa kém;50
-B1_031;Glucose 5% 500ml;20000;Truyền tĩnh mạch;200
-B2_013;Nutriflex Lipid (Túi 3 ngăn);350000;Truyền tĩnh mạch nuôi dưỡng;40
 DV_027;Bột pha đạm Whey Protein;550000;Bổ sung đạm theo chỉ định;30

@@ -23,7 +23,7 @@
        <layout class="QVBoxLayout" name="verticalLayoutUsers">
         <item>
          <layout class="QHBoxLayout" name="horizontalLayoutUserInputs">
-          <!-- Đã khóa readOnly ô User ID -->
+          <!-- Đã khóa ô User ID -->
           <item><widget class="QLineEdit" name="txtUserId">
             <property name="placeholderText"><string>User ID (Tự cấp/Nhấp bảng)</string></property>
             <property name="readOnly"><bool>true</bool></property>
@@ -48,7 +48,6 @@
        <layout class="QVBoxLayout" name="verticalLayoutDoctors">
         <item>
          <layout class="QGridLayout" name="gridLayoutDocInputs">
-          <!-- Đã khóa readOnly ô Mã BS -->
           <item row="0" column="0"><widget class="QLineEdit" name="txtDocId">
             <property name="placeholderText"><string>Mã BS (Nhấp bảng)</string></property>
             <property name="readOnly"><bool>true</bool></property>
@@ -72,7 +71,13 @@
        <layout class="QVBoxLayout" name="verticalLayoutMed">
         <item>
          <layout class="QHBoxLayout" name="horizontalLayoutMedInputs">
-          <!-- Đã khóa readOnly ô Mã Thuốc -->
+          <!-- MỚI: Thêm cbMedPrefix cho Admin -->
+          <item><widget class="QComboBox" name="cbMedPrefix">
+            <item><property name="text"><string>B1 - Thuốc cơ bản</string></property></item>
+            <item><property name="text"><string>B2 - Thuốc đặc trị</string></property></item>
+            <item><property name="text"><string>B3 - Thuốc khác</string></property></item>
+            <item><property name="text"><string>DV - Ngoài BHYT</string></property></item>
+          </widget></item>
           <item><widget class="QLineEdit" name="txtMedId">
             <property name="placeholderText"><string>Mã Thuốc (Nhấp bảng)</string></property>
             <property name="readOnly"><bool>true</bool></property>
@@ -92,7 +97,12 @@
        <layout class="QVBoxLayout" name="verticalLayoutServices">
         <item>
          <layout class="QHBoxLayout" name="horizontalLayoutServiceInputs">
-          <!-- Đã khóa readOnly ô Mã Dịch vụ -->
+          <item><widget class="QComboBox" name="cbServicePrefix">
+            <item><property name="text"><string>S1 - Khám bệnh cơ bản</string></property></item>
+            <item><property name="text"><string>S2 - Cận lâm sàng (Siêu âm, X-Quang)</string></property></item>
+            <item><property name="text"><string>S3 - Kỹ thuật cao (MRI, CT Scan)</string></property></item>
+            <item><property name="text"><string>SV - Dịch vụ yêu cầu thêm</string></property></item>
+          </widget></item>
           <item><widget class="QLineEdit" name="txtServiceId">
             <property name="placeholderText"><string>Mã DV (Nhấp bảng)</string></property>
             <property name="readOnly"><bool>true</bool></property>
