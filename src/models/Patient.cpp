@@ -17,7 +17,7 @@ void Patient::inputData(){
     cout << "Nhap Ma benh an: ";
     getline(cin, this->medicalRecordId);
     cin.ignore();
-    cout << "Nhap chiet khau giam gia bao hiem (VD: 0.8): ";
+    cout << "Nhap BHYT: ";
       getline(cin, this->BHYT);
     cin.ignore();
 }
