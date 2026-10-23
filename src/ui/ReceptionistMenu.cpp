@@ -5,6 +5,7 @@
 #include <QMessageBox>
 #include <QTableWidgetItem>
 #include <QComboBox>
+#include <QInputDialog>
 #include <QRegularExpressionValidator>
 #include <QRegularExpression>
 #include "services/AuthService.h"
@@ -293,9 +294,49 @@ void ReceptionistMenu::on_cbSpecialty_currentIndexChanged(const QString &special
     updateAvailableDoctors();
 }
 
+void ReceptionistMenu::on_btnAssignBed_clicked() {
+    // 1. Kiểm tra xem Lễ tân đã click chọn bệnh nhân trên bảng chưa
+    int row = ui->tablePatients->currentRow();
+    if (row < 0) {
+        QMessageBox::warning(this, "Chưa chọn", "Vui lòng click chọn 1 Bệnh nhân trên bảng!");
+        return;
+    }
+
+    // 2. Chặn chặn nếu bệnh nhân là Ngoại trú
+    QString type = ui->tablePatients->item(row, 3)->text();
+    if (type != "NoiTru") {
+        QMessageBox::warning(this, "Lỗi", "Chức năng này chỉ dành cho Bệnh nhân NỘI TRÚ!");
+        return;
+    }
+
+    string patientId = ui->tablePatients->item(row, 0)->text().toStdString();
+
+    // 3. Hiển thị Pop-up nhập Số Phòng
+    bool ok1;
+    QString room = QInputDialog::getText(this, "Xếp Phòng", 
+                                         "Nhập SỐ PHÒNG bệnh:", 
+                                         QLineEdit::Normal, "", &ok1);
+    if (!ok1) return; // Lễ tân bấm Cancel
+
+    // 4. Hiển thị Pop-up nhập Số Giường
+    bool ok2;
+    QString bed = QInputDialog::getText(this, "Xếp Giường", 
+                                        "Nhập SỐ GIƯỜNG bệnh:", 
+                                        QLineEdit::Normal, "", &ok2);
+    if (!ok2) return;
+
+    // 5. Cập nhật xuống Database và Lưu file
+    bool success = db.updateInpatientBed(patientId, room.toStdString(), bed.toStdString());
+    if (success) {
+        db.saveAllData();
+        QMessageBox::information(this, "Thành công", "Đã cập nhật Phòng/Giường cho bệnh nhân!");
+        refreshPatientTable(); // Load lại bảng để thấy kết quả
+    }
+}
 void ReceptionistMenu::refreshPatientTable() {
-    ui->tablePatients->setColumnCount(5); 
-    ui->tablePatients->setHorizontalHeaderLabels({"Mã BN", "Họ Tên", "SĐT", "Loại", "Mã BHYT"});
+    // ĐỔI THÀNH 6 CỘT
+    ui->tablePatients->setColumnCount(6); 
+    ui->tablePatients->setHorizontalHeaderLabels({"Mã BN", "Họ Tên", "SĐT", "Loại", "Mã BHYT", "Phòng/Giường"});
     ui->tablePatients->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 
     ui->tablePatients->setRowCount(0);
@@ -310,6 +351,18 @@ void ReceptionistMenu::refreshPatientTable() {
         ui->tablePatients->setItem(row, 2, new QTableWidgetItem(QString::fromStdString(pat->getPhoneNumber())));
         ui->tablePatients->setItem(row, 3, new QTableWidgetItem(QString::fromStdString(pat->getType())));
         ui->tablePatients->setItem(row, 4, new QTableWidgetItem(QString::fromStdString(pat->getBHYT())));
+        
+        // THÊM ĐOẠN NÀY LẤY THÔNG TIN GIƯỜNG NẾU LÀ NỘI TRÚ
+        string note = "";
+        if (Inpatient* inpat = dynamic_cast<Inpatient*>(pat)) {
+            if (!inpat->getRoomNumber().empty() && inpat->getRoomNumber() != "Chua xep") {
+                note = "P: " + inpat->getRoomNumber() + " - G: " + inpat->getBedNumber();
+            } else {
+                note = "Chưa xếp giường";
+            }
+        }
+        ui->tablePatients->setItem(row, 5, new QTableWidgetItem(QString::fromStdString(note)));
+        
         row++;
     }
 }

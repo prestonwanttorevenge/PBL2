@@ -699,6 +699,19 @@ bool Database::addPatientFromGUI(string name, string phone, string BH, bool isNo
     }
     return true;
 }
+bool Database::updateInpatientBed(string patientId, string room, string bed) {
+    Patient* pat = findPatientById(patientId);
+    if (pat == nullptr) return false;
+    
+    // Ép kiểu sang Inpatient để sử dụng các hàm của Nội trú
+    Inpatient* inpat = dynamic_cast<Inpatient*>(pat);
+    if (inpat != nullptr) {
+        inpat->setRoomNumber(room);
+        inpat->setBedNumber(bed);
+        return true;
+    }
+    return false; // Trả về false nếu đây là bệnh nhân Ngoại trú
+}
 
 // --- MỤC C: LỄ TÂN TẠO LỊCH ĐỒNG THỜI SINH LUÔN MÃ BỆNH ÁN RỖNG (BA...) ---
 int Database::bookAppointmentFromQT(string patientId, string doctorId, string receptionistId, string specialty, string day, string time) {

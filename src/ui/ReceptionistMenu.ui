@@ -1,97 +1,303 @@
-<?xml version='1.0' encoding='utf-8'?>
+<?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
  <class>ReceptionistMenu</class>
  <widget class="QMainWindow" name="ReceptionistMenu">
-  <property name="geometry"><rect><x>0</x><y>0</y><width>1100</width><height>700</height></rect></property>
-  <property name="windowTitle"><string>Giao Diện Lễ Tân - Receptionist Menu</string></property>
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1100</width>
+    <height>700</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Giao Diện Lễ Tân - Receptionist Menu</string>
+  </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QHBoxLayout" name="horizontalLayoutMain">
     <item>
      <layout class="QVBoxLayout" name="verticalLayoutLeftPanel">
-      
-      <!-- PHẦN ĐĂNG KÝ MỚI -->
       <item>
        <layout class="QHBoxLayout" name="horizontalLayoutPatientInfo">
-        <item><widget class="QLineEdit" name="txtPatientName"><property name="placeholderText"><string>Họ và Tên</string></property></widget></item>
-        <item><widget class="QLineEdit" name="txtPatientPhone"><property name="placeholderText"><string>Số điện thoại</string></property></widget></item>
-        <!-- NÂNG CẤP: BỔ SUNG Ô NHẬP MÃ BHYT -->
-        <item><widget class="QLineEdit" name="txtBHYT"><property name="placeholderText"><string>Mã BHYT (Để trống nếu ko có)</string></property></widget></item>
+        <item>
+         <widget class="QLineEdit" name="txtPatientName">
+          <property name="placeholderText">
+           <string>Họ và Tên</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="txtPatientPhone">
+          <property name="placeholderText">
+           <string>Số điện thoại</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="txtBHYT">
+          <property name="placeholderText">
+           <string>Mã BHYT (Để trống nếu ko có)</string>
+          </property>
+         </widget>
+        </item>
        </layout>
       </item>
       <item>
        <layout class="QHBoxLayout" name="horizontalLayoutPatientReg">
-        <item><widget class="QRadioButton" name="radioNoiTru"><property name="text"><string>Nội Trú</string></property></widget></item>
-        <item><spacer name="horizontalSpacerReg"><property name="orientation"><enum>Qt::Horizontal</enum></property></spacer></item>
-        <item><widget class="QPushButton" name="btnRegisterPatient"><property name="text"><string>Đăng Ký Mới</string></property></widget></item>
+        <item>
+         <widget class="QRadioButton" name="radioNoiTru">
+          <property name="text">
+           <string>Nội Trú</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="btnAssignBed">
+          <property name="text">
+           <string>Xếp Giường</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer name="horizontalSpacerReg">
+          <property name="orientation">
+           <enum>Qt::Orientation::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>0</width>
+            <height>0</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item>
+         <widget class="QPushButton" name="btnRegisterPatient">
+          <property name="text">
+           <string>Đăng Ký Mới</string>
+          </property>
+         </widget>
+        </item>
        </layout>
       </item>
-      <item><spacer name="verticalSpacer1"><property name="orientation"><enum>Qt::Vertical</enum></property></spacer></item>
-      
-      <!-- PHẦN ĐẶT LỊCH HẸN -->
       <item>
-         <widget class="QLineEdit" name="txtBookPatientId">
-            <property name="placeholderText"><string>Mã BN (Chọn từ bảng để đặt lịch)</string></property>
-            <property name="readOnly"><bool>true</bool></property>
-         </widget>
+       <spacer name="verticalSpacer1">
+        <property name="orientation">
+         <enum>Qt::Orientation::Vertical</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>0</width>
+          <height>0</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <widget class="QLineEdit" name="txtBookPatientId">
+        <property name="readOnly">
+         <bool>true</bool>
+        </property>
+        <property name="placeholderText">
+         <string>Mã BN (Chọn từ bảng để đặt lịch)</string>
+        </property>
+       </widget>
       </item>
       <item>
        <layout class="QHBoxLayout" name="horizontalLayoutAppointment">
-        <item><widget class="QComboBox" name="cbSpecialty" /></item>
-        <item><widget class="QComboBox" name="cbDay">
-          <item><property name="text"><string>Thứ 2</string></property></item><item><property name="text"><string>Thứ 3</string></property></item>
-          <item><property name="text"><string>Thứ 4</string></property></item><item><property name="text"><string>Thứ 5</string></property></item>
-          <item><property name="text"><string>Thứ 6</string></property></item><item><property name="text"><string>Thứ 7</string></property></item>
-          <item><property name="text"><string>Chủ nhật</string></property></item>
-        </widget></item>
-        <item><widget class="QComboBox" name="cbShift">
-          <item><property name="text"><string>Sáng</string></property></item><item><property name="text"><string>Chiều</string></property></item>
-          <item><property name="text"><string>Tối</string></property></item>
-        </widget></item>
-        <item><widget class="QComboBox" name="cbDoctor" /></item>
+        <item>
+         <widget class="QComboBox" name="cbSpecialty"/>
+        </item>
+        <item>
+         <widget class="QComboBox" name="cbDay">
+          <item>
+           <property name="text">
+            <string>Thứ 2</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Thứ 3</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Thứ 4</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Thứ 5</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Thứ 6</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Thứ 7</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Chủ nhật</string>
+           </property>
+          </item>
+         </widget>
+        </item>
+        <item>
+         <widget class="QComboBox" name="cbShift">
+          <item>
+           <property name="text">
+            <string>Sáng</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Chiều</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Tối</string>
+           </property>
+          </item>
+         </widget>
+        </item>
+        <item>
+         <widget class="QComboBox" name="cbDoctor"/>
+        </item>
        </layout>
       </item>
-      <item><widget class="QPushButton" name="btnBookAppointment"><property name="text"><string>Đặt Lịch Hẹn Khám</string></property></widget></item>
-      
-      <!-- KHU VỰC HỦY LỊCH HẸN -->
-      <item><spacer name="verticalSpacerCancel"><property name="orientation"><enum>Qt::Vertical</enum></property></spacer></item>
+      <item>
+       <widget class="QPushButton" name="btnBookAppointment">
+        <property name="text">
+         <string>Đặt Lịch Hẹn Khám</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="verticalSpacerCancel">
+        <property name="orientation">
+         <enum>Qt::Orientation::Vertical</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>0</width>
+          <height>0</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
       <item>
        <layout class="QHBoxLayout" name="horizontalLayoutCancel">
-        <item><widget class="QComboBox" name="cbPendingAppointments" /></item>
-        <item><widget class="QPushButton" name="btnCancelAppointment"><property name="text"><string>Hủy Lịch Hẹn</string></property></widget></item>
+        <item>
+         <widget class="QComboBox" name="cbPendingAppointments"/>
+        </item>
+        <item>
+         <widget class="QPushButton" name="btnCancelAppointment">
+          <property name="text">
+           <string>Hủy Lịch Hẹn</string>
+          </property>
+         </widget>
+        </item>
        </layout>
       </item>
-
-      <!-- PHẦN HÓA ĐƠN -->
-      <item><spacer name="verticalSpacer2"><property name="orientation"><enum>Qt::Vertical</enum></property></spacer></item>
+      <item>
+       <spacer name="verticalSpacer2">
+        <property name="orientation">
+         <enum>Qt::Orientation::Vertical</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>0</width>
+          <height>0</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
       <item>
        <layout class="QHBoxLayout" name="horizontalLayoutInvoice">
-        <item><widget class="QLineEdit" name="txtPatientId_Invoice">
-          <property name="placeholderText"><string>Mã BN (Chọn từ bảng)</string></property>
-          <property name="readOnly"><bool>true</bool></property>
-        </widget></item>
-        <item><widget class="QPushButton" name="btnCreateInvoice"><property name="text"><string>Lập Hóa Đơn &amp;&amp; Thanh Toán</string></property></widget></item>
+        <item>
+         <widget class="QLineEdit" name="txtPatientId_Invoice">
+          <property name="readOnly">
+           <bool>true</bool>
+          </property>
+          <property name="placeholderText">
+           <string>Mã BN (Chọn từ bảng)</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="btnCreateInvoice">
+          <property name="text">
+           <string>Lập Hóa Đơn &amp;&amp; Thanh Toán</string>
+          </property>
+         </widget>
+        </item>
        </layout>
       </item>
-      
-      <!-- PHẦN TRA CỨU -->
-      <item><spacer name="verticalSpacer3"><property name="orientation"><enum>Qt::Vertical</enum></property></spacer></item>
+      <item>
+       <spacer name="verticalSpacer3">
+        <property name="orientation">
+         <enum>Qt::Orientation::Vertical</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>0</width>
+          <height>0</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
       <item>
        <layout class="QHBoxLayout" name="horizontalLayoutSearch">
-        <item><widget class="QLineEdit" name="txtSearchPatient"><property name="placeholderText"><string>Nhập Mã hoặc Tên để tìm...</string></property></widget></item>
-        <item><widget class="QPushButton" name="btnSearchPatient"><property name="text"><string>Tra Cứu</string></property></widget></item>
+        <item>
+         <widget class="QLineEdit" name="txtSearchPatient">
+          <property name="placeholderText">
+           <string>Nhập Mã hoặc Tên để tìm...</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="btnSearchPatient">
+          <property name="text">
+           <string>Tra Cứu</string>
+          </property>
+         </widget>
+        </item>
        </layout>
       </item>
-      
-      <item><spacer name="verticalSpacer4"><property name="orientation"><enum>Qt::Vertical</enum></property></spacer></item>
-      <item><widget class="QPushButton" name="btnLogout"><property name="text"><string>Đăng Xuất</string></property></widget></item>
+      <item>
+       <spacer name="verticalSpacer4">
+        <property name="orientation">
+         <enum>Qt::Orientation::Vertical</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>0</width>
+          <height>0</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <widget class="QPushButton" name="btnLogout">
+        <property name="text">
+         <string>Đăng Xuất</string>
+        </property>
+       </widget>
+      </item>
      </layout>
     </item>
-    
-    <!-- BẢNG DANH SÁCH BỆNH NHÂN -->
     <item>
-     <widget class="QTableWidget" name="tablePatients" />
+     <widget class="QTableWidget" name="tablePatients"/>
     </item>
    </layout>
   </widget>
  </widget>
+ <resources/>
+ <connections/>
 </ui>

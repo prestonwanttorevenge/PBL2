@@ -5,6 +5,7 @@
 #include <QTableWidgetItem>
 #include "services/Database.h"
 #include "services/AuthService.h"
+#include <QInputDialog>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class ReceptionistMenu; }
@@ -27,7 +28,7 @@ private slots:
     void on_cbSpecialty_currentIndexChanged(const QString &specialtyText);
     void on_btnCancelAppointment_clicked();
     void loadPendingAppointments();
-    
+    void on_btnAssignBed_clicked();
     // Bắt sự kiện khi Lễ tân click chọn Bệnh nhân trên bảng
     void on_tablePatients_itemClicked(QTableWidgetItem *item);
 
