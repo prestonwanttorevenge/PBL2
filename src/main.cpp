@@ -43,9 +43,19 @@ void runPerformanceBenchmark() {
         QFile::rename(realPatientFilePath, backupFilePath); // Đổi tên file thật thành file backup
     }
 
-    std::vector<int> N_values = {100, 500, 1000, 2000, 3000, 5000, 8000, 10000};
-    const int K = 50; 
+    std::vector<int> N_values;
+    int startN = 100;
+    int endN = 10000;
+    int numPoints = 50;
     
+    // Tính bước nhảy (Step = (10000 - 100) / 49 = 202.04)
+    double step = (double)(endN - startN) / (numPoints - 1);
+    
+    for (int i = 0; i < numPoints; ++i) {
+        N_values.push_back(startN + (int)(i * step));
+    }
+    
+    const int K = 50; // Giữ nguyên số lần lặp K = 50 để lấy trung bình cộng
     std::ofstream outFile("benchmark_results.csv");
     outFile << "N,T_Load_ms,T_Save_ms,T_Search_us\n";
 
@@ -108,7 +118,7 @@ int main(int argc, char *argv[]) {
     QApplication a(argc, argv);
     
     // GỌI CHẠY TEST TẠI ĐÂY
-    runPerformanceBenchmark();
+    //runPerformanceBenchmark();
 
     a.setQuitOnLastWindowClosed(false);
     a.setStyle(QStyleFactory::create("Fusion"));
