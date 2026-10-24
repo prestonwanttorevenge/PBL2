@@ -12,6 +12,10 @@
       <item><widget class="QPushButton" name="btnManageDoctors"><property name="text"><string>Bác Sĩ</string></property></widget></item>
       <item><widget class="QPushButton" name="btnManageMedicines"><property name="text"><string>Kho Thuốc</string></property></widget></item>
       <item><widget class="QPushButton" name="btnManageServices"><property name="text"><string>Dịch Vụ</string></property></widget></item>
+      
+      <!-- NÚT MỚI: Truy cập bảng Doanh Thu -->
+      <item><widget class="QPushButton" name="btnViewRevenue"><property name="text"><string>Doanh Thu</string></property></widget></item>
+      
       <item><spacer name="horizontalSpacer"><property name="orientation"><enum>Qt::Horizontal</enum></property></spacer></item>
       <item><widget class="QPushButton" name="btnLogout"><property name="text"><string>Đăng Xuất</string></property></widget></item>
      </layout>
@@ -19,11 +23,12 @@
     <item>
      <widget class="QStackedWidget" name="stackedWidget">
       <property name="currentIndex"><number>0</number></property>
+      
+      <!-- TRANG 0: QUẢN LÝ USER -->
       <widget class="QWidget" name="pageUsers">
        <layout class="QVBoxLayout" name="verticalLayoutUsers">
         <item>
          <layout class="QHBoxLayout" name="horizontalLayoutUserInputs">
-          <!-- Đã khóa ô User ID -->
           <item><widget class="QLineEdit" name="txtUserId">
             <property name="placeholderText"><string>User ID (Tự cấp/Nhấp bảng)</string></property>
             <property name="readOnly"><bool>true</bool></property>
@@ -44,6 +49,8 @@
         <item><widget class="QTableWidget" name="tableUsers" /></item>
        </layout>
       </widget>
+
+      <!-- TRANG 1: QUẢN LÝ BÁC SĨ -->
       <widget class="QWidget" name="pageDoctors">
        <layout class="QVBoxLayout" name="verticalLayoutDoctors">
         <item>
@@ -67,11 +74,12 @@
         <item><widget class="QTableWidget" name="tableDoctors" /></item>
        </layout>
       </widget>
+
+      <!-- TRANG 2: QUẢN LÝ THUỐC -->
       <widget class="QWidget" name="pageMedicines">
        <layout class="QVBoxLayout" name="verticalLayoutMed">
         <item>
          <layout class="QHBoxLayout" name="horizontalLayoutMedInputs">
-          <!-- MỚI: Thêm cbMedPrefix cho Admin -->
           <item><widget class="QComboBox" name="cbMedPrefix">
             <item><property name="text"><string>B1 - Thuốc cơ bản</string></property></item>
             <item><property name="text"><string>B2 - Thuốc đặc trị</string></property></item>
@@ -93,14 +101,16 @@
         <item><widget class="QTableWidget" name="tableMedicines" /></item>
        </layout>
       </widget>
+
+      <!-- TRANG 3: QUẢN LÝ DỊCH VỤ -->
       <widget class="QWidget" name="pageServices">
        <layout class="QVBoxLayout" name="verticalLayoutServices">
         <item>
          <layout class="QHBoxLayout" name="horizontalLayoutServiceInputs">
           <item><widget class="QComboBox" name="cbServicePrefix">
             <item><property name="text"><string>S1 - Khám bệnh cơ bản</string></property></item>
-            <item><property name="text"><string>S2 - Cận lâm sàng (Siêu âm, X-Quang)</string></property></item>
-            <item><property name="text"><string>S3 - Kỹ thuật cao (MRI, CT Scan)</string></property></item>
+            <item><property name="text"><string>S2 - Cận lâm sàng</string></property></item>
+            <item><property name="text"><string>S3 - Kỹ thuật cao</string></property></item>
             <item><property name="text"><string>SV - Dịch vụ yêu cầu thêm</string></property></item>
           </widget></item>
           <item><widget class="QLineEdit" name="txtServiceId">
@@ -116,9 +126,50 @@
         <item><widget class="QTableWidget" name="tableServices" /></item>
        </layout>
       </widget>
+
+      <!-- TRANG 4 (MỚI): XEM DOANH THU & THỐNG KÊ (pageRevenue) -->
+      <widget class="QWidget" name="pageRevenue">
+       <layout class="QVBoxLayout" name="verticalLayoutRevenue">
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayoutRevStats">
+          <item>
+           <widget class="QLabel" name="lblTitleRevenue">
+            <property name="text"><string>&lt;b&gt;TỔNG DOANH THU:&lt;/b&gt;</string></property>
+            <property name="font"><font><pointsize>12</pointsize></font></property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="lblTotalRevenue">
+            <property name="text"><string>0 VNĐ</string></property>
+            <property name="font"><font><pointsize>12</pointsize><weight>75</weight><bold>true</bold></font></property>
+            <property name="styleSheet"><string>color: #D97706;</string></property>
+           </widget>
+          </item>
+          <item><spacer name="horizontalSpacerRev"><property name="orientation"><enum>Qt::Horizontal</enum></property></spacer></item>
+          <item>
+           <widget class="QLabel" name="lblTitlePatients">
+            <property name="text"><string>&lt;b&gt;TỔNG HỒ SƠ BỆNH NHÂN:&lt;/b&gt;</string></property>
+            <property name="font"><font><pointsize>12</pointsize></font></property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="lblTotalPatients">
+            <property name="text"><string>0 người</string></property>
+            <property name="font"><font><pointsize>12</pointsize><weight>75</weight><bold>true</bold></font></property>
+            <property name="styleSheet"><string>color: #0284C7;</string></property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item><widget class="QTableWidget" name="tableRevenue" /></item>
+       </layout>
+      </widget>
+
      </widget>
     </item>
    </layout>
   </widget>
  </widget>
+ <resources/>
+ <connections/>
 </ui>

@@ -4,8 +4,10 @@
 #include "services/Database.h"
 #include <QMessageBox>
 #include <QTableWidgetItem>
-#include <QColor> 
-#include <QDate>
+#include <QColor>
+#include <QDate> 
+
+using namespace std;
 
 DoctorMenu::DoctorMenu(Database& database, AuthService& authService, QWidget *parent)
     : QMainWindow(parent), ui(new Ui::DoctorMenu), db(database), auth(authService) {
@@ -16,13 +18,14 @@ DoctorMenu::DoctorMenu(Database& database, AuthService& authService, QWidget *pa
     
     loadPatientQueue();
     loadMedicineComboBox("Tất cả"); 
-    //lam them UI hien thi combobox services
+    
+    // Tải danh sách Dịch vụ Cận lâm sàng
     ui->cbService->clear();
     vector<Service*> srvs = db.getServices().getAllPointers();
     for (auto srv : srvs) {
-    QString displayText = QString::fromStdString(srv->getId() + " - " + srv->getServiceName());
-    ui->cbService->addItem(displayText, QString::fromStdString(srv->getId()));
-}
+        QString displayText = QString::fromStdString(srv->getId() + " - " + srv->getServiceName());
+        ui->cbService->addItem(displayText, QString::fromStdString(srv->getId()));
+    }
 }
 
 DoctorMenu::~DoctorMenu() {
@@ -33,12 +36,12 @@ void DoctorMenu::on_tableAppointments_itemClicked(QTableWidgetItem *item) {
     int row = item->row();
     if (row >= 0) {
         QString apptId = ui->tableAppointments->item(row, 0)->text();
-        QString patientId = ui->tableAppointments->item(row, 1)->text();
+        QString patientId = ui->tableAppointments->item(row, 1)->text(); // Cột 1 là Mã Bệnh Nhân
         
         ui->txtAppointmentId->setText(apptId);
         ui->txtPatientId_History->setText(patientId);
 
-        // --- NÂNG CẤP: TỰ ĐỘNG LẤY MÃ BỆNH ÁN TỪ LỄ TÂN ĐỂ HIỂN THỊ ---
+        // TỰ ĐỘNG LẤY MÃ BỆNH ÁN TỪ LỄ TÂN
         ui->txtRecordId->clear();
         vector<MedicalRecord>& records = db.getMedicalRecords();
         for (auto& rec : records) {
@@ -47,7 +50,6 @@ void DoctorMenu::on_tableAppointments_itemClicked(QTableWidgetItem *item) {
                 break;
             }
         }
-        // -------------------------------------------------------------
     }
 }
 
@@ -173,31 +175,28 @@ void DoctorMenu::on_btnPrescribeMedicine_clicked() {
         return;
     }
 
-    // --- LỚP KHIÊN BẢO VỆ UX: ÉP BÁC SĨ PHẢI LƯU BỆNH ÁN TRƯỚC ---
+    // --- LỚP KHIÊN BẢO VỆ UX: ĐÃ ĐƯỢC KHÔI PHỤC NGUYÊN TRẠNG ---
     MedicalRecord* record = db.findMedicalRecordById(recordId);
     if (record != nullptr && record->getDiagnosis().empty()) {
         QMessageBox::warning(this, QString::fromUtf8("Quy trình sai"), 
                              QString::fromUtf8("Bác sĩ vui lòng nhập [Chẩn đoán] và bấm [Lưu Bệnh Án] ở phía trên để chốt hồ sơ trước khi kê đơn thuốc!"));
         return;
     }
-    // -------------------------------------------------------------
 
-    // === LỚP KHIÊN: ÉP BUỘC CHỜ KẾT QUẢ XÉT NGHIỆM ===
+    // === LỚP KHIÊN ÉP BUỘC CHỜ KẾT QUẢ CLS: ĐÃ ĐƯỢC KHÔI PHỤC ===
     string apptId = ui->txtAppointmentId->text().toStdString();
     Appointment* appt = db.findAppointmentById(apptId);
 
     if (appt != nullptr && record != nullptr) {
-        // Nếu Bác sĩ ĐÃ chỉ định dịch vụ (Siêu âm, X-Quang...) 
-        // VÀ trạng thái Lịch hẹn vẫn đang là "Pending" (Tức là chưa chịu cho bệnh nhân đi làm xét nghiệm)
         if (!record->getAssignedServices().empty() && appt->getStatus() == "Pending") {
-            
             QMessageBox::critical(this, QString::fromUtf8("Cảnh Báo Vi Phạm Quy Trình"), 
                 QString::fromUtf8("Bệnh nhân đã được chỉ định Dịch vụ Cận lâm sàng!\n\n"
                                   "Vui lòng bấm nút [Lưu & Chờ Kết Quả CLS] cho bệnh nhân đi làm xét nghiệm.\n"
                                   "Khi bệnh nhân mang kết quả về, bạn click lại vào tên bệnh nhân trên bảng mới được phép kê đơn thuốc!"));
-            return; // CHẶN ĐỨNG QUÁ TRÌNH KÊ THUỐC
+            return; 
         }
     }
+    
     int result = db.prescribeMedicineFromQT(recordId, medId, dosage, qty);
 
     if (result == 1) {
@@ -246,8 +245,8 @@ void DoctorMenu::on_btnViewPatientHistory_clicked() {
         return;
     }
 
+    // ĐÃ KHÔI PHỤC NGUYÊN DẠNG GHI CHÚ
     QString msg = "LỊCH SỬ KHÁM CỦA BỆNH NHÂN: " + QString::fromStdString(patientId) + "\n\n";
-    
     for (size_t i = 0; i < history.size(); i++) {
         msg += "--- Lần khám thứ " + QString::number(i + 1) + " ---\n";
         msg += "+ Mã Bệnh Án: " + QString::fromStdString(history[i]->getRecordId()) + "\n";
@@ -277,6 +276,7 @@ void DoctorMenu::on_btnCancelAppointment_clicked() {
     if (reply == QMessageBox::Yes) {
         int result = db.cancelAppointmentFromQT(apptId);
         
+        // ĐÃ KHÔI PHỤC KIỂM TRA LỖI -2
         if (result == 1) {
             QMessageBox::information(this, "Thành công", "Đã hủy lịch hẹn thành công!");
             loadPatientQueue(); 
@@ -288,6 +288,7 @@ void DoctorMenu::on_btnCancelAppointment_clicked() {
         }
     }
 }
+
 void DoctorMenu::on_btnAssignService_clicked() {
     string recordId = ui->txtRecordId->text().toStdString();
     string serviceId = ui->cbService->currentData().toString().toStdString();
@@ -306,7 +307,7 @@ void DoctorMenu::on_btnAssignService_clicked() {
         QMessageBox::warning(this, "Cảnh báo", "Dịch vụ này đã được chỉ định rồi!");
     }
 }
-//làm 1 cái nút lưu tạm vào bệnh án rồi chờ đợi xét nghiệm xong mới tới bước làm đơn thuốc
+
 void DoctorMenu::on_btnWaitResult_clicked() {
     string apptId = ui->txtAppointmentId->text().toStdString();
     string symp = ui->txtSymptoms->text().toStdString();
@@ -318,18 +319,17 @@ void DoctorMenu::on_btnWaitResult_clicked() {
         return;
     }
 
-    // Truyền chữ "Waiting" vào để chuyển trạng thái bệnh nhân
     string updatedRecordId = db.updateMedicalRecordFromQT(apptId, symp, diag, notes, "Waiting");
 
     if (!updatedRecordId.empty()) {
         QMessageBox::information(this, "Thành công", "Đã lưu hồ sơ. Bệnh nhân đang đi làm xét nghiệm Cận lâm sàng!");
-        loadPatientQueue(); // Tải lại bảng sẽ thấy bệnh nhân đổi sang màu Xanh lam
+        loadPatientQueue(); 
     }
 }
 
 void DoctorMenu::loadPatientQueue() {
-    ui->tableAppointments->setColumnCount(4);
-    ui->tableAppointments->setHorizontalHeaderLabels({"Mã Lịch Hẹn", "Mã Bệnh Nhân", "Thời Gian", "Trạng Thái"});
+    ui->tableAppointments->setColumnCount(5);
+    ui->tableAppointments->setHorizontalHeaderLabels({"Mã Lịch Hẹn", "Mã Bệnh Nhân", "Loại", "Thời Gian", "Trạng Thái"});
     ui->tableAppointments->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 
     ui->tableAppointments->setRowCount(0);
@@ -337,35 +337,45 @@ void DoctorMenu::loadPatientQueue() {
     
     int row = 0;
     for (const auto& appt : appts) {
-        // Lấy cả 2 trạng thái: Pending và Waiting
         if (appt.getStatus() == "Pending" || appt.getStatus() == "Waiting") {
             ui->tableAppointments->insertRow(row);
             
             QTableWidgetItem *item0 = new QTableWidgetItem(QString::fromStdString(appt.getAppointmentId()));
             QTableWidgetItem *item1 = new QTableWidgetItem(QString::fromStdString(appt.getPatientId()));
+            
+            // CỘT LOẠI BỆNH NHÂN
+            Patient* pat = db.findPatientById(appt.getPatientId());
+            QString typeStr = "Chưa rõ";
+            if (pat != nullptr) {
+                if (pat->getType() == "NoiTru") typeStr = QString::fromUtf8("Nội Trú");
+                else if (pat->getType() == "NgoaiTru") typeStr = QString::fromUtf8("Ngoại Trú");
+            }
+            QTableWidgetItem *item2 = new QTableWidgetItem(typeStr);
+
             QString timeStr = QString::fromStdString(appt.getDayOfWeek() + " - " + appt.getTimeSlot());
-            QTableWidgetItem *item2 = new QTableWidgetItem(timeStr);
+            QTableWidgetItem *item3 = new QTableWidgetItem(timeStr);
             
-            // Xử lý text hiển thị
             QString statusText = (appt.getStatus() == "Pending") ? QString::fromUtf8("Chờ Khám") : QString::fromUtf8("Chờ Kết Quả CLS");
-            QTableWidgetItem *item3 = new QTableWidgetItem(statusText);
+            QTableWidgetItem *item4 = new QTableWidgetItem(statusText);
             
-            // Đổi màu để Bác sĩ dễ phân biệt (Vàng = Chờ khám, Xanh lam = Chờ kết quả)
+            // ĐÃ KHÔI PHỤC NGUYÊN TRẠNG BẢNG MÀU UI
             QColor bg = (appt.getStatus() == "Pending") ? QColor(255, 243, 205) : QColor(217, 237, 247); 
             QColor fg = (appt.getStatus() == "Pending") ? QColor(133, 100, 4) : QColor(12, 84, 96);
             
-            item0->setBackground(bg); item1->setBackground(bg);
-            item2->setBackground(bg); item3->setBackground(bg);
-            item3->setForeground(fg);
+            item0->setBackground(bg); item1->setBackground(bg); item2->setBackground(bg);
+            item3->setBackground(bg); item4->setBackground(bg);
+            item4->setForeground(fg);
 
             ui->tableAppointments->setItem(row, 0, item0);
             ui->tableAppointments->setItem(row, 1, item1);
             ui->tableAppointments->setItem(row, 2, item2);
             ui->tableAppointments->setItem(row, 3, item3);
+            ui->tableAppointments->setItem(row, 4, item4);
             row++;
         }
     }
 }
+
 void DoctorMenu::on_btnDischargePatient_clicked() {
     string patientId = ui->txtPatientId_History->text().toStdString();
 
@@ -380,28 +390,20 @@ void DoctorMenu::on_btnDischargePatient_clicked() {
                                        QMessageBox::Yes | QMessageBox::No);
 
     if (reply == QMessageBox::Yes) {
-        // Trích xuất ngày giờ thực tế từ hệ thống để làm Ngày xuất viện
         QString currentDate = QDate::currentDate().toString("dd/MM/yyyy");
-
-        // Giao tiếp với tầng Database thông qua mã trạng thái (SOLID)
         int result = db.dischargeInpatientFromQT(patientId, currentDate.toStdString());
 
         if (result == 1) {
-            db.saveAllData(); // Đồng bộ dữ liệu xuống tệp .csv ngay lập tức
+            db.saveAllData(); 
             QMessageBox::information(this, QString::fromUtf8("Thành công"), 
-                                     QString::fromUtf8("Đã phê duyệt xuất viện thành công!\nKhông gian lưu trú đã được thu hồi và sẵn sàng đón bệnh nhân mới."));
+                                     QString::fromUtf8("Đã phê duyệt xuất viện thành công!\nKhông gian lưu trú đã được thu hồi."));
             ui->txtPatientId_History->clear();
         } 
         else if (result == -2) {
-            QMessageBox::warning(this, QString::fromUtf8("Quy chế từ chối"), 
-                                 QString::fromUtf8("Đây là bệnh nhân Ngoại trú. Quy trình giải phóng giường không áp dụng cho đối tượng này."));
+            QMessageBox::warning(this, QString::fromUtf8("Từ chối"), QString::fromUtf8("Đây là bệnh nhân Ngoại trú. Quy trình giải phóng giường không áp dụng."));
         } 
         else if (result == -3) {
-            QMessageBox::warning(this, QString::fromUtf8("Lỗi Trạng thái"), 
-                                 QString::fromUtf8("Hồ sơ nội trú này chưa được Lễ tân xếp giường hoặc đã hoàn tất thủ tục xuất viện từ trước."));
+            QMessageBox::warning(this, QString::fromUtf8("Lỗi Trạng thái"), QString::fromUtf8("Hồ sơ này chưa được xếp giường hoặc đã xuất viện từ trước."));
         } 
-        else {
-            QMessageBox::critical(this, QString::fromUtf8("Lỗi Hệ thống"), QString::fromUtf8("Không thể truy xuất Hồ sơ Bệnh nhân trong cơ sở dữ liệu."));
-        }
     }
 }
