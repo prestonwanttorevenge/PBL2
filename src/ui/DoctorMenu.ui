@@ -20,7 +20,6 @@
         <property name="readOnly"><bool>true</bool></property>
       </widget></item>
       
-      <!-- Đã sửa placeholder của RecordId để phản ánh đúng thực tế -->
       <item><widget class="QLineEdit" name="txtRecordId">
         <property name="placeholderText"><string>Mã Bệnh Án (Lễ tân đã cấp sẵn)</string></property>
         <property name="readOnly"><bool>true</bool></property>
@@ -30,10 +29,23 @@
       <item><widget class="QLineEdit" name="txtDiagnosis"><property name="placeholderText"><string>Chẩn đoán</string></property></widget></item>
       <item><widget class="QLineEdit" name="txtNotes"><property name="placeholderText"><string>Ghi chú thêm</string></property></widget></item>
       
-      <!-- Đổi nút Tạo thành nút Lưu/Cập nhật Bệnh án -->
-      <item><widget class="QPushButton" name="btnCreateMedicalRecord"><property name="text"><string>Lưu Bệnh Án</string></property></widget></item>
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayoutSaveRecord">
+        <item><widget class="QPushButton" name="btnCreateMedicalRecord"><property name="text"><string>Lưu Bệnh Án</string></property></widget></item>
+        <item><widget class="QPushButton" name="btnWaitResult"><property name="text"><string>Lưu &amp;&amp; Chờ KQ CLS</string></property></widget></item>
+       </layout>
+      </item>
       <item><spacer name="verticalSpacer1"><property name="orientation"><enum>Qt::Vertical</enum></property></spacer></item>
       
+      <!-- PHẦN CHỈ ĐỊNH DỊCH VỤ -->
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayoutService">
+        <item><widget class="QComboBox" name="cbService"/></item>
+        <item><widget class="QPushButton" name="btnAssignService"><property name="text"><string>Chỉ Định DV</string></property></widget></item>
+       </layout>
+      </item>
+      <item><spacer name="verticalSpacer1_2"><property name="orientation"><enum>Qt::Vertical</enum></property></spacer></item>
+
       <item>
        <layout class="QHBoxLayout" name="horizontalLayoutFilter">
         <item><widget class="QLabel" name="lblFilter"><property name="text"><string>Nhóm Thuốc:</string></property></widget></item>
@@ -56,10 +68,24 @@
        </layout>
       </item>
       <item><spacer name="verticalSpacer2"><property name="orientation"><enum>Qt::Vertical</enum></property></spacer></item>
-      <item><widget class="QLineEdit" name="txtPatientId_History"><property name="placeholderText"><string>Mã Bệnh Nhân</string></property></widget></item>
-      <item><widget class="QPushButton" name="btnViewPatientHistory"><property name="text"><string>Xem Lịch Sử Bệnh Nhân</string></property></widget></item>
+      
+      <!-- KHU VỰC TRÍCH XUẤT VÀ DUYỆT XUẤT VIỆN -->
+      <item><widget class="QLineEdit" name="txtPatientId_History"><property name="placeholderText"><string>Mã Bệnh Nhân (Để xem lịch sử hoặc cho xuất viện)</string></property></widget></item>
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayoutHistoryAndDischarge">
+        <item><widget class="QPushButton" name="btnViewPatientHistory"><property name="text"><string>Lịch Sử Khám</string></property></widget></item>
+        <!-- NÚT DUYỆT XUẤT VIỆN MỚI ĐƯỢC THÊM VÀO ĐÂY -->
+        <item><widget class="QPushButton" name="btnDischargePatient"><property name="text"><string>Duyệt Xuất Viện</string></property></widget></item>
+       </layout>
+      </item>
+      
       <item><spacer name="verticalSpacer3"><property name="orientation"><enum>Qt::Vertical</enum></property></spacer></item>
-      <item><widget class="QPushButton" name="btnLogout"><property name="text"><string>Đăng Xuất</string></property></widget></item>
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayoutLogout">
+        <item><widget class="QPushButton" name="btnViewSchedule"><property name="text"><string>Xem Lịch Trực</string></property></widget></item>
+        <item><widget class="QPushButton" name="btnLogout"><property name="text"><string>Đăng Xuất</string></property></widget></item>
+       </layout>
+      </item>
      </layout>
     </item>
    </layout>

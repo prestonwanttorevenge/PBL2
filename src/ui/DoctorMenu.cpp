@@ -5,6 +5,7 @@
 #include <QMessageBox>
 #include <QTableWidgetItem>
 #include <QColor> 
+#include <QDate>
 
 DoctorMenu::DoctorMenu(Database& database, AuthService& authService, QWidget *parent)
     : QMainWindow(parent), ui(new Ui::DoctorMenu), db(database), auth(authService) {
@@ -362,6 +363,45 @@ void DoctorMenu::loadPatientQueue() {
             ui->tableAppointments->setItem(row, 2, item2);
             ui->tableAppointments->setItem(row, 3, item3);
             row++;
+        }
+    }
+}
+void DoctorMenu::on_btnDischargePatient_clicked() {
+    string patientId = ui->txtPatientId_History->text().toStdString();
+
+    if (patientId.empty()) {
+        QMessageBox::warning(this, QString::fromUtf8("Cảnh báo"), QString::fromUtf8("Vui lòng truy xuất Hồ sơ Bệnh nhân cần duyệt xuất viện tại ô Mã Bệnh Nhân."));
+        return;
+    }
+
+    auto reply = QMessageBox::question(this, QString::fromUtf8("Xác nhận Phê duyệt"), 
+                                       QString::fromUtf8("Xác nhận phê duyệt xuất viện cho Bệnh nhân [") + QString::fromStdString(patientId) + 
+                                       QString::fromUtf8("]?\nHành động này sẽ tự động thu hồi không gian lưu trú (Trả giường)."), 
+                                       QMessageBox::Yes | QMessageBox::No);
+
+    if (reply == QMessageBox::Yes) {
+        // Trích xuất ngày giờ thực tế từ hệ thống để làm Ngày xuất viện
+        QString currentDate = QDate::currentDate().toString("dd/MM/yyyy");
+
+        // Giao tiếp với tầng Database thông qua mã trạng thái (SOLID)
+        int result = db.dischargeInpatientFromQT(patientId, currentDate.toStdString());
+
+        if (result == 1) {
+            db.saveAllData(); // Đồng bộ dữ liệu xuống tệp .csv ngay lập tức
+            QMessageBox::information(this, QString::fromUtf8("Thành công"), 
+                                     QString::fromUtf8("Đã phê duyệt xuất viện thành công!\nKhông gian lưu trú đã được thu hồi và sẵn sàng đón bệnh nhân mới."));
+            ui->txtPatientId_History->clear();
+        } 
+        else if (result == -2) {
+            QMessageBox::warning(this, QString::fromUtf8("Quy chế từ chối"), 
+                                 QString::fromUtf8("Đây là bệnh nhân Ngoại trú. Quy trình giải phóng giường không áp dụng cho đối tượng này."));
+        } 
+        else if (result == -3) {
+            QMessageBox::warning(this, QString::fromUtf8("Lỗi Trạng thái"), 
+                                 QString::fromUtf8("Hồ sơ nội trú này chưa được Lễ tân xếp giường hoặc đã hoàn tất thủ tục xuất viện từ trước."));
+        } 
+        else {
+            QMessageBox::critical(this, QString::fromUtf8("Lỗi Hệ thống"), QString::fromUtf8("Không thể truy xuất Hồ sơ Bệnh nhân trong cơ sở dữ liệu."));
         }
     }
 }
