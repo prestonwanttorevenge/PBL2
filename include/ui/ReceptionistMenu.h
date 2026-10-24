@@ -5,7 +5,9 @@
 #include <QTableWidgetItem>
 #include "services/Database.h"
 #include "services/AuthService.h"
-#include <QInputDialog>
+#include <map>
+#include <vector>
+#include <string>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class ReceptionistMenu; }
@@ -29,13 +31,15 @@ private slots:
     void on_btnCancelAppointment_clicked();
     void loadPendingAppointments();
     void on_btnAssignBed_clicked();
-    // Bắt sự kiện khi Lễ tân click chọn Bệnh nhân trên bảng
     void on_tablePatients_itemClicked(QTableWidgetItem *item);
+    void loadAvailableRooms();
+    void on_cbRoom_currentIndexChanged(const QString &roomName);
 
 private:
     Ui::ReceptionistMenu *ui;
     Database& db;
     AuthService& auth;
+    std::map<std::string, std::vector<std::string>> currentRoomMap;
 
     void refreshPatientTable();
 };
