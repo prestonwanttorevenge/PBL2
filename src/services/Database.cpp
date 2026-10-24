@@ -4,6 +4,7 @@
 #include <iostream>
 #include <string>
 #include <iomanip> 
+#include <algorithm> // Dùng cho thuật toán càn quét phòng trống
 
 Database::Database() {
 }
@@ -40,7 +41,6 @@ string Database::generateAppointmentId() {
     return ss.str();
 }
 
-// --- LUỒNG MỚI: SINH MÃ BỆNH ÁN DUY NHẤT TĂNG TIẾN (BA00001...) ---
 string Database::generateMedicalRecordId() {
     medicalRecordCounter++;
     stringstream ss;
@@ -390,7 +390,6 @@ void Database::loadAllData() {
             getline(ss, diag, ';');
             getline(ss, notes, ';');
 
-            // Đọc và đồng bộ bộ đếm cho mã BA...
             if (rId.length() > 2) {
                 int num = 0;
                 try { num = stoi(rId.substr(2)); } catch(...) {}
@@ -647,7 +646,7 @@ MedicalRecord* Database::findMedicalRecordById(string id){
 }
 
 // ==========================================
-// CÁC HÀM XÓA & CẬP NHẬT
+// CÁC HÀM XÓA & CẬP NHẬT TỪ QT
 // ==========================================
 bool Database::deleteUserFromQT(const std::string& id) {
     if (users.search(id) == nullptr) return false; 
@@ -699,21 +698,7 @@ bool Database::addPatientFromGUI(string name, string phone, string BH, bool isNo
     }
     return true;
 }
-bool Database::updateInpatientBed(string patientId, string room, string bed) {
-    Patient* pat = findPatientById(patientId);
-    if (pat == nullptr) return false;
-    
-    // Ép kiểu sang Inpatient để sử dụng các hàm của Nội trú
-    Inpatient* inpat = dynamic_cast<Inpatient*>(pat);
-    if (inpat != nullptr) {
-        inpat->setRoomNumber(room);
-        inpat->setBedNumber(bed);
-        return true;
-    }
-    return false; // Trả về false nếu đây là bệnh nhân Ngoại trú
-}
 
-// --- MỤC C: LỄ TÂN TẠO LỊCH ĐỒNG THỜI SINH LUÔN MÃ BỆNH ÁN RỖNG (BA...) ---
 int Database::bookAppointmentFromQT(string patientId, string doctorId, string receptionistId, string specialty, string day, string time) {
     if (findPatientById(patientId) == nullptr) return -1; 
     Doctor* doc = findDoctorById(doctorId);
@@ -731,7 +716,6 @@ int Database::bookAppointmentFromQT(string patientId, string doctorId, string re
     string newAppId = generateAppointmentId(); 
     appointments.push_back(Appointment(newAppId, patientId, doctorId, receptionistId, specialty, day, time, "Pending"));
     
-    // Tự động sinh mã bệnh án BA... và nhét vào kho lưu trữ ngay từ khâu Lễ Tân
     string newRecordId = generateMedicalRecordId(); 
     medicalRecords.push_back(MedicalRecord(newRecordId, newAppId, "", "", ""));
     
@@ -739,7 +723,6 @@ int Database::bookAppointmentFromQT(string patientId, string doctorId, string re
     return 1; 
 }
 
-// --- MỤC D: BÁC SĨ GỌI HÀM CẬP NHẬT THAY VÌ TỰ CHẾ MÃ MỚI ---
 string Database::updateMedicalRecordFromQT(string apptId, string symp, string diag, string notes, string status) {
     Appointment* appt = findAppointmentById(apptId);
     if (appt == nullptr) return "";
@@ -752,7 +735,7 @@ string Database::updateMedicalRecordFromQT(string apptId, string symp, string di
             
             appt->setStatus(status);
             saveAllData(); 
-            return record.getRecordId(); // Trả về mã BA... chuẩn xác đã được cấp từ Lễ tân
+            return record.getRecordId(); 
         }
     }
     return "";
@@ -817,21 +800,22 @@ int Database::addMedicineFromQT(string prefix, string medicineName, double unitP
     outId = newId; 
     return 1; 
 }
+
 int Database::assignServiceFromQT(string recordId, string serviceId) {
     MedicalRecord* record = findMedicalRecordById(recordId);
-    if (record == nullptr) return -1; // Không tìm thấy bệnh án
+    if (record == nullptr) return -1; 
     
     Service* srv = services.search(serviceId);
-    if (srv == nullptr) return -2; // Dịch vụ không tồn tại
+    if (srv == nullptr) return -2; 
 
-    // Tránh bác sĩ bấm nhầm chỉ định 2 lần cùng 1 dịch vụ
     for (const string& s : record->getAssignedServices()) {
-        if (s == serviceId) return -3; // Đã chỉ định rồi
+        if (s == serviceId) return -3; 
     }
 
     record->addService(serviceId);
     return 1;
 }
+
 int Database::addServiceFromQT(string prefix, string name, double price, string& outId) {
     vector<Service*> allSrv = services.getAllPointers();
     for (auto srv : allSrv) {
@@ -845,6 +829,7 @@ int Database::addServiceFromQT(string prefix, string name, double price, string&
     outId = newId; 
     return 1; 
 }
+
 double Database::calculateTotalRevenue() {
     double total = 0.0;
     for (const auto& inv : invoices) {
@@ -935,18 +920,13 @@ int Database::createInvoiceFromQT(string patientId, double& outTotalFee) {
   string newInvId = "INV" + to_string(invoices.size() + 1);
     Invoice newInv(newInvId, patientId, finalMedFee); 
 
-    // === TÍNH TIỀN DỊCH VỤ DỰA VÀO CHỈ ĐỊNH CỦA BÁC SĨ ===
     double totalServiceFee = 0.0;
-    
-    // Mặc định luôn thu tiền "Khám cơ bản S1_001" (100k) như cũ
     vector<string> billableServices = {"S1_001"}; 
     
-    // Gộp thêm các dịch vụ cận lâm sàng mà Bác sĩ vừa bắt đi khám
     for (const string& sId : record->getAssignedServices()) {
         billableServices.push_back(sId);
     }
 
-    // Quét qua danh sách để tính tiền và nhét vào Chi tiết Hóa đơn
     int detailCount = 1;
     for (const string& sId : billableServices) {
         Service* srv = services.search(sId);
@@ -965,11 +945,11 @@ int Database::createInvoiceFromQT(string patientId, double& outTotalFee) {
             InvoiceDetail detail(detailId, sId, newInvId, 1, finalSrvPrice);
             newInv.addDetail(detail);
             
-            totalServiceFee += finalSrvPrice; // Cộng dồn tiền dịch vụ
+            totalServiceFee += finalSrvPrice; 
         }
     }
 
-    outTotalFee = totalServiceFee + finalMedFee; // Tổng tiền cuối cùng bắt khách trả
+    outTotalFee = totalServiceFee + finalMedFee; 
 
     invoices.push_back(newInv);
     saveAllData(); 
@@ -1001,6 +981,9 @@ int Database::cancelAppointmentFromQT(string apptId) {
     return 1; 
 }
 
+// ==========================================
+// CÁC HÀM XÓA/CẬP NHẬT CLI (GIỮ NGUYÊN)
+// ==========================================
 void Database::deleteDoctor(string id) {
     if (doctors.remove(id)) {
         cout << "=> Da xoa Bac si thanh cong!\n";
@@ -1081,9 +1064,7 @@ void Database::updatePatient(string id) {
     cout << "--- CAP NHAT THONG TIN BENH NHAN: " << pat->getFullName() << " ---\n";
     cout << "(Nhan Enter de bo qua neu khong muon doi thong tin do)\n";
     string input;
-    // ==========================================
-    // 1. CẬP NHẬT THÔNG TIN CHUNG (Lớp Person / Patient)
-    // ==========================================
+
     cout << "So dien thoai moi (Hien tai: " << pat->getPhoneNumber() << "): ";
     getline(cin, input);
     sanitizeInput(input);
@@ -1097,9 +1078,7 @@ void Database::updatePatient(string id) {
     if (!input.empty()) {
         pat->setBHYT(input); 
     }
-    // ==========================================
-    // 2. PHÂN LOẠI VÀ CẬP NHẬT THÔNG TIN RIÊNG (Lớp con)
-    // ==========================================
+
     if (Inpatient* inpat = dynamic_cast<Inpatient*>(pat)) {
         cout << "\n[Phat hien he thong: Benh Nhan Noi Tru]\n";
         cout << "So phong moi (Hien tai: " << inpat->getRoomNumber() << "): ";
@@ -1294,7 +1273,6 @@ void Database::addPatient() {
         cout << "Nhap So phong: "; getline(cin, room); sanitizeInput(room);
         cout << "Nhap So giuong: "; getline(cin, bed); sanitizeInput(bed);
 
-        // Tạo đối tượng Nội trú và đẩy con trỏ vào mảng
         patients.insert(id,new Inpatient(id, name, dob, gender, phone, recordId, bhyt, admDate, disDate, room, bed));
         cout << "=> Da them Benh nhan Noi tru thanh cong!\n";
 
@@ -1321,4 +1299,90 @@ void Database::showAllPatients() const {
         cout << i + 1 << ". ";
         (*allPats[i])->displayData();
     }
+}
+
+// ==========================================
+// THUẬT TOÁN QUẢN LÝ KHÔNG GIAN BỆNH VIỆN TỪ QT
+// ==========================================
+
+map<string, vector<string>> Database::getAvailableRoomMap() {
+    map<string, vector<string>> roomBeds;
+    for (int f = 1; f <= 5; f++) {
+        for (int r = 1; r <= 13; r++) {
+            char buffer[10];
+            sprintf(buffer, "P%d%02d", f, r);
+            roomBeds[string(buffer)] = {"1", "2", "3", "4"};
+        }
+    }
+
+    vector<Patient**> allPats = patients.getAllPointers();
+    for (auto pPtr : allPats) {
+        if (Inpatient* inpat = dynamic_cast<Inpatient*>(*pPtr)) {
+            string r = inpat->getRoomNumber();
+            string b = inpat->getBedNumber();
+            
+            if (!r.empty() && r != "Chua xep" && r != "Da xuat vien" && roomBeds.count(r)) {
+                auto& beds = roomBeds[r];
+                beds.erase(std::remove(beds.begin(), beds.end(), b), beds.end());
+            }
+        }
+    }
+
+    for (auto it = roomBeds.begin(); it != roomBeds.end(); ) {
+        if (it->second.empty()) {
+            it = roomBeds.erase(it);
+        } else {
+            ++it;
+        }
+    }
+    return roomBeds;
+}
+
+int Database::updateInpatientBed(string patientId, string room, string bed) {
+    Patient* pat = findPatientById(patientId);
+    if (!pat) return -1; 
+    
+    Inpatient* inpat = dynamic_cast<Inpatient*>(pat);
+    if (!inpat) return -2; 
+    if (inpat->getRoomNumber() == room && inpat->getBedNumber() == bed) {
+        return 1;
+    }
+    vector<Patient**> allPats = patients.getAllPointers();
+    int occupancyCount = 0;
+    
+    for (auto pPtr : allPats) {
+        if (Inpatient* other = dynamic_cast<Inpatient*>(*pPtr)) {
+            if (other->getRoomNumber() == room) {
+                occupancyCount++;
+                if (other->getBedNumber() == bed && other->getId() != patientId) {
+                    return -3; 
+                }
+            }
+        }
+    }
+
+    if (occupancyCount >= 4 && inpat->getRoomNumber() != room) {
+        return -4; 
+    }
+
+    inpat->setRoomNumber(room);
+    inpat->setBedNumber(bed);
+    return 1;
+}
+
+int Database::dischargeInpatientFromQT(string patientId, string dischargeDate) {
+    Patient* pat = findPatientById(patientId);
+    if (!pat) return -1;
+    
+    Inpatient* inpat = dynamic_cast<Inpatient*>(pat);
+    if (!inpat) return -2; 
+    if (inpat->getRoomNumber() == "Da xuat vien" || inpat->getRoomNumber().empty() || inpat->getRoomNumber() == "Chua xep") {
+        return -3; 
+    }
+
+    inpat->setRoomNumber("Da xuat vien");
+    inpat->setBedNumber("0");
+    inpat->setDischargeDate(dischargeDate);
+    
+    return 1;
 }

@@ -30,6 +30,7 @@ class Inpatient : public Patient {
         void processDischarge();
         void setRoomNumber(string room) { this->roomNumber = room; }
         void setBedNumber(string bed) { this->bedNumber = bed; }
+        void setDischargeDate(string date) { this->dischargeDate = date; }
 };
 
 #endif

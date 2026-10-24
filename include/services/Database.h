@@ -129,7 +129,8 @@ public:
     bool addPatientFromGUI(string name, string phone, string BH,bool isNoiTru); 
     bool addInpatientFromQT(string id, string name, string dob, string gender, string phone,string recordId, string BH, string admDate, string disDate, string room, string bed);
     bool addOutpatientFromQT(string id, string name, string dob, string gender, string phone, string recordId, string BH, string apptDate, string clinic);
-    bool updateInpatientBed(string patientId, string room, string bed);
+    int updateInpatientBed(string patientId, string room, string bed);
+    map<string, vector<string>> getAvailableRoomMap();
     vector<Doctor*> getAvailableDoctors(string day, string shift);
     int bookAppointmentFromQT(string patientId, string doctorId, string receptionistId,string specialty ,string day, string time);
     int createInvoiceFromQT(string patientId, double& outTotalFee);
@@ -141,6 +142,7 @@ public:
     int prescribeMedicineFromQT(string recordId, string medId, string dosage, int qty);
     vector<MedicalRecord*> getPatientHistory(string patientId);
     int assignServiceFromQT(string recordId, string serviceId);
+    int dischargeInpatientFromQT(string patientId, string dischargeDate);
 
     // ==========================================
     // Dùng chung
