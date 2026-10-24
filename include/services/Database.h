@@ -116,6 +116,7 @@ public:
     bool addDoctorFromQT(string id, string fullName, string dob, string gender, string phone, string specialty, int expYears);
     bool addShiftToDoctorFromQT(string doctorId, string day, string time);
     int addServiceFromQT(string prefix, string name, double price, string& outId);
+    double calculateTotalRevenue();
     
     bool deleteUserFromQT(const std::string& id);
     int deleteDoctorFromQT(const std::string& id);
@@ -136,9 +137,10 @@ public:
     // ==========================================
     // Bác Sĩ (Doctor)
     // ==========================================
-    string updateMedicalRecordFromQT(string apptId, string symp, string diag, string notes);
+    string updateMedicalRecordFromQT(string apptId, string symp, string diag, string notes, string status = "Completed");
     int prescribeMedicineFromQT(string recordId, string medId, string dosage, int qty);
     vector<MedicalRecord*> getPatientHistory(string patientId);
+    int assignServiceFromQT(string recordId, string serviceId);
 
     // ==========================================
     // Dùng chung

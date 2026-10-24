@@ -19,6 +19,7 @@ private:
     std::string diagnosis;
     std::string notes;
     std::vector<PrescriptionDetail> prescriptions;
+    std::vector<std::string> assignedServices;
 
 public:
     MedicalRecord(std::string recordId = "-1", std::string appointmentId = "-1", 
@@ -31,11 +32,12 @@ public:
     std::string getSymptoms() const;
     std::string getDiagnosis() const;
     std::string getNotes() const;
+    std::vector<std::string> getAssignedServices() const { return assignedServices; }
     const std::vector<PrescriptionDetail>& getPrescriptions() const { return prescriptions; }
     void setSymptoms(const std::string& symp) { symptoms = symp; }
     void setDiagnosis(const std::string& diag) { diagnosis = diag; }
     void setNotes(const std::string& n) { notes = n; }
-    
+    void addService(std::string serviceId) { assignedServices.push_back(serviceId); }
     void inputData();
     void displayData() const;
     void addMedicine(std::string mId, std::string dose, int qty);

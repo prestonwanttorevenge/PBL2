@@ -39,6 +39,9 @@ private slots:
     void on_btnAddUser_clicked();
     void on_btnDeleteUser_clicked();
     void on_tableUsers_itemClicked(QTableWidgetItem *item); // MỚI: Click bảng User
+    
+    void on_btnViewRevenue_clicked();
+    void refreshRevenueTable();
 
 private:
     Ui::AdminMenu *ui;

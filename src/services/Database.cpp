@@ -740,7 +740,7 @@ int Database::bookAppointmentFromQT(string patientId, string doctorId, string re
 }
 
 // --- MỤC D: BÁC SĨ GỌI HÀM CẬP NHẬT THAY VÌ TỰ CHẾ MÃ MỚI ---
-string Database::updateMedicalRecordFromQT(string apptId, string symp, string diag, string notes) {
+string Database::updateMedicalRecordFromQT(string apptId, string symp, string diag, string notes, string status) {
     Appointment* appt = findAppointmentById(apptId);
     if (appt == nullptr) return "";
     
@@ -750,7 +750,7 @@ string Database::updateMedicalRecordFromQT(string apptId, string symp, string di
             record.setDiagnosis(diag);
             record.setNotes(notes);
             
-            appt->setStatus("Completed");
+            appt->setStatus(status);
             saveAllData(); 
             return record.getRecordId(); // Trả về mã BA... chuẩn xác đã được cấp từ Lễ tân
         }
@@ -817,7 +817,21 @@ int Database::addMedicineFromQT(string prefix, string medicineName, double unitP
     outId = newId; 
     return 1; 
 }
+int Database::assignServiceFromQT(string recordId, string serviceId) {
+    MedicalRecord* record = findMedicalRecordById(recordId);
+    if (record == nullptr) return -1; // Không tìm thấy bệnh án
+    
+    Service* srv = services.search(serviceId);
+    if (srv == nullptr) return -2; // Dịch vụ không tồn tại
 
+    // Tránh bác sĩ bấm nhầm chỉ định 2 lần cùng 1 dịch vụ
+    for (const string& s : record->getAssignedServices()) {
+        if (s == serviceId) return -3; // Đã chỉ định rồi
+    }
+
+    record->addService(serviceId);
+    return 1;
+}
 int Database::addServiceFromQT(string prefix, string name, double price, string& outId) {
     vector<Service*> allSrv = services.getAllPointers();
     for (auto srv : allSrv) {
@@ -830,6 +844,13 @@ int Database::addServiceFromQT(string prefix, string name, double price, string&
     services.insert(newId, Service(newId, name, price));
     outId = newId; 
     return 1; 
+}
+double Database::calculateTotalRevenue() {
+    double total = 0.0;
+    for (const auto& inv : invoices) {
+        total += inv.getTotalAmount(); 
+    }
+    return total;
 }
 
 vector<Doctor*> Database::getAvailableDoctors(string day, string shift) {
@@ -911,49 +932,44 @@ int Database::createInvoiceFromQT(string patientId, double& outTotalFee) {
         }
     }
 
-    string newInvId = "INV" + to_string(invoices.size() + 1);
-    Invoice newInv(newInvId, patientId, medFee);
+  string newInvId = "INV" + to_string(invoices.size() + 1);
+    Invoice newInv(newInvId, patientId, finalMedFee); 
 
-    string srvId = "S1_001";          
-    double srvPrice = 100000.0;      
-    vector<Service*> srvList = services.getAllPointers();
+    // === TÍNH TIỀN DỊCH VỤ DỰA VÀO CHỈ ĐỊNH CỦA BÁC SĨ ===
+    double totalServiceFee = 0.0;
     
-    if (!srvList.empty()) {
-        Service* selectedSrv = srvList[0];
-        for (auto s : srvList) {
-            if (s->getId() == "S1_001") {
-                selectedSrv = s;
-                break;
+    // Mặc định luôn thu tiền "Khám cơ bản S1_001" (100k) như cũ
+    vector<string> billableServices = {"S1_001"}; 
+    
+    // Gộp thêm các dịch vụ cận lâm sàng mà Bác sĩ vừa bắt đi khám
+    for (const string& sId : record->getAssignedServices()) {
+        billableServices.push_back(sId);
+    }
+
+    // Quét qua danh sách để tính tiền và nhét vào Chi tiết Hóa đơn
+    int detailCount = 1;
+    for (const string& sId : billableServices) {
+        Service* srv = services.search(sId);
+        if (srv != nullptr) {
+            double rawSrvPrice = srv->getPrice();
+            double finalSrvPrice = rawSrvPrice;
+
+            if (isBHYT) {
+                string prefix = (sId.length() >= 2) ? sId.substr(0, 2) : "";
+                if (prefix == "S1") finalSrvPrice = 0; 
+                else if (prefix == "S2") finalSrvPrice = rawSrvPrice * 0.3; 
+                else if (prefix == "S3") finalSrvPrice = rawSrvPrice * 0.8; 
             }
-        }
-        srvId = selectedSrv->getId();
-        srvPrice = selectedSrv->getPrice();
-    }
 
-    double finalSrvPrice = srvPrice; 
-
-    if (isBHYT) {
-        string prefix = (srvId.length() >= 2) ? srvId.substr(0, 2) : "";
-
-        if (prefix == "S1") {
-            finalSrvPrice = 0; 
-        } 
-        else if (prefix == "S2") {
-            finalSrvPrice = srvPrice * 0.3; 
-        } 
-        else if (prefix == "S3") {
-            finalSrvPrice = srvPrice * 0.8; 
-        }
-        else {
-            finalSrvPrice = srvPrice; 
+            string detailId = newInvId + "_D" + to_string(detailCount++);
+            InvoiceDetail detail(detailId, sId, newInvId, 1, finalSrvPrice);
+            newInv.addDetail(detail);
+            
+            totalServiceFee += finalSrvPrice; // Cộng dồn tiền dịch vụ
         }
     }
-    
-    string detailId = newInvId + "_D1";
-    InvoiceDetail consultDetail(detailId, srvId, newInvId, 1, srvPrice);
-    newInv.addDetail(consultDetail);
 
-    outTotalFee = finalSrvPrice + finalMedFee; 
+    outTotalFee = totalServiceFee + finalMedFee; // Tổng tiền cuối cùng bắt khách trả
 
     invoices.push_back(newInv);
     saveAllData(); 

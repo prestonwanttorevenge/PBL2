@@ -15,6 +15,13 @@ DoctorMenu::DoctorMenu(Database& database, AuthService& authService, QWidget *pa
     
     loadPatientQueue();
     loadMedicineComboBox("Tất cả"); 
+    //lam them UI hien thi combobox services
+    ui->cbService->clear();
+    vector<Service*> srvs = db.getServices().getAllPointers();
+    for (auto srv : srvs) {
+    QString displayText = QString::fromStdString(srv->getId() + " - " + srv->getServiceName());
+    ui->cbService->addItem(displayText, QString::fromStdString(srv->getId()));
+}
 }
 
 DoctorMenu::~DoctorMenu() {
@@ -174,6 +181,22 @@ void DoctorMenu::on_btnPrescribeMedicine_clicked() {
     }
     // -------------------------------------------------------------
 
+    // === LỚP KHIÊN: ÉP BUỘC CHỜ KẾT QUẢ XÉT NGHIỆM ===
+    string apptId = ui->txtAppointmentId->text().toStdString();
+    Appointment* appt = db.findAppointmentById(apptId);
+
+    if (appt != nullptr && record != nullptr) {
+        // Nếu Bác sĩ ĐÃ chỉ định dịch vụ (Siêu âm, X-Quang...) 
+        // VÀ trạng thái Lịch hẹn vẫn đang là "Pending" (Tức là chưa chịu cho bệnh nhân đi làm xét nghiệm)
+        if (!record->getAssignedServices().empty() && appt->getStatus() == "Pending") {
+            
+            QMessageBox::critical(this, QString::fromUtf8("Cảnh Báo Vi Phạm Quy Trình"), 
+                QString::fromUtf8("Bệnh nhân đã được chỉ định Dịch vụ Cận lâm sàng!\n\n"
+                                  "Vui lòng bấm nút [Lưu & Chờ Kết Quả CLS] cho bệnh nhân đi làm xét nghiệm.\n"
+                                  "Khi bệnh nhân mang kết quả về, bạn click lại vào tên bệnh nhân trên bảng mới được phép kê đơn thuốc!"));
+            return; // CHẶN ĐỨNG QUÁ TRÌNH KÊ THUỐC
+        }
+    }
     int result = db.prescribeMedicineFromQT(recordId, medId, dosage, qty);
 
     if (result == 1) {
@@ -264,6 +287,44 @@ void DoctorMenu::on_btnCancelAppointment_clicked() {
         }
     }
 }
+void DoctorMenu::on_btnAssignService_clicked() {
+    string recordId = ui->txtRecordId->text().toStdString();
+    string serviceId = ui->cbService->currentData().toString().toStdString();
+
+    if (recordId.empty() || serviceId.empty()) {
+        QMessageBox::warning(this, "Lỗi", "Vui lòng nhập Chẩn đoán và Lưu bệnh án trước!");
+        return;
+    }
+
+    int result = db.assignServiceFromQT(recordId, serviceId);
+
+    if (result == 1) {
+        db.saveAllData(); 
+        QMessageBox::information(this, "Thành công", "Đã chỉ định Dịch vụ thành công!");
+    } else if (result == -3) {
+        QMessageBox::warning(this, "Cảnh báo", "Dịch vụ này đã được chỉ định rồi!");
+    }
+}
+//làm 1 cái nút lưu tạm vào bệnh án rồi chờ đợi xét nghiệm xong mới tới bước làm đơn thuốc
+void DoctorMenu::on_btnWaitResult_clicked() {
+    string apptId = ui->txtAppointmentId->text().toStdString();
+    string symp = ui->txtSymptoms->text().toStdString();
+    string diag = ui->txtDiagnosis->text().toStdString();
+    string notes = ui->txtNotes->text().toStdString();
+
+    if (apptId.empty() || diag.empty()) {
+        QMessageBox::warning(this, "Thiếu thông tin", "Vui lòng click chọn Lịch hẹn và nhập Chẩn đoán sơ bộ!");
+        return;
+    }
+
+    // Truyền chữ "Waiting" vào để chuyển trạng thái bệnh nhân
+    string updatedRecordId = db.updateMedicalRecordFromQT(apptId, symp, diag, notes, "Waiting");
+
+    if (!updatedRecordId.empty()) {
+        QMessageBox::information(this, "Thành công", "Đã lưu hồ sơ. Bệnh nhân đang đi làm xét nghiệm Cận lâm sàng!");
+        loadPatientQueue(); // Tải lại bảng sẽ thấy bệnh nhân đổi sang màu Xanh lam
+    }
+}
 
 void DoctorMenu::loadPatientQueue() {
     ui->tableAppointments->setColumnCount(4);
@@ -275,22 +336,26 @@ void DoctorMenu::loadPatientQueue() {
     
     int row = 0;
     for (const auto& appt : appts) {
-        if (appt.getStatus() == "Pending") {
+        // Lấy cả 2 trạng thái: Pending và Waiting
+        if (appt.getStatus() == "Pending" || appt.getStatus() == "Waiting") {
             ui->tableAppointments->insertRow(row);
             
             QTableWidgetItem *item0 = new QTableWidgetItem(QString::fromStdString(appt.getAppointmentId()));
             QTableWidgetItem *item1 = new QTableWidgetItem(QString::fromStdString(appt.getPatientId()));
             QString timeStr = QString::fromStdString(appt.getDayOfWeek() + " - " + appt.getTimeSlot());
             QTableWidgetItem *item2 = new QTableWidgetItem(timeStr);
-            QTableWidgetItem *item3 = new QTableWidgetItem(QString::fromUtf8("Chờ Khám"));
             
-            QColor pendingBg(255, 243, 205); 
-            QColor pendingFg(133, 100, 4);   
-            item0->setBackground(pendingBg);
-            item1->setBackground(pendingBg);
-            item2->setBackground(pendingBg);
-            item3->setBackground(pendingBg);
-            item3->setForeground(pendingFg);
+            // Xử lý text hiển thị
+            QString statusText = (appt.getStatus() == "Pending") ? QString::fromUtf8("Chờ Khám") : QString::fromUtf8("Chờ Kết Quả CLS");
+            QTableWidgetItem *item3 = new QTableWidgetItem(statusText);
+            
+            // Đổi màu để Bác sĩ dễ phân biệt (Vàng = Chờ khám, Xanh lam = Chờ kết quả)
+            QColor bg = (appt.getStatus() == "Pending") ? QColor(255, 243, 205) : QColor(217, 237, 247); 
+            QColor fg = (appt.getStatus() == "Pending") ? QColor(133, 100, 4) : QColor(12, 84, 96);
+            
+            item0->setBackground(bg); item1->setBackground(bg);
+            item2->setBackground(bg); item3->setBackground(bg);
+            item3->setForeground(fg);
 
             ui->tableAppointments->setItem(row, 0, item0);
             ui->tableAppointments->setItem(row, 1, item1);

@@ -24,7 +24,7 @@ private slots:
     void on_btnPrescribeMedicine_clicked();
     void on_btnViewPatientHistory_clicked();
     void on_btnCancelAppointment_clicked();
-    
+    void on_btnAssignService_clicked()
     // Bắt sự kiện click trên bảng
     void on_tableAppointments_itemClicked(QTableWidgetItem *item);
     

@@ -351,6 +351,52 @@ void AdminMenu::on_btnLogout_clicked() {
         this->close();
     }
 }
+//làm thêm 1 giao diện xem hóa đơn
+void AdminMenu::on_btnViewRevenue_clicked() {
+    ui->stackedWidget->setCurrentIndex(4); 
+    
+    // ==========================================
+    // 1. TÍNH VÀ HIỂN THỊ DOANH THU
+    // ==========================================
+    double totalRev = db.calculateTotalRevenue();
+    QString formattedRevenue = QLocale(QLocale::Vietnamese, QLocale::Vietnam).toString(totalRev, 'f', 0);
+    ui->lblTotalRevenue->setText(formattedRevenue + " VNĐ");
+    
+    // ==========================================
+    // 2. ĐẾM VÀ HIỂN THỊ SỐ BỆNH NHÂN (THÊM MỚI Ở ĐÂY)
+    // ==========================================
+    // Đếm tổng số hồ sơ bệnh nhân đang có trong hệ thống (Cây BST)
+    int totalPatients = db.getPatients().getAllPointers().size();
+    ui->lblTotalPatients->setText(QString::number(totalPatients) + " người");
+    
+    // (Tùy chọn) Đếm số Lượt khám đã hoàn thành và xuất hóa đơn thành công
+    int totalVisits = db.getInvoices().size(); 
+    // ui->lblTotalVisits->setText(QString::number(totalVisits) + " lượt");
+
+    // ==========================================
+    // 3. LÀM MỚI BẢNG (Nếu có)
+    // ==========================================
+    refreshRevenueTable(); 
+}
+void AdminMenu::refreshRevenueTable() {
+    ui->tableRevenue->setColumnCount(3);
+    ui->tableRevenue->setHorizontalHeaderLabels({"Mã Hóa Đơn", "Mã Bệnh Nhân", "Tổng Thu (VNĐ)"});
+    ui->tableRevenue->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    
+    ui->tableRevenue->setRowCount(0);
+    vector<Invoice> invList = db.getInvoices();
+    
+    int row = 0;
+    for (const auto& inv : invList) {
+        ui->tableRevenue->insertRow(row);
+        ui->tableRevenue->setItem(row, 0, new QTableWidgetItem(QString::fromStdString(inv.getId())));
+        ui->tableRevenue->setItem(row, 1, new QTableWidgetItem(QString::fromStdString(inv.getPatientId())));
+        
+        QString feeStr = QLocale(QLocale::Vietnamese, QLocale::Vietnam).toString(inv.getTotalAmount(), 'f', 0);
+        ui->tableRevenue->setItem(row, 2, new QTableWidgetItem(feeStr));
+        row++;
+    }
+}
 
 // ==========================================
 // 6. CÁC HÀM LÀM MỚI BẢNG (REFRESH TABLES)
