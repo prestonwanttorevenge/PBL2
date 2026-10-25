@@ -394,10 +394,21 @@ void DoctorMenu::on_btnDischargePatient_clicked() {
         int result = db.dischargeInpatientFromQT(patientId, currentDate.toStdString());
 
         if (result == 1) {
+            string currentApptId = ui->txtAppointmentId->text().toStdString();
+            if (!currentApptId.empty()) {
+                Appointment* appt = db.findAppointmentById(currentApptId);
+                if (appt != nullptr && appt->getPatientId() == patientId) {
+                    appt->setStatus("Completed");
+                }
+            }
+
             db.saveAllData(); 
             QMessageBox::information(this, QString::fromUtf8("Thành công"), 
-                                     QString::fromUtf8("Đã phê duyệt xuất viện thành công!\nKhông gian lưu trú đã được thu hồi."));
+                                     QString::fromUtf8("Đã phê duyệt xuất viện và hoàn tất ca khám!\nKhông gian lưu trú đã được thu hồi."));
+            
             ui->txtPatientId_History->clear();
+            ui->txtAppointmentId->clear();
+            loadPatientQueue();
         } 
         else if (result == -2) {
             QMessageBox::warning(this, QString::fromUtf8("Từ chối"), QString::fromUtf8("Đây là bệnh nhân Ngoại trú. Quy trình giải phóng giường không áp dụng."));
