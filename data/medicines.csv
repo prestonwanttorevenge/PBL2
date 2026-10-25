@@ -1,4 +1,4 @@
-B1_001;Paracetamol 500mg;1500;1-2 viên/lần, ngày 3 lần;506
+B1_001;Paracetamol 500mg;1500;1-2 viên/lần, ngày 3 lần;496
 B1_002;Paracetamol 650mg;2000;1 viên/lần, cách 4-6 giờ;157
 B1_003;Amoxicillin 500mg;3000;1 viên/lần, ngày 2-3 lần;112
 B1_004;Ibuprofen 400mg;2500;1 viên/lần, ngày 2 lần sau ăn;479
@@ -48,6 +48,7 @@ B1_047;Nystatin 500.000IU;3000;1 viên/lần, ngày 3-4 lần;470
 B1_048;Acyclovir 200mg;3500;1 viên/lần, ngày 5 lần cách nhau 4 giờ;216
 B1_049;Mebendazole 500mg;15000;1 viên duy nhất;165
 B1_050;Albendazole 400mg;18000;1 viên duy nhất;421
+B1_051;Thuốc bình thường;1;1-2viên/lần;99
 B2_001;Atorvastatin 10mg;8000;1 viên buổi tối;173
 B2_002;Atorvastatin 20mg;12000;1 viên buổi tối;174
 B2_003;Losartan 50mg;6500;1 viên/ngày buổi sáng;172

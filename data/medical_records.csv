@@ -18,7 +18,7 @@ BA00017;APP0017;Đau nhức xương khớp;Rối loạn tiêu hóa;Uống thuố
 BA00018;APP0018;Đau nhức xương khớp;Cảm cúm;Uống thuốc đúng giờ
 BA00019;APP0019;Mệt mỏi, chán ăn;Suy nhược cơ thể;Uống thuốc đúng giờ
 BA00020;APP0020;Đau đầu, chóng mặt;Viêm dạ dày;Uống thuốc đúng giờ
-BA00021;APP0021;Đau nhức xương khớp;Viêm dạ dày;Uống thuốc đúng giờ
+BA00021;APP0021;nghiện đánh điện tử;nghiện dopamine;cai gamez
 BA00022;APP0022;Đau đầu, chóng mặt;Viêm họng cấp;Uống thuốc đúng giờ
 BA00023;APP0023;Mệt mỏi, chán ăn;Cảm cúm;Uống thuốc đúng giờ
 BA00024;APP0024;Ho khan, sốt nhẹ;Suy nhược cơ thể;Uống thuốc đúng giờ
@@ -47,3 +47,8 @@ BA00046;APP0071;Đau nửa đầu;Mất ngủ bình thường;Vì PBL2
 BA00047;APP0072;Tôi không biết;Không biết;
 BA00048;APP0073;Tôi không biết;Tôi không biết;
 BA00049;APP0074;;;
+BA00050;APP0075;;;
+BA00051;APP0076;;;
+BA00052;APP0077;;;
+BA00053;APP0078;;;
+BA00054;APP0079;;;
