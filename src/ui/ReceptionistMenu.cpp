@@ -7,13 +7,23 @@
 #include <QComboBox>
 #include <QRegularExpressionValidator>
 #include <QRegularExpression>
+#include <QDate>
 #include "services/AuthService.h"
 
 using namespace std;
 
+namespace {
+string weekdayName(int dayOfWeek) {
+    if (dayOfWeek == 7) return "Chủ nhật";
+    return "Thứ " + to_string(dayOfWeek + 1);
+}
+}
+
 ReceptionistMenu::ReceptionistMenu(Database& database, AuthService& authService, QWidget *parent)
     : QMainWindow(parent), ui(new Ui::ReceptionistMenu), db(database), auth(authService) {
     ui->setupUi(this);
+    ui->dateAppointment->setMinimumDate(QDate::currentDate());
+    ui->dateAppointment->setDate(QDate::currentDate());
 
     QRegularExpression rx("^[0-9]{10,11}$");
     QValidator *validator = new QRegularExpressionValidator(rx, this);
@@ -39,7 +49,7 @@ ReceptionistMenu::ReceptionistMenu(Database& database, AuthService& authService,
 
     // KẾT NỐI TÍN HIỆU (SIGNALS & SLOTS)
     connect(ui->cbSpecialty, &QComboBox::currentTextChanged, this, &ReceptionistMenu::on_cbSpecialty_currentIndexChanged);
-    connect(ui->cbDay, &QComboBox::currentTextChanged, this, &ReceptionistMenu::updateAvailableDoctors);
+    connect(ui->dateAppointment, &QDateEdit::dateChanged, this, &ReceptionistMenu::updateAvailableDoctors);
     connect(ui->cbShift, &QComboBox::currentTextChanged, this, &ReceptionistMenu::updateAvailableDoctors);
     
     connect(ui->tablePatients, &QTableWidget::itemClicked, this, &ReceptionistMenu::on_tablePatients_itemClicked);
@@ -47,6 +57,8 @@ ReceptionistMenu::ReceptionistMenu(Database& database, AuthService& authService,
     
     // Bắt sự kiện Lễ tân chuyển đổi phòng thì danh sách giường đổi theo
     connect(ui->cbRoom, &QComboBox::currentTextChanged, this, &ReceptionistMenu::on_cbRoom_currentIndexChanged);
+    connect(ui->cbPendingAppointments, QOverload<int>::of(&QComboBox::currentIndexChanged),
+            this, &ReceptionistMenu::on_cbPendingAppointments_currentIndexChanged);
 
     updateAvailableDoctors();
     refreshPatientTable();
@@ -118,18 +130,23 @@ void ReceptionistMenu::on_btnLogout_clicked() {
     );
 
     if (reply == QMessageBox::Yes) {
-        Login *loginForm = new Login(this->db);
+        auth.logout();
+        Login *loginForm = new Login(this->db, this->auth);
         loginForm->show();
         this->close(); 
     }
 }
 
 void ReceptionistMenu::on_btnRegisterPatient_clicked() {
-    QString qName = ui->txtPatientName->text();
-    QString qPhone = ui->txtPatientPhone->text();
+    const QString qName = ui->txtPatientName->text().trimmed();
+    const QString qPhone = ui->txtPatientPhone->text().trimmed();
+    const QString qDob = ui->txtPatientDob->text().trimmed();
+    const QDate dob = QDate::fromString(qDob, "dd/MM/yyyy");
 
-    if(qName.isEmpty() || qPhone.isEmpty()) {
-        QMessageBox::warning(this, QString::fromUtf8("Cảnh báo"), QString::fromUtf8("Vui lòng nhập đầy đủ thông tin hành chính. Số điện thoại (10-11 số)."));
+    if (qName.isEmpty() || !ui->txtPatientPhone->hasAcceptableInput() ||
+        !dob.isValid() || dob > QDate::currentDate()) {
+        QMessageBox::warning(this, QString::fromUtf8("Thông tin chưa hợp lệ"),
+                             QString::fromUtf8("Nhập họ tên, số điện thoại 10-11 chữ số và ngày sinh dd/MM/yyyy hợp lệ."));
         return;
     }
 
@@ -140,7 +157,10 @@ void ReceptionistMenu::on_btnRegisterPatient_clicked() {
     QString qBhyt = ui->txtBHYT->text().trimmed(); 
     string bhyt = qBhyt.isEmpty() ? "Không" : qBhyt.toStdString();
 
-    bool success = db.addPatientFromGUI(name, phone, bhyt, isNoiTru);
+    const string gender = ui->cbPatientGender->currentText().toStdString();
+    const string admissionDate = QDate::currentDate().toString("dd/MM/yyyy").toStdString();
+    bool success = db.addPatientFromGUI(name, qDob.toStdString(), gender, phone,
+                                        bhyt, isNoiTru, admissionDate);
     
     if (success) {
         db.saveAllData(); 
@@ -148,6 +168,7 @@ void ReceptionistMenu::on_btnRegisterPatient_clicked() {
         
         ui->txtPatientName->clear();
         ui->txtPatientPhone->clear();
+        ui->txtPatientDob->clear();
         ui->txtBHYT->clear(); 
         refreshPatientTable();
     } else {
@@ -159,7 +180,7 @@ void ReceptionistMenu::updateAvailableDoctors() {
     ui->cbDoctor->clear();
 
     string targetSpecialty = ui->cbSpecialty->currentText().toStdString();
-    string day = ui->cbDay->currentText().toStdString();
+    string day = weekdayName(ui->dateAppointment->date().dayOfWeek());
     string shift = ui->cbShift->currentText().toStdString();
 
     vector<Doctor*> availableDocs = db.getAvailableDoctors(day, shift);
@@ -184,7 +205,9 @@ void ReceptionistMenu::updateAvailableDoctors() {
 
 void ReceptionistMenu::on_btnBookAppointment_clicked() {
     string patientId = ui->txtBookPatientId->text().toStdString();
-    string day = ui->cbDay->currentText().toStdString();
+    const QDate selectedDate = ui->dateAppointment->date();
+    string day = weekdayName(selectedDate.dayOfWeek());
+    string appointmentDate = selectedDate.toString("dd/MM/yyyy").toStdString();
     string time = ui->cbShift->currentText().toStdString();
 
     if (!ui->cbDoctor->isEnabled() || ui->cbDoctor->currentText() == QString::fromUtf8("Không có Bác sĩ nhận bệnh")) {
@@ -207,7 +230,7 @@ void ReceptionistMenu::on_btnBookAppointment_clicked() {
         return;
     }
 
-    int result = db.bookAppointmentFromQT(patientId, doctorId, receptionistId, selectedSpecialty, day, time);
+    int result = db.bookAppointmentFromQT(patientId, doctorId, receptionistId, selectedSpecialty, day, time, appointmentDate);
 
     if (result == 1) {
         db.saveAllData(); 
@@ -218,8 +241,17 @@ void ReceptionistMenu::on_btnBookAppointment_clicked() {
     else if (result == -1) {
         QMessageBox::critical(this, QString::fromUtf8("Lỗi"), QString::fromUtf8("Hồ sơ Bệnh nhân không tồn tại."));
     }
+    else if (result == -4) {
+        QMessageBox::warning(this, QString::fromUtf8("Trùng lịch"),
+                             QString::fromUtf8("Bác sĩ đã có lịch hẹn ở ngày và ca này."));
+    }
+    else if (result == -5) {
+        QMessageBox::warning(this, QString::fromUtf8("Trùng lịch"),
+                             QString::fromUtf8("Bệnh nhân đã có lịch hẹn khác cùng ngày và ca."));
+    }
     else {
-        QMessageBox::critical(this, QString::fromUtf8("Lỗi"), QString::fromUtf8("Trạng thái Bác sĩ không hợp lệ."));
+        QMessageBox::critical(this, QString::fromUtf8("Lỗi"),
+                              QString::fromUtf8("Bác sĩ không thuộc chuyên khoa hoặc không làm ca đã chọn."));
     }
 }
 
@@ -248,6 +280,14 @@ void ReceptionistMenu::on_btnCreateInvoice_clicked() {
     }
     else if (result == -3) {
         QMessageBox::critical(this, QString::fromUtf8("Quy trình"), QString::fromUtf8("Hồ sơ Bệnh án chưa được Bác sĩ hoàn tất chẩn đoán. Không thể lập hóa đơn."));
+    }
+    else if (result == -4) {
+        QMessageBox::warning(this, QString::fromUtf8("Đã thanh toán"),
+                             QString::fromUtf8("Lịch khám gần nhất của bệnh nhân đã được lập hóa đơn."));
+    }
+    else if (result == -5) {
+        QMessageBox::warning(this, QString::fromUtf8("Chờ cấp phát"),
+                             QString::fromUtf8("Cần cấp phát đủ thuốc theo đơn trước khi lập hóa đơn."));
     }
 }
 
@@ -280,7 +320,7 @@ void ReceptionistMenu::loadPendingAppointments() {
     bool hasPending = false;
 
     for (const auto& appt : appts) {
-        if (appt.getStatus() == "Pending") {
+        if (appt.getStatus() == "Scheduled" || appt.getStatus() == "Pending") {
             hasPending = true;
             
             string patientName = "Không rõ";
@@ -289,10 +329,17 @@ void ReceptionistMenu::loadPendingAppointments() {
                 patientName = pat->getFullName();
             }
 
-            QString displayText = QString::fromStdString(appt.getAppointmentId() + " - " + patientName 
-                                  + " (" + appt.getDayOfWeek() + ", " + appt.getTimeSlot() + ")");
+            const string date = appt.getAppointmentDate().empty()
+                                    ? appt.getDayOfWeek()
+                                    : appt.getAppointmentDate();
+
+            QString displayText = QString::fromStdString(appt.getAppointmentId() + " - " + patientName
+                                  + " (" + date + ", " + appt.getTimeSlot() + ", " +
+                                  (appt.getStatus() == "Scheduled" ? "Đã đặt" : "Đã đến") + ")");
             
             ui->cbPendingAppointments->addItem(displayText, QString::fromStdString(appt.getAppointmentId()));
+            ui->cbPendingAppointments->setItemData(ui->cbPendingAppointments->count() - 1,
+                                                  QString::fromStdString(appt.getStatus()), Qt::UserRole + 1);
         }
     }
 
@@ -300,9 +347,34 @@ void ReceptionistMenu::loadPendingAppointments() {
         ui->cbPendingAppointments->addItem(QString::fromUtf8("Không có lịch chờ khám"));
         ui->cbPendingAppointments->setEnabled(false);
         ui->btnCancelAppointment->setEnabled(false);
+        ui->btnCheckInAppointment->setEnabled(false);
     } else {
         ui->cbPendingAppointments->setEnabled(true);
         ui->btnCancelAppointment->setEnabled(true);
+        on_cbPendingAppointments_currentIndexChanged(ui->cbPendingAppointments->currentIndex());
+    }
+}
+
+void ReceptionistMenu::on_cbPendingAppointments_currentIndexChanged(int index) {
+    const bool isScheduled = index >= 0 &&
+        ui->cbPendingAppointments->itemData(index, Qt::UserRole + 1).toString() == "Scheduled";
+    const bool isToday = index >= 0 &&
+        ui->cbPendingAppointments->currentText().contains(
+            QDate::currentDate().toString("dd/MM/yyyy"));
+    ui->btnCheckInAppointment->setEnabled(isScheduled && isToday);
+}
+
+void ReceptionistMenu::on_btnCheckInAppointment_clicked() {
+    const string appointmentId = ui->cbPendingAppointments->currentData().toString().toStdString();
+    const string currentDate = QDate::currentDate().toString("dd/MM/yyyy").toStdString();
+    const int result = db.checkInAppointmentFromQT(appointmentId, currentDate);
+    if (result == 1) {
+        QMessageBox::information(this, "Đã tiếp nhận", "Bệnh nhân đã được xác nhận đến khám và chuyển vào hàng đợi bác sĩ.");
+        loadPendingAppointments();
+    } else if (result == -3) {
+        QMessageBox::warning(this, "Sai ngày hẹn", "Chỉ xác nhận đến khám trong đúng ngày đã đặt.");
+    } else {
+        QMessageBox::warning(this, "Không thể tiếp nhận", "Lịch hẹn không còn ở trạng thái chờ bệnh nhân đến.");
     }
 }
 
@@ -376,6 +448,9 @@ void ReceptionistMenu::on_btnAssignBed_clicked() {
     } else if (result == -4) {
         QMessageBox::warning(this, QString::fromUtf8("Đầy phòng"), QString::fromUtf8("Căn phòng này vừa đạt sức chứa tối đa. Hệ thống đang đồng bộ lại."));
         loadAvailableRooms();
+    } else if (result == -5) {
+        QMessageBox::warning(this, QString::fromUtf8("Đã xuất viện"),
+                             QString::fromUtf8("Không thể cấp giường lại cho hồ sơ đã xuất viện. Hãy tạo đợt tiếp nhận mới."));
     } else {
         QMessageBox::critical(this, QString::fromUtf8("Lỗi Hệ thống"), QString::fromUtf8("Hồ sơ Bệnh nhân bị gián đoạn."));
     }

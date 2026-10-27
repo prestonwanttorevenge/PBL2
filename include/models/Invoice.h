@@ -11,14 +11,16 @@ class Invoice {
 private:
     string invoiceId;
     string patientId;
+    string appointmentId;
     double consultationFee; 
     double medicineFee;     
     double totalAmount;     
     vector<InvoiceDetail> details;
 
 public:
-    Invoice(string iId = "", string pId = "", double mFee = 0.0)
-        : invoiceId(iId), patientId(pId), consultationFee(0.0), medicineFee(mFee), totalAmount(mFee) {}
+    Invoice(string iId = "", string pId = "", double mFee = 0.0, string aId = "")
+        : invoiceId(iId), patientId(pId), appointmentId(aId),
+          consultationFee(0.0), medicineFee(mFee), totalAmount(mFee) {}
         
     void addDetail(const InvoiceDetail& detail) {
         details.push_back(detail);
@@ -28,10 +30,12 @@ public:
     
     string getId() const {return invoiceId;}
     string getPatientId() const {return patientId;}
+    string getAppointmentId() const { return appointmentId; }
     double getMedicineFee() const {return medicineFee;}
     vector<InvoiceDetail> getDetails() const {return details;}
     double getConsultationFee() const { return consultationFee; }
     double getTotalAmount() const { return totalAmount; }
+    void setAppointmentId(const string& id) { appointmentId = id; }
     void setMedicineFee(double fee);
     void printInvoice() const;
     

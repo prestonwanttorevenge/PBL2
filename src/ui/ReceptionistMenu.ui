@@ -33,6 +33,14 @@
           </property>
          </widget>
         </item>
+        <item><widget class="QLineEdit" name="txtPatientDob">
+         <property name="placeholderText"><string>Ngày sinh (dd/MM/yyyy)</string></property>
+        </widget></item>
+        <item><widget class="QComboBox" name="cbPatientGender">
+         <item><property name="text"><string>Nam</string></property></item>
+         <item><property name="text"><string>Nữ</string></property></item>
+         <item><property name="text"><string>Khác</string></property></item>
+        </widget></item>
         <item>
          <widget class="QLineEdit" name="txtBHYT">
           <property name="placeholderText">
@@ -120,17 +128,10 @@
         <item>
          <widget class="QComboBox" name="cbSpecialty"/>
         </item>
-        <item>
-         <widget class="QComboBox" name="cbDay">
-          <item><property name="text"><string>Thứ 2</string></property></item>
-          <item><property name="text"><string>Thứ 3</string></property></item>
-          <item><property name="text"><string>Thứ 4</string></property></item>
-          <item><property name="text"><string>Thứ 5</string></property></item>
-          <item><property name="text"><string>Thứ 6</string></property></item>
-          <item><property name="text"><string>Thứ 7</string></property></item>
-          <item><property name="text"><string>Chủ nhật</string></property></item>
-         </widget>
-        </item>
+        <item><widget class="QDateEdit" name="dateAppointment">
+         <property name="calendarPopup"><bool>true</bool></property>
+         <property name="displayFormat"><string>dd/MM/yyyy</string></property>
+        </widget></item>
         <item>
          <widget class="QComboBox" name="cbShift">
           <item><property name="text"><string>Sáng</string></property></item>
@@ -169,6 +170,9 @@
           </property>
          </widget>
         </item>
+        <item><widget class="QPushButton" name="btnCheckInAppointment">
+         <property name="text"><string>Xác nhận bệnh nhân đến</string></property>
+        </widget></item>
        </layout>
       </item>
       <item>

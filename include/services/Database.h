@@ -1,158 +1,134 @@
 #ifndef DATABASE_H
 #define DATABASE_H
-
+#include <string>
 #include <vector>
 #include <map>
-#include "BST.h"
-#include <string>
+#include "utils/CustomMap.h"
+#include "utils/RBTree.h"
+#include "models/User.h"
 #include "models/Doctor.h"
 #include "models/Patient.h"
 #include "models/Inpatient.h"
 #include "models/Outpatient.h"
 #include "models/Medicine.h"
-#include "models/Invoice.h"
-#include "models/User.h"
+#include "models/Service.h"
 #include "models/Appointment.h"
 #include "models/MedicalRecord.h"
-#include "models/Service.h"
+#include "models/Invoice.h"
+#include "models/InvoiceDetail.h"
 
 using namespace std;
 
 class Database {
 private:
-    BST<Doctor> doctors;
-    BST<Patient*> patients;
-    vector<Invoice> invoices;
-    BST<Medicine> medicines;
+    int patientCounter = 0;
+    int appointmentCounter = 0;
+    int doctorCounter = 0;
+    int medicalRecordCounter = 0;
 
-    BST<User> users;
+    CounterMap userCounters;
+    CounterMap medicineCounters;
+    CounterMap serviceCounters;
+
+    string doctorFile = "data/doctors.csv";
+    string doctorScheduleFile = "data/data_doctor_schedules.csv";
+    string patientFile = "data/patients.csv";
+    string invoiceFile = "data/invoices.csv";
+    string invoiceDetailsFile = "data/data_invoice_details.csv";
+    string userFile = "data/users.csv";
+    string medicineFile = "data/medicines.csv";
+    string serviceFile = "data/data_services.csv";
+    string appointmentFile = "data/data_appointments.csv";
+    string medicalRecordFile = "data/medical_records.csv";
+    string prescriptionDetailFile = "data/data_prescription_details.csv";
+
+    RBTree<string, Doctor> doctors;
+    RBTree<string, Patient*> patients;
+    RBTree<string, Medicine> medicines;
+    RBTree<string, Service> services;
+    RBTree<string, User> users;
+
     vector<Appointment> appointments;
     vector<MedicalRecord> medicalRecords;
-    BST<Service> services;
+    vector<Invoice> invoices;
 
-    const std::string doctorFile = "data/doctors.csv";
-    const std::string patientFile = "data/patients.csv";
-    const std::string invoiceFile = "data/invoices.csv";
-    const std::string invoiceDetailsFile = "data/data_invoice_details.csv";
-    const std::string medicineFile = "data/medicines.csv";
-    const std::string userFile = "data/users.csv";
-    const std::string appointmentFile = "data/data_appointments.csv";
-    const std::string medicalRecordFile = "data/medical_records.csv";
-    const std::string serviceFile = "data/data_services.csv";
-    const std::string doctorScheduleFile = "data/data_doctor_schedules.csv";
-    const std::string prescriptionDetailFile = "data/data_prescription_details.csv";
-    
-    // --- BỘ ĐẾM TỰ ĐỘNG SINH MÃ ---
-    int medicalRecordCounter = 0;
-    std::map<string, int> userCounters; // MỚI: Đếm user theo Role (ADMIN, RECEP, KHO)
-    int patientCounter = 0;                      
-    int appointmentCounter = 0;   
-    int doctorCounter = 0;              // MỚI
-    std::map<std::string, int> medicineCounters;
-    std::map<std::string, int> serviceCounters;       // MỚI
-    
     void sanitizeInput(string& input);
 
 public:
     Database();
-    Database(Database&);
     ~Database();
 
-    Doctor* findDoctorById(string id);
-    Patient* findPatientById(string id);
-    Medicine* findMedicineById(string id);
-    Appointment* findAppointmentById(string id);
-    MedicalRecord* findMedicalRecordById(string id);
-    vector<Patient*> searchPatients(string keyword);
-
-    BST<User>& getUsers() { return users; }
-    BST<Doctor>& getDoctors() { return doctors; }
-    BST<Patient*>& getPatients() { return patients; }
-    BST<Medicine>& getMedicines() { return medicines; }
-    BST<Service>& getServices() { return services; }
+    RBTree<string, User>& getUsers() { return users; }
+    RBTree<string, Doctor>& getDoctors() { return doctors; }
+    RBTree<string, Patient*>& getPatients() { return patients; }
+    RBTree<string, Medicine>& getMedicines() { return medicines; }
+    RBTree<string, Service>& getServices() { return services; }
 
     vector<Appointment>& getAppointments() { return appointments; }
     vector<Invoice>& getInvoices() { return invoices; }
     vector<MedicalRecord>& getMedicalRecords() { return medicalRecords; }
-    
-    void deleteDoctor(string id);
-    void deleteMedicine(string id);
-    void deletePatient(string id);
-    
-    void updateDoctor(string id);
-    void updateMedicine(string id);
-    void updatePatient(string id);
-    
-    void addDoctor();
-    void addMedicine();
-    void addPatient();
 
-    void showAllDoctors ()const ;
-    void showAllMedicine() const;
-    void showAllPatients() const;
-
-    void loadAllData();
-    void saveAllData(); 
-
-    // --- CÁC HÀM TỰ ĐỘNG SINH MÃ ---
     string generatePatientId();
     string generateAppointmentId();
     string generateMedicalRecordId();
-    string generateUserId(const string& role); // MỚI
-    string generateDoctorId();                 // MỚI
-    string generateMedicineId(const string& prefix);            // MỚI
-    string generateServiceId(const string& prefix);       // MỚI
+    string generateUserId(const string& role);
+    string generateDoctorId();
+    string generateMedicineId(const string& prefix);
+    string generateServiceId(const string& prefix);
 
-    // ==========================================
-    // Hệ thống & Đăng nhập
-    // ==========================================
+    void loadAllData();
+    void saveAllData();
+
+    Doctor* findDoctorById(string id);
+    Patient* findPatientById(string id);
+    vector<Patient*> searchPatients(string keyword);
+    Medicine* findMedicineById(string id);
+    Appointment* findAppointmentById(string id);
+    MedicalRecord* findMedicalRecordById(string id);
+
+    bool deleteUserFromQT(const string& id);
+    bool setUserActiveFromQT(const string& id, bool active);
+    int deleteDoctorFromQT(const string& id);
+    int deleteMedicineFromQT(const string& id);
+    bool deleteServiceFromQT(const string& id);
+
+    bool addPatientFromGUI(string name, string dob, string gender, string phone,
+                           string BH, bool isNoiTru, string admissionDate);
+    int bookAppointmentFromQT(string patientId, string doctorId, string receptionistId, string specialty, string day, string time, string appointmentDate);
+    int checkInAppointmentFromQT(const string& appointmentId, const string& currentDate);
+    string updateMedicalRecordFromQT(string apptId, string symp, string diag, string notes, string status = "Completed");
     User* loginFromQT(string username, string password);
-
-    // ==========================================
-    // Quản Trị Viên (Admin)
-    // ==========================================
     int addUserFromQT(string id, string username, string plainPassword, string fullName, string role);
-    int addDoctorWithAccount(string id, string name, string dob, string gender, string phone, string specialty, int expYears, string username, string plainPassword);
-    bool addDoctorFromQT(string id, string fullName, string dob, string gender, string phone, string specialty, int expYears);
-    bool addShiftToDoctorFromQT(string doctorId, string day, string time);
+    int addDoctorWithAccount(string id, string name, string dob, string gender, string phone,
+                             string specialty, int expYears, string username, string plainPassword,
+                             string workDay, string workShift);
+    int addMedicineFromQT(string prefix, string medicineName, double unitPrice, string dosage, int addQty, string& outId);
+    int assignServiceFromQT(string recordId, string serviceId);
     int addServiceFromQT(string prefix, string name, double price, string& outId);
     double calculateTotalRevenue();
-    
-    bool deleteUserFromQT(const std::string& id);
-    int deleteDoctorFromQT(const std::string& id);
-    int deleteMedicineFromQT(const std::string& id);
-    bool deleteServiceFromQT(const std::string& id);
-
-    // ==========================================
-    // Lễ Tân (Receptionist)
-    // ==========================================
-    bool addPatientFromGUI(string name, string phone, string BH,bool isNoiTru); 
-    bool addInpatientFromQT(string id, string name, string dob, string gender, string phone,string recordId, string BH, string admDate, string disDate, string room, string bed);
-    bool addOutpatientFromQT(string id, string name, string dob, string gender, string phone, string recordId, string BH, string apptDate, string clinic);
-    int updateInpatientBed(string patientId, string room, string bed);
-    map<string, vector<string>> getAvailableRoomMap();
     vector<Doctor*> getAvailableDoctors(string day, string shift);
-    int bookAppointmentFromQT(string patientId, string doctorId, string receptionistId,string specialty ,string day, string time);
-    int createInvoiceFromQT(string patientId, double& outTotalFee);
-
-    // ==========================================
-    // Bác Sĩ (Doctor)
-    // ==========================================
-    string updateMedicalRecordFromQT(string apptId, string symp, string diag, string notes, string status = "Completed");
     int prescribeMedicineFromQT(string recordId, string medId, string dosage, int qty);
+    int dispensePrescriptionFromQT(string recordId, string medicineId);
+    int createInvoiceFromQT(string patientId, double& outTotalFee);
     vector<MedicalRecord*> getPatientHistory(string patientId);
-    int assignServiceFromQT(string recordId, string serviceId);
-    int dischargeInpatientFromQT(string patientId, string dischargeDate);
-
-    // ==========================================
-    // Dùng chung
-    // ==========================================
     int cancelAppointmentFromQT(string apptId);
 
-    // ==========================================
-    // Quản Lý Kho / Dược Sĩ
-    // ==========================================
-    int addMedicineFromQT(string medicineId,string medicineName,double unitPrice,string dosage,int addQty,string &outId);
+    map<string, vector<string>> getAvailableRoomMap();
+    int updateInpatientBed(string patientId, string room, string bed);
+    int dischargeInpatientFromQT(string patientId, string dischargeDate);
+
+    void deleteDoctor(string id);
+    void deleteMedicine(string id);
+    void deletePatient(string id);
+    void updateDoctor(string id);
+    void updateMedicine(string id);
+    void updatePatient(string id);
+    void addDoctor();
+    void showAllDoctors() const;
+    void addMedicine();
+    void showAllMedicine() const;
+    void addPatient();
+    void showAllPatients() const;
 };
 
-#endif
+#endif // DATABASE_H

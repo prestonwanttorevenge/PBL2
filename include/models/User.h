@@ -25,6 +25,7 @@ public:
     string getFullName() const{return fullName; }
     string getRole() const{return roleName; }
     bool getIsActive() const{return isActive; }
+    void setIsActive(bool active) { isActive = active; }
     bool authenticate(const string& inputPassword) const {
         return bcrypt::validatePassword(inputPassword, this->passwordHash);
     }

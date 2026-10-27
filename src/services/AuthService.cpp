@@ -4,10 +4,10 @@ AuthService::AuthService(Database& database) : db(database), currentUser(nullptr
 AuthService::~AuthService() {}
 
 bool AuthService::login(const std::string& inputUsername, const std::string& inputPassword) {
-    // Tìm trực tiếp User trong Cây BST theo Username (không dùng vòng lặp for)
+    currentUser = nullptr;
     User* user = db.loginFromQT(inputUsername, inputPassword);
 
-    if (user != nullptr) {
+    if (user != nullptr && user->getIsActive()) {
         currentUser = user;
         return true;
     }

@@ -41,12 +41,17 @@ void DoctorMenu::on_tableAppointments_itemClicked(QTableWidgetItem *item) {
         ui->txtAppointmentId->setText(apptId);
         ui->txtPatientId_History->setText(patientId);
 
-        // TỰ ĐỘNG LẤY MÃ BỆNH ÁN TỪ LỄ TÂN
+        ui->txtSymptoms->clear();
+        ui->txtDiagnosis->clear();
+        ui->txtNotes->clear();
         ui->txtRecordId->clear();
         vector<MedicalRecord>& records = db.getMedicalRecords();
         for (auto& rec : records) {
             if (rec.getAppointmentId() == apptId.toStdString()) {
                 ui->txtRecordId->setText(QString::fromStdString(rec.getRecordId()));
+                ui->txtSymptoms->setText(QString::fromStdString(rec.getSymptoms()));
+                ui->txtDiagnosis->setText(QString::fromStdString(rec.getDiagnosis()));
+                ui->txtNotes->setText(QString::fromStdString(rec.getNotes()));
                 break;
             }
         }
@@ -101,7 +106,8 @@ void DoctorMenu::on_btnLogout_clicked() {
     );
 
     if (reply == QMessageBox::Yes) {
-        Login *loginForm = new Login(this->db);
+        auth.logout();
+        Login *loginForm = new Login(this->db, this->auth);
         loginForm->show();
         this->close(); 
     }
@@ -147,7 +153,7 @@ void DoctorMenu::on_btnCreateMedicalRecord_clicked() {
         return;
     }
 
-    string updatedRecordId = db.updateMedicalRecordFromQT(apptId, symp, diag, notes);
+    string updatedRecordId = db.updateMedicalRecordFromQT(apptId, symp, diag, notes, "Completed");
 
     if (!updatedRecordId.empty()) {
         ui->txtRecordId->setText(QString::fromStdString(updatedRecordId));
@@ -188,11 +194,9 @@ void DoctorMenu::on_btnPrescribeMedicine_clicked() {
     Appointment* appt = db.findAppointmentById(apptId);
 
     if (appt != nullptr && record != nullptr) {
-        if (!record->getAssignedServices().empty() && appt->getStatus() == "Pending") {
+        if (appt->getStatus() != "Completed") {
             QMessageBox::critical(this, QString::fromUtf8("Cảnh Báo Vi Phạm Quy Trình"), 
-                QString::fromUtf8("Bệnh nhân đã được chỉ định Dịch vụ Cận lâm sàng!\n\n"
-                                  "Vui lòng bấm nút [Lưu & Chờ Kết Quả CLS] cho bệnh nhân đi làm xét nghiệm.\n"
-                                  "Khi bệnh nhân mang kết quả về, bạn click lại vào tên bệnh nhân trên bảng mới được phép kê đơn thuốc!"));
+                QString::fromUtf8("Chỉ được kê đơn sau khi đã hoàn tất khám và cập nhật kết quả cận lâm sàng (nếu có)."));
             return; 
         }
     }
@@ -222,6 +226,12 @@ void DoctorMenu::on_btnPrescribeMedicine_clicked() {
     } 
     else if (result == -3) {
         QMessageBox::critical(this, QString::fromUtf8("Hết hàng"), QString::fromUtf8("Số lượng thuốc trong kho không đủ để kê đơn này!"));
+    }
+    else if (result == -5) {
+        QMessageBox::warning(this, QString::fromUtf8("Quy trình"), QString::fromUtf8("Hãy hoàn tất khám hoặc cập nhật kết quả CLS trước khi kê đơn."));
+    }
+    else if (result == -6) {
+        QMessageBox::warning(this, QString::fromUtf8("Đơn thuốc"), QString::fromUtf8("Thuốc này đã có trong đơn. Không thêm trùng dòng thuốc."));
     }
 }
 
@@ -285,6 +295,9 @@ void DoctorMenu::on_btnCancelAppointment_clicked() {
         } 
         else if (result == -2) {
             QMessageBox::warning(this, "Lỗi", "Lịch hẹn này đã khám xong, không thể hủy!");
+        } else if (result == -3) {
+            QMessageBox::warning(this, "Đang thực hiện",
+                                 "Không thể hủy lịch khi bệnh nhân đang chờ kết quả cận lâm sàng.");
         }
     }
 }
@@ -303,8 +316,13 @@ void DoctorMenu::on_btnAssignService_clicked() {
     if (result == 1) {
         db.saveAllData(); 
         QMessageBox::information(this, "Thành công", "Đã chỉ định Dịch vụ thành công!");
+        loadPatientQueue();
     } else if (result == -3) {
         QMessageBox::warning(this, "Cảnh báo", "Dịch vụ này đã được chỉ định rồi!");
+    } else if (result == -4) {
+        QMessageBox::warning(this, "Quy trình", "Không thể chỉ định dịch vụ cho lịch đã hủy, đã lập hóa đơn hoặc đã kết thúc.");
+    } else if (result == -5) {
+        QMessageBox::warning(this, "Thiếu chẩn đoán", "Hãy ghi nhận chẩn đoán sơ bộ trước khi chỉ định cận lâm sàng.");
     }
 }
 
@@ -337,6 +355,8 @@ void DoctorMenu::loadPatientQueue() {
     
     int row = 0;
     for (const auto& appt : appts) {
+        User* currentUser = auth.getCurrentUser();
+        if (currentUser == nullptr || appt.getDoctorId() != currentUser->getId()) continue;
         if (appt.getStatus() == "Pending" || appt.getStatus() == "Waiting") {
             ui->tableAppointments->insertRow(row);
             
@@ -352,7 +372,10 @@ void DoctorMenu::loadPatientQueue() {
             }
             QTableWidgetItem *item2 = new QTableWidgetItem(typeStr);
 
-            QString timeStr = QString::fromStdString(appt.getDayOfWeek() + " - " + appt.getTimeSlot());
+            const string date = appt.getAppointmentDate().empty()
+                                    ? appt.getDayOfWeek()
+                                    : appt.getAppointmentDate();
+            QString timeStr = QString::fromStdString(date + " - " + appt.getTimeSlot());
             QTableWidgetItem *item3 = new QTableWidgetItem(timeStr);
             
             QString statusText = (appt.getStatus() == "Pending") ? QString::fromUtf8("Chờ Khám") : QString::fromUtf8("Chờ Kết Quả CLS");
@@ -415,6 +438,9 @@ void DoctorMenu::on_btnDischargePatient_clicked() {
         } 
         else if (result == -3) {
             QMessageBox::warning(this, QString::fromUtf8("Lỗi Trạng thái"), QString::fromUtf8("Hồ sơ này chưa được xếp giường hoặc đã xuất viện từ trước."));
+        } else if (result == -4) {
+            QMessageBox::warning(this, QString::fromUtf8("Chưa hoàn tất"),
+                                 QString::fromUtf8("Cần hoàn tất các kết quả cận lâm sàng trước khi xuất viện."));
         } 
     }
 }

@@ -4,7 +4,8 @@
 #include <iostream>
 #include <string>
 #include <iomanip> 
-#include <algorithm> // Dùng cho thuật toán càn quét phòng trống
+#include <cctype>
+#include <cstdio>
 
 Database::Database() {
 }
@@ -53,11 +54,15 @@ string Database::generateUserId(const string& role) {
     if (role == "Admin") prefix = "ADMIN";
     else if (role == "Receptionist") prefix = "RECEP";
     else if (role == "QuanLyKho") prefix = "KHO";
-    
-    userCounters[prefix]++;
-    stringstream ss;
-    ss << prefix << setfill('0') << setw(2) << userCounters[prefix];
-    return ss.str();
+
+    string id;
+    do {
+        ++userCounters[prefix];
+        stringstream ss;
+        ss << prefix << setfill('0') << setw(2) << userCounters[prefix];
+        id = ss.str();
+    } while (users.search(id) != nullptr);
+    return id;
 }
 
 string Database::generateDoctorId() {
@@ -101,7 +106,7 @@ void Database::loadAllData() {
         doctors.clear(); 
         while (getline(fDoc, line)) {
             if (line.empty()) continue;
-            
+
             stringstream ss(line);
             string id, name, dob, gender, phone, spec, tempExp;
 
@@ -114,7 +119,7 @@ void Database::loadAllData() {
             getline(ss, tempExp, ';');
             int exp = 0;
             try { exp = stoi(tempExp); } catch (...) {}
-            
+
             if (id.substr(0, 2) == "BS") {
                 int num = 0;
                 try { num = stoi(id.substr(2)); } catch(...) {}
@@ -136,7 +141,7 @@ void Database::loadAllData() {
             std::getline(ss, docId, ';');
             std::getline(ss, day, ';');
             std::getline(ss, time, ';');
-            
+
             Doctor* doc = findDoctorById(docId); 
             if (doc != nullptr) {
                 doc->setWorkSchedule(day, time);
@@ -144,7 +149,7 @@ void Database::loadAllData() {
         }
         fSched.close();
     }
-    
+
     ifstream fPat(patientFile);
     if (fPat.is_open()) {
         string line;
@@ -167,7 +172,7 @@ void Database::loadAllData() {
             getline(ss, phone, ';');
             getline(ss, recordId, ';');
             getline(ss, BHYTstr, ';');
-            
+
             if (id.length() > 2) {
                 int num = 0;
                 try { num = stoi(id.substr(2)); } catch(...) {}
@@ -198,16 +203,17 @@ void Database::loadAllData() {
         while (getline(fInv, line)) {
             if (line.empty()) continue;
             stringstream ss(line);
-            string id, patientId, medFeeStr;
-            
+            string id, patientId, medFeeStr, appointmentId;
+
             getline(ss, id, ';');
             getline(ss, patientId, ';');
             getline(ss, medFeeStr, ';');
-            
+            getline(ss, appointmentId, ';');
+
             double medFee = 0;
             try { medFee = stod(medFeeStr); } catch (...) {}
 
-            invoices.push_back(Invoice(id, patientId, medFee));
+            invoices.push_back(Invoice(id, patientId, medFee, appointmentId));
         }
         fInv.close();
     } 
@@ -219,21 +225,21 @@ void Database::loadAllData() {
             if (line.empty()) continue;
             stringstream ss(line);
             string dId, iId, sId, qtyStr, priceStr;
-            
+
             getline(ss, dId, ';');    
             getline(ss, iId, ';');    
             getline(ss, sId, ';');   
             getline(ss, qtyStr, ';');
             getline(ss, priceStr, ';');
-            
+
             int qty = 0;
             double price = 0;
             try { 
                 qty = stoi(qtyStr); 
                 price = stod(priceStr); 
             } catch (...) {}
-            
-            InvoiceDetail detail(dId, iId , sId, qty, price);
+
+            InvoiceDetail detail(dId, sId, iId, qty, price);
             for (auto& inv : invoices) { 
                 if (inv.getId() == iId) {
                     inv.addDetail(detail); 
@@ -250,7 +256,7 @@ void Database::loadAllData() {
         users.clear();
         while (getline(fUser, line)) {
             if (line.empty()) continue;
-            
+
             stringstream ss(line);
             string id, Username , pass , fullName , role, activestr;
             getline(ss, id, ';');
@@ -259,10 +265,10 @@ void Database::loadAllData() {
             getline(ss, fullName, ';');
             getline(ss, role, ';');
             getline(ss, activestr, ';');
-            
+
             bool isActive = false;
             if (activestr == "1" || activestr == "true") { isActive = true; }
-            
+
             string prefix = ""; string numStr = "";
             for (char c : id) {
                 if (isalpha(c)) prefix += c;
@@ -354,15 +360,17 @@ void Database::loadAllData() {
         while (getline(fAppt, line)) {
             if (line.empty()) continue;
             stringstream ss(line);
-            string aId, pId, dId, rId, spec ,date, status;
+            string aId, pId, dId, rId, spec, day, time, status, date;
 
             getline(ss, aId, ';');
             getline(ss, pId, ';');
             getline(ss, dId, ';');
             getline(ss, rId, ';');
-            getline(ss,spec,';');
-            getline(ss, date, ';');
+            getline(ss, spec, ';');
+            getline(ss, day, ';');
+            getline(ss, time, ';');
             getline(ss, status, ';');
+            getline(ss, date, ';');
 
             if (aId.length() > 3) {
                 int num = 0;
@@ -370,11 +378,11 @@ void Database::loadAllData() {
                 if (num > appointmentCounter) appointmentCounter = num;
             }
 
-            appointments.push_back(Appointment(aId, pId, dId, rId, spec,date, status));
+            appointments.push_back(Appointment(aId, pId, dId, rId, spec, day, time, status, date));
         }
         fAppt.close();
     }
- 
+
     ifstream fMedRec(medicalRecordFile);
     if (fMedRec.is_open()) {
         string line;
@@ -382,13 +390,14 @@ void Database::loadAllData() {
         while (getline(fMedRec, line)) {
             if (line.empty()) continue;
             stringstream ss(line);
-            string rId, aId, symp, diag, notes;
+            string rId, aId, symp, diag, notes, assignedServices;
 
             getline(ss, rId, ';');
             getline(ss, aId, ';');
             getline(ss, symp, ';');
             getline(ss, diag, ';');
             getline(ss, notes, ';');
+            getline(ss, assignedServices, ';');
 
             if (rId.length() > 2) {
                 int num = 0;
@@ -399,6 +408,15 @@ void Database::loadAllData() {
             }
 
             medicalRecords.push_back(MedicalRecord(rId, aId, symp, diag, notes));
+            if (!assignedServices.empty()) {
+                stringstream servicesStream(assignedServices);
+                string serviceId;
+                while (getline(servicesStream, serviceId, ',')) {
+                    if (!serviceId.empty()) {
+                        medicalRecords.back().addService(serviceId);
+                    }
+                }
+            }
         }
         fMedRec.close();
     }
@@ -409,25 +427,51 @@ void Database::loadAllData() {
         while (getline(fPresc, line)) {
             if (line.empty()) continue;
             stringstream ss(line);
-            string rId, mId, dosage, qtyStr;
+            string rId, mId, dosage, qtyStr, priceStr, dispensedStr;
 
             getline(ss, rId, ';');       
             getline(ss, mId, ';');       
             getline(ss, dosage, ';');    
             getline(ss, qtyStr, ';');    
+            getline(ss, priceStr, ';');
+            getline(ss, dispensedStr, ';');
 
             int qty = 0;
             try { qty = stoi(qtyStr); } catch (...) {}
+            Medicine* medicine = findMedicineById(mId);
+            double price = medicine == nullptr ? 0.0 : medicine->getUnitPrice();
+            if (!priceStr.empty()) {
+                try { price = stod(priceStr); } catch (...) {}
+            }
+            const bool dispensed = priceStr.empty() || dispensedStr == "1" || dispensedStr == "true";
 
             for (auto& record : medicalRecords){
                 if (record.getRecordId() == rId){
-                    record.addMedicine(mId, dosage, qty);
+                    record.addMedicine(mId, dosage, qty, price, dispensed);
                     break;
                 }
             }
         }
         fPresc.close();
     } 
+
+    for (Invoice& invoice : invoices) {
+        if (!invoice.getAppointmentId().empty()) {
+            Appointment* appt = findAppointmentById(invoice.getAppointmentId());
+            if (appt != nullptr && appt->getStatus() == "Completed") {
+                appt->setStatus("Billed");
+            }
+            continue;
+        }
+
+        for (auto it = appointments.rbegin(); it != appointments.rend(); ++it) {
+            if (it->getPatientId() == invoice.getPatientId() && it->getStatus() == "Completed") {
+                invoice.setAppointmentId(it->getAppointmentId());
+                it->setStatus("Billed");
+                break;
+            }
+        }
+    }
 
     cout << "-> Tai du lieu hoan tat!" << endl;
 }
@@ -437,7 +481,13 @@ void Database::loadAllData() {
 // ==========================================
 void Database::saveAllData() {
     cout << "Dang luu co so du lieu..." << endl;
-    
+
+    if (users.isEmpty()) {
+        User defaultAdmin("ADMIN01", "admin", "", "Quan Tri Vien", "Admin", true);
+        defaultAdmin.setPassword("admin123");
+        users.insert("ADMIN01", defaultAdmin);
+    }
+
     ofstream fsrv(serviceFile);
     if (fsrv.is_open()) {
         vector<Service*> allSrv = services.getAllPointers();
@@ -459,7 +509,8 @@ void Database::saveAllData() {
                   << appt.getSpecialty() << ";"
                   << appt.getDayOfWeek() << ";"
                   << appt.getTimeSlot() << ";"
-                  << appt.getStatus() << "\n";
+                  << appt.getStatus() << ";"
+                  << appt.getAppointmentDate() << "\n";
         }
         fappt.close();
     }
@@ -486,12 +537,20 @@ void Database::saveAllData() {
                     << record.getAppointmentId() << ";"
                     << record.getSymptoms() << ";"
                     << record.getDiagnosis() << ";"
-                    << record.getNotes() << "\n";
+                    << record.getNotes() << ";";
+            const vector<string> assignedServices = record.getAssignedServices();
+            for (size_t i = 0; i < assignedServices.size(); ++i) {
+                if (i > 0) fMedRec << ",";
+                fMedRec << assignedServices[i];
+            }
+            fMedRec << "\n";
             for (const auto& rx : record.getPrescriptions()) {
                 fPresc << record.getRecordId() << ";"
                        << rx.medicineId << ";"
                        << rx.dosage << ";"
-                       << rx.quantity << "\n"; 
+                       << rx.quantity << ";"
+                       << rx.unitPrice << ";"
+                       << (rx.dispensed ? "1" : "0") << "\n";
             }
         }
         fMedRec.close();
@@ -503,7 +562,7 @@ void Database::saveAllData() {
 
     if (fDoc.is_open() && fSched.is_open()) {
         vector<Doctor*> allDocs = doctors.getAllPointers();
-        
+
         for (size_t i = 0; i < allDocs.size(); i++) {
             fDoc << allDocs[i]->getId() << ";"
                  << allDocs[i]->getFullName() << ";"
@@ -512,7 +571,7 @@ void Database::saveAllData() {
                  << allDocs[i]->getPhoneNumber() << ";"
                  << allDocs[i]->getSpecialty() << ";"
                  << allDocs[i]->getYearsOfExperience() << "\n";
-            
+
             const std::vector<WorkShift>& sched = allDocs[i]->getSchedule();
             for (size_t j = 0; j < sched.size(); j++) {
                 fSched << allDocs[i]->getId() << ";"
@@ -537,11 +596,6 @@ void Database::saveAllData() {
         }
         fUser.close();
 
-        if (users.isEmpty()) {
-            User defaultAdmin("ADMIN01", "admin", "", "Quan Tri Vien", "Admin", true);
-            defaultAdmin.setPassword("admin123"); 
-            users.insert("ADMIN01", defaultAdmin);
-        }
     }
 
     ofstream fPat(patientFile);
@@ -549,7 +603,7 @@ void Database::saveAllData() {
         vector<Patient**> allPats = patients.getAllPointers();
         for (size_t i = 0; i < allPats.size(); i++) {
             Patient* pat = *(allPats[i]); 
-            
+
             if (Inpatient* inpat = dynamic_cast<Inpatient*>(pat)) {
                 fPat << "NoiTru;"
                      << inpat->getId() << ";"
@@ -579,7 +633,7 @@ void Database::saveAllData() {
         }
         fPat.close();
     }
-    
+
     ofstream fInv(invoiceFile);
     ofstream fInvDetail(invoiceDetailsFile);
 
@@ -587,7 +641,8 @@ void Database::saveAllData() {
         for (const auto& inv : invoices) {
             fInv << inv.getId() << ";"
                  << inv.getPatientId() << ";"
-                 << inv.getMedicineFee() << "\n";
+                 << inv.getMedicineFee() << ";"
+                 << inv.getAppointmentId() << "\n";
 
             for (const auto& detail : inv.getDetails()) {
                 fInvDetail << detail.getDetailId() << ";"
@@ -649,15 +704,44 @@ MedicalRecord* Database::findMedicalRecordById(string id){
 // CÁC HÀM XÓA & CẬP NHẬT TỪ QT
 // ==========================================
 bool Database::deleteUserFromQT(const std::string& id) {
-    if (users.search(id) == nullptr) return false; 
+    User* user = users.search(id);
+    if (user == nullptr || user->getRole() == "Doctor" || user->getRole() == "BacSi") return false;
+    if (user->getRole() == "Admin" || user->getRole() == "QuanTri") {
+        int activeAdmins = 0;
+        for (User* candidate : users.getAllPointers()) {
+            if ((candidate->getRole() == "Admin" || candidate->getRole() == "QuanTri") &&
+                candidate->getIsActive()) {
+                ++activeAdmins;
+            }
+        }
+        if (user->getIsActive() && activeAdmins <= 1) return false;
+    }
     users.remove(id); 
+    return true;
+}
+
+bool Database::setUserActiveFromQT(const std::string& id, bool active) {
+    User* user = users.search(id);
+    if (user == nullptr) return false;
+    if (!active && (user->getRole() == "Admin" || user->getRole() == "QuanTri") &&
+        user->getIsActive()) {
+        int activeAdmins = 0;
+        for (User* candidate : users.getAllPointers()) {
+            if ((candidate->getRole() == "Admin" || candidate->getRole() == "QuanTri") &&
+                candidate->getIsActive()) {
+                ++activeAdmins;
+            }
+        }
+        if (activeAdmins <= 1) return false;
+    }
+    user->setIsActive(active);
     return true;
 }
 
 int Database::deleteDoctorFromQT(const std::string& id) {
     if (doctors.search(id) == nullptr) return -1;
     for (const auto& appt : appointments) {
-        if (appt.getDoctorId() == id && appt.getStatus() == "Pending") {
+        if (appt.getDoctorId() == id) {
             return -2; 
         }
     }
@@ -681,6 +765,16 @@ int Database::deleteMedicineFromQT(const std::string& id) {
 
 bool Database::deleteServiceFromQT(const std::string& id) {
     if (services.search(id) == nullptr) return false;
+    for (const MedicalRecord& record : medicalRecords) {
+        for (const string& assignedService : record.getAssignedServices()) {
+            if (assignedService == id) return false;
+        }
+    }
+    for (const Invoice& invoice : invoices) {
+        for (const InvoiceDetail& detail : invoice.getDetails()) {
+            if (detail.getServiceId() == id) return false;
+        }
+    }
     services.remove(id);
     return true;
 }
@@ -689,21 +783,31 @@ bool Database::deleteServiceFromQT(const std::string& id) {
 // CÁC HÀM XỬ LÝ NGHIỆP VỤ (LỄ TÂN & BÁC SĨ)
 // ==========================================
 
-bool Database::addPatientFromGUI(string name, string phone, string BH, bool isNoiTru){
+bool Database::addPatientFromGUI(string name, string dob, string gender, string phone,
+                                 string BH, bool isNoiTru, string admissionDate) {
+    if (name.empty() || dob.empty() || gender.empty() || phone.size() < 10 || phone.size() > 11) {
+        return false;
+    }
+    for (char digit : phone) {
+        if (digit < '0' || digit > '9') return false;
+    }
     string newId = generatePatientId();
     if (isNoiTru){
-        patients.insert(newId, new Inpatient(newId, name, "", "", phone, "", BH, "", "", "", ""));
+        patients.insert(newId, new Inpatient(newId, name, dob, gender, phone, "", BH,
+                                             admissionDate, "", "Chua xep", ""));
     } else{
-        patients.insert(newId, new Outpatient(newId, name, "", "", phone, "", BH, "", ""));
+        patients.insert(newId, new Outpatient(newId, name, dob, gender, phone, "", BH, "", ""));
     }
     return true;
 }
 
-int Database::bookAppointmentFromQT(string patientId, string doctorId, string receptionistId, string specialty, string day, string time) {
+int Database::bookAppointmentFromQT(string patientId, string doctorId, string receptionistId,
+                                    string specialty, string day, string time, string appointmentDate) {
     if (findPatientById(patientId) == nullptr) return -1; 
     Doctor* doc = findDoctorById(doctorId);
     if (doc == nullptr) return -2; 
-    
+    if (appointmentDate.empty() || specialty.empty() || doc->getSpecialty() != specialty) return -3;
+
     bool isAvailable = false;
     for (const auto& shift : doc->getSchedule()) {
         if (shift.dayOfWeek == day && shift.timeSlot == time) {
@@ -712,27 +816,52 @@ int Database::bookAppointmentFromQT(string patientId, string doctorId, string re
         }
     }
     if (!isAvailable) return -3;
-    
+
+    for (const Appointment& appt : appointments) {
+        if (appt.getAppointmentDate() == appointmentDate &&
+            appt.getTimeSlot() == time &&
+            appt.getStatus() != "Canceled" &&
+            appt.getStatus() != "Cancelled") {
+            if (appt.getDoctorId() == doctorId) return -4;
+            if (appt.getPatientId() == patientId) return -5;
+        }
+    }
+
     string newAppId = generateAppointmentId(); 
-    appointments.push_back(Appointment(newAppId, patientId, doctorId, receptionistId, specialty, day, time, "Pending"));
-    
+    appointments.push_back(Appointment(newAppId, patientId, doctorId, receptionistId,
+                                       specialty, day, time, "Scheduled", appointmentDate));
+
     string newRecordId = generateMedicalRecordId(); 
     medicalRecords.push_back(MedicalRecord(newRecordId, newAppId, "", "", ""));
-    
+
     saveAllData();
     return 1; 
+}
+
+int Database::checkInAppointmentFromQT(const string& appointmentId, const string& currentDate) {
+    Appointment* appointment = findAppointmentById(appointmentId);
+    if (appointment == nullptr) return -1;
+    if (appointment->getStatus() != "Scheduled") return -2;
+    if (appointment->getAppointmentDate() != currentDate) return -3;
+    appointment->setStatus("Pending");
+    saveAllData();
+    return 1;
 }
 
 string Database::updateMedicalRecordFromQT(string apptId, string symp, string diag, string notes, string status) {
     Appointment* appt = findAppointmentById(apptId);
     if (appt == nullptr) return "";
-    
+    if (diag.empty() || (status != "Completed" && status != "Waiting") ||
+        appt->getStatus() == "Canceled" || appt->getStatus() == "Cancelled" ||
+        appt->getStatus() == "Billed") return "";
+
     for (auto& record : medicalRecords) {
         if (record.getAppointmentId() == apptId) {
+            if (status == "Waiting" && record.getAssignedServices().empty()) return "";
             record.setSymptoms(symp);
             record.setDiagnosis(diag);
             record.setNotes(notes);
-            
+
             appt->setStatus(status);
             saveAllData(); 
             return record.getRecordId(); 
@@ -754,7 +883,7 @@ User* Database::loginFromQT(string username, string password) {
     vector<User*> allusers = users.getAllPointers();
     for (size_t i = 0; i < allusers.size(); i++) {
         if (allusers[i]->getUsername() == username) {
-            if (allusers[i]->authenticate(password)) return allusers[i];
+            if (allusers[i]->getIsActive() && allusers[i]->authenticate(password)) return allusers[i];
             else return nullptr; 
         }
     }
@@ -762,7 +891,8 @@ User* Database::loginFromQT(string username, string password) {
 }
 
 int Database::addUserFromQT(string id, string username, string plainPassword, string fullName, string role) {
-    if (users.search(id) != nullptr) return -1; 
+    if (id.empty() || username.empty() || plainPassword.empty() || fullName.empty() ||
+        users.search(id) != nullptr) return -1;
     vector<User*> allUsers = users.getAllPointers();
     for (size_t i = 0; i < allUsers.size(); i++) {
         if (allUsers[i]->getUsername() == username) return -1; 
@@ -773,23 +903,32 @@ int Database::addUserFromQT(string id, string username, string plainPassword, st
     return 1;
 }
 
-int Database::addDoctorWithAccount(string id, string name, string dob, string gender, string phone, string specialty, int expYears, string username, string plainPassword) {
-     if (doctors.search(id) != nullptr) return -1; 
-    vector<Doctor*> allDocs = doctors.getAllPointers();
-    for (size_t i = 0; i < allDocs.size(); i++) {
-        if (allDocs[i]->getFullName() == username) return -2; 
+int Database::addDoctorWithAccount(string id, string name, string dob, string gender, string phone,
+                                   string specialty, int expYears, string username, string plainPassword,
+                                   string workDay, string workShift) {
+    if (id.empty() || name.empty() || dob.empty() || gender.empty() || phone.empty() ||
+        specialty.empty() || expYears < 0 || username.empty() || plainPassword.empty() ||
+        workDay.empty() || workShift.empty() || doctors.search(id) != nullptr ||
+        users.search(id) != nullptr) return -1;
+    vector<User*> allUsers = users.getAllPointers();
+    for (User* user : allUsers) {
+        if (user->getUsername() == username) return -2;
     }
-    doctors.insert(id,Doctor(id, name, dob, gender, phone, specialty, expYears));
-    User newAccount(id, username, "", name, "Doctor", true); 
-    newAccount.setPassword(plainPassword); 
-    users.insert(id,newAccount);
+    Doctor doctor(id, name, dob, gender, phone, specialty, expYears);
+    doctor.setWorkSchedule(workDay, workShift);
+    doctors.insert(id, doctor);
+    User newAccount(id, username, "", name, "Doctor", true);
+    newAccount.setPassword(plainPassword);
+    users.insert(id, newAccount);
     return 1;
 }
 
 int Database::addMedicineFromQT(string prefix, string medicineName, double unitPrice, string dosage, int addQty, string& outId) {
+    if (medicineName.empty() || unitPrice < 0.0 || addQty <= 0) return -2;
     vector<Medicine*> allMeds = medicines.getAllPointers();
     for (auto med : allMeds) {
         if (med->getMedicineName() == medicineName) {
+            if (med->getMedicineId().rfind(prefix + "_", 0) != 0) return -3;
             med->setStock(med->getStock() + addQty); 
             outId = med->getMedicineId(); 
             return 2; 
@@ -801,22 +940,8 @@ int Database::addMedicineFromQT(string prefix, string medicineName, double unitP
     return 1; 
 }
 
-int Database::assignServiceFromQT(string recordId, string serviceId) {
-    MedicalRecord* record = findMedicalRecordById(recordId);
-    if (record == nullptr) return -1; 
-    
-    Service* srv = services.search(serviceId);
-    if (srv == nullptr) return -2; 
-
-    for (const string& s : record->getAssignedServices()) {
-        if (s == serviceId) return -3; 
-    }
-
-    record->addService(serviceId);
-    return 1;
-}
-
 int Database::addServiceFromQT(string prefix, string name, double price, string& outId) {
+    if (name.empty() || price < 0.0) return -2;
     vector<Service*> allSrv = services.getAllPointers();
     for (auto srv : allSrv) {
         if (srv->getServiceName() == name) {
@@ -830,10 +955,34 @@ int Database::addServiceFromQT(string prefix, string name, double price, string&
     return 1; 
 }
 
+int Database::assignServiceFromQT(string recordId, string serviceId) {
+    MedicalRecord* record = findMedicalRecordById(recordId);
+    if (record == nullptr) return -1;
+    if (services.search(serviceId) == nullptr) return -2;
+    Appointment* appointment = findAppointmentById(record->getAppointmentId());
+    if (appointment == nullptr || appointment->getStatus() == "Canceled" ||
+        appointment->getStatus() == "Cancelled" || appointment->getStatus() == "Billed" ||
+        (appointment->getStatus() != "Pending" && appointment->getStatus() != "Waiting" &&
+         appointment->getStatus() != "Completed")) return -4;
+    if (record->getDiagnosis().empty()) return -5;
+    if (!record->getPrescriptions().empty()) return -4;
+    for (const Invoice& invoice : invoices) {
+        if (invoice.getAppointmentId() == appointment->getAppointmentId()) return -4;
+    }
+
+    for (const string& assignedService : record->getAssignedServices()) {
+        if (assignedService == serviceId) return -3;
+    }
+
+    record->addService(serviceId);
+    appointment->setStatus("Waiting");
+    return 1;
+}
+
 double Database::calculateTotalRevenue() {
     double total = 0.0;
-    for (const auto& inv : invoices) {
-        total += inv.getTotalAmount(); 
+    for (const Invoice& invoice : invoices) {
+        total += invoice.getTotalAmount();
     }
     return total;
 }
@@ -857,28 +1006,66 @@ int Database::prescribeMedicineFromQT(string recordId, string medId, string dosa
     if (record == nullptr) return -1;
     Medicine* med = findMedicineById(medId);
     if (med == nullptr) return -2;
+    if (qty <= 0 || dosage.empty()) return -4;
     if (med->getStock() < qty) return -3;
-    med->setStock(med->getStock() - qty);
-    record->addMedicine(medId, dosage, qty);
+    Appointment* appointment = findAppointmentById(record->getAppointmentId());
+    if (appointment == nullptr || appointment->getStatus() != "Completed") return -5;
+    if (record->hasMedicine(medId)) return -6;
+    record->addMedicine(medId, dosage, qty, med->getUnitPrice(), false);
+    return 1;
+}
+
+int Database::dispensePrescriptionFromQT(string recordId, string medicineId) {
+    MedicalRecord* record = findMedicalRecordById(recordId);
+    if (record == nullptr) return -1;
+    Appointment* appointment = findAppointmentById(record->getAppointmentId());
+    if (appointment == nullptr || appointment->getStatus() != "Completed") return -2;
+    if (!record->hasMedicine(medicineId)) return -5;
+    if (record->isMedicineDispensed(medicineId)) return -4;
+
+    Medicine* medicine = findMedicineById(medicineId);
+    if (medicine == nullptr) return -5;
+    int quantity = 0;
+    for (const PrescriptionDetail& prescription : record->getPrescriptions()) {
+        if (prescription.medicineId == medicineId) {
+            quantity = prescription.quantity;
+            break;
+        }
+    }
+    if (quantity <= 0 || medicine->getStock() < quantity) return -3;
+    if (!record->markMedicineDispensed(medicineId)) return -4;
+
+    medicine->setStock(medicine->getStock() - quantity);
+    saveAllData();
     return 1;
 }
 
 int Database::createInvoiceFromQT(string patientId, double& outTotalFee) {
+    outTotalFee = 0.0;
     Patient* pat = findPatientById(patientId);
     if (pat == nullptr) return -1;
 
-    string targetApptId = "";
-    for (int i = appointments.size() - 1; i >= 0; i--) {
-        if (appointments[i].getPatientId() == patientId) {
-            targetApptId = appointments[i].getAppointmentId();
+    Appointment* targetAppointment = nullptr;
+    bool hasAlreadyBilledVisit = false;
+    for (auto it = appointments.rbegin(); it != appointments.rend(); ++it) {
+        if (it->getPatientId() != patientId) continue;
+        if (it->getStatus() == "Billed") {
+            hasAlreadyBilledVisit = true;
+            continue;
+        }
+        if (it->getStatus() == "Completed") {
+            targetAppointment = &*it;
             break;
         }
     }
-    if (targetApptId == "") return -2;
+    if (targetAppointment == nullptr) return hasAlreadyBilledVisit ? -4 : -2;
+    for (const Invoice& invoice : invoices) {
+        if (invoice.getAppointmentId() == targetAppointment->getAppointmentId()) return -4;
+    }
 
     MedicalRecord* record = nullptr;
     for (size_t i = 0; i < medicalRecords.size(); i++) {
-        if (medicalRecords[i].getAppointmentId() == targetApptId) {
+        if (medicalRecords[i].getAppointmentId() == targetAppointment->getAppointmentId()) {
             record = &medicalRecords[i];
             break;
         }
@@ -886,75 +1073,100 @@ int Database::createInvoiceFromQT(string patientId, double& outTotalFee) {
     if (record == nullptr || record->getDiagnosis().empty()) return -3;
 
     bool isBHYT = pat->hasBHYT();
-    double medFee = 0.0;       
-    double finalMedFee = 0.0;  
-
+    double finalMedFee = 0.0;
     for (const auto& rx : record->getPrescriptions()) {
         Medicine* med = findMedicineById(rx.medicineId);
-        if (med != nullptr) {
-            double rawLinePrice = med->getUnitPrice() * rx.quantity;
-            medFee += rawLinePrice; 
-
+        if (med == nullptr || !rx.dispensed) return -5;
+        {
+            double rawLinePrice = rx.unitPrice * rx.quantity;
             if (isBHYT) {
-                string mId = med->getMedicineId(); 
+                string mId = med->getMedicineId();
                 string prefix = (mId.length() >= 2) ? mId.substr(0, 2) : "";
-                
                 if (prefix == "B1") {
-                    finalMedFee += 0; 
-                } 
-                else if (prefix == "B2") {
-                    finalMedFee += rawLinePrice * 0.5; 
-                } 
-                else if (prefix == "B3") {
-                    finalMedFee += rawLinePrice * 0.2; 
-                }
-                else {
-                    finalMedFee += rawLinePrice; 
+                    continue;
+                } else if (prefix == "B2") {
+                    finalMedFee += rawLinePrice * 0.5;
+                } else if (prefix == "B3") {
+                    finalMedFee += rawLinePrice * 0.2;
+                } else {
+                    finalMedFee += rawLinePrice;
                 }
             } else {
-                finalMedFee += rawLinePrice; 
+                finalMedFee += rawLinePrice;
             }
         }
     }
 
-  string newInvId = "INV" + to_string(invoices.size() + 1);
-    Invoice newInv(newInvId, patientId, finalMedFee); 
-
-    double totalServiceFee = 0.0;
-    vector<string> billableServices = {"S1_001"}; 
-    
-    for (const string& sId : record->getAssignedServices()) {
-        billableServices.push_back(sId);
-    }
-
-    int detailCount = 1;
-    for (const string& sId : billableServices) {
-        Service* srv = services.search(sId);
-        if (srv != nullptr) {
-            double rawSrvPrice = srv->getPrice();
-            double finalSrvPrice = rawSrvPrice;
-
-            if (isBHYT) {
-                string prefix = (sId.length() >= 2) ? sId.substr(0, 2) : "";
-                if (prefix == "S1") finalSrvPrice = 0; 
-                else if (prefix == "S2") finalSrvPrice = rawSrvPrice * 0.3; 
-                else if (prefix == "S3") finalSrvPrice = rawSrvPrice * 0.8; 
+    int nextInvoiceNumber = 1;
+    string newInvId;
+    bool idExists = true;
+    while (idExists) {
+        newInvId = "INV" + to_string(nextInvoiceNumber++);
+        idExists = false;
+        for (const Invoice& invoice : invoices) {
+            if (invoice.getId() == newInvId) {
+                idExists = true;
+                break;
             }
-
-            string detailId = newInvId + "_D" + to_string(detailCount++);
-            InvoiceDetail detail(detailId, sId, newInvId, 1, finalSrvPrice);
-            newInv.addDetail(detail);
-            
-            totalServiceFee += finalSrvPrice; 
         }
     }
 
-    outTotalFee = totalServiceFee + finalMedFee; 
+    Invoice newInv(newInvId, patientId, finalMedFee, targetAppointment->getAppointmentId());
+    vector<Service*> srvList = services.getAllPointers();
 
+    vector<string> serviceIds = record->getAssignedServices();
+    bool hasConsultationService = false;
+    for (const string& serviceId : serviceIds) {
+        if (serviceId.rfind("S1", 0) == 0) {
+            hasConsultationService = true;
+            break;
+        }
+    }
+
+    string consultationServiceId;
+    if (services.search("S1_001") != nullptr) {
+        consultationServiceId = "S1_001";
+    } else {
+        for (Service* service : srvList) {
+            if (service->getId().rfind("S1", 0) == 0) {
+                consultationServiceId = service->getId();
+                break;
+            }
+        }
+    }
+
+    if (!hasConsultationService && !consultationServiceId.empty()) {
+        serviceIds.insert(serviceIds.begin(), consultationServiceId);
+    }
+    if (serviceIds.empty()) {
+        serviceIds.push_back(consultationServiceId.empty() ? "S1_001" : consultationServiceId);
+    }
+
+    int detailNumber = 1;
+    for (const string& serviceId : serviceIds) {
+        Service* service = services.search(serviceId);
+        const double listedPrice = service == nullptr ? 100000.0 : service->getPrice();
+        const string prefix = serviceId.substr(0, serviceId.find('_'));
+        double patientPrice = listedPrice;
+        if (isBHYT && prefix == "S1") {
+            patientPrice = 0.0;
+        } else if (isBHYT && prefix == "S2") {
+            patientPrice = listedPrice * 0.3;
+        } else if (isBHYT && prefix == "S3") {
+            patientPrice = listedPrice * 0.8;
+        }
+
+        const string detailId = newInvId + "_D" + to_string(detailNumber++);
+        newInv.addDetail(InvoiceDetail(detailId, serviceId, newInvId, 1, patientPrice));
+    }
+
+    outTotalFee = newInv.getTotalAmount();
     invoices.push_back(newInv);
-    saveAllData(); 
+    targetAppointment->setStatus("Billed");
+    saveAllData();
     return 1;
 }
+
 
 vector<MedicalRecord*> Database::getPatientHistory(string patientId) {
     vector<MedicalRecord*> history;
@@ -975,7 +1187,9 @@ vector<MedicalRecord*> Database::getPatientHistory(string patientId) {
 int Database::cancelAppointmentFromQT(string apptId) {
     Appointment* appt = findAppointmentById(apptId);
     if (appt == nullptr) return -1; 
-    if (appt->getStatus() == "Completed") return -2; 
+    if (appt->getStatus() == "Completed" || appt->getStatus() == "Billed") return -2;
+    if (appt->getStatus() == "Waiting") return -3;
+    if (appt->getStatus() == "Canceled" || appt->getStatus() == "Cancelled") return -4;
     appt->setStatus("Canceled");
     saveAllData(); 
     return 1; 
@@ -1096,7 +1310,7 @@ void Database::updatePatient(string id) {
     } 
     else if (Outpatient* outpat = dynamic_cast<Outpatient*>(pat)) {
         cout << "\n[Phat hien he thong: Benh Nhan Ngoai Tru]\n";
-        
+
         cout << "Phong kham moi (Hien tai: " << outpat->getClinicRoom() << "): ";
         getline(cin, input);
         sanitizeInput(input);
@@ -1116,7 +1330,7 @@ void Database::updatePatient(string id) {
 }
 void Database::addDoctor() {
     string id, name, dob, gender, phone, spec, schedule, expStr;
-    
+
     cout << "\n--- THEM BAC SI MOI ---\n";
     cout << "Nhap ID: ";
     getline(cin, id);
@@ -1156,10 +1370,10 @@ void Database::addDoctor() {
     for (int i = 0; i < soCa; i++) {
         string day, shift;
         cout << "- Ca thu " << i + 1 << ":\n";
-        
+
         cout << "  + Thu (VD: Thu 2, Thu 3): ";
         getline(cin, day); sanitizeInput(day);
-        
+
         cout << "  + Buoi (VD: Sang, Chieu, Toi): ";
         getline(cin, shift); sanitizeInput(shift);
 
@@ -1175,7 +1389,7 @@ void Database::showAllDoctors() const {
         cout << "Chua co du lieu!\n";
         return;
     }
-    vector<Doctor*> allDocs = doctors.getAllPointers();
+    vector<const Doctor*> allDocs = doctors.getAllPointers();
     for (size_t i = 0; i < allDocs.size(); i++){
         cout << i + 1 << ". ";
         allDocs[i]->displayData();
@@ -1194,7 +1408,7 @@ void Database::addMedicine() {
     if (existingMed != nullptr) {
         cout << "Thuoc [" << existingMed->getMedicineName() << "] dang co " 
              << existingMed->getStock() << " vien trong kho.\n";
-        
+
         string addQtyStr;
         cout << "Nhap so luong muon nhap them: ";
         getline(cin, addQtyStr);
@@ -1227,7 +1441,7 @@ void Database::showAllMedicine() const {
         cout << "Chua co du lieu!\n";
         return;
     }
-    vector<Medicine*> allMeds = medicines.getAllPointers();
+    vector<const Medicine*> allMeds = medicines.getAllPointers();
     for (size_t i = 0; i < allMeds.size(); i++){
         cout << i + 1 << ". ";
         allMeds[i]->displayData(); 
@@ -1235,7 +1449,7 @@ void Database::showAllMedicine() const {
 }
 void Database::addPatient() {
     string id, name, dob, gender, phone, recordId, bhyt;
-    
+
     cout << "\n--- THEM BENH NHAN MOI ---\n";
     cout << "Nhap ID: ";
     getline(cin, id); sanitizeInput(id);
@@ -1282,7 +1496,7 @@ void Database::addPatient() {
         cout << "Nhap Phong kham (VD: Khoa Noi, Phong 102): "; getline(cin, clinic); sanitizeInput(clinic);
         patients.insert(id,new Outpatient(id, name, dob, gender, phone, recordId, bhyt, apptDate, clinic));
         cout << "=> Da them Benh nhan Ngoai tru thanh cong!\n";
-        
+
     } else {
         cout << "Loi: Lua chon khong hop le. Da huy qua trinh them Benh nhan!\n";
     }
@@ -1294,7 +1508,7 @@ void Database::showAllPatients() const {
         cout << "Chua co du lieu!\n";
         return;
     }
-    vector<Patient**> allPats = patients.getAllPointers();
+    vector<Patient* const*> allPats = patients.getAllPointers();
     for (size_t i = 0; i < allPats.size(); i++) {
         cout << i + 1 << ". ";
         (*allPats[i])->displayData();
@@ -1304,66 +1518,70 @@ void Database::showAllPatients() const {
 // ==========================================
 // THUẬT TOÁN QUẢN LÝ KHÔNG GIAN BỆNH VIỆN TỪ QT
 // ==========================================
-
 map<string, vector<string>> Database::getAvailableRoomMap() {
-    map<string, vector<string>> roomBeds;
+    CustomRoomMap roomBeds;
+
+    // Khởi tạo toàn bộ phòng trống
+    const vector<string> standardBeds = {"G1", "G2", "G3", "G4", "G5"};
     for (int f = 1; f <= 5; f++) {
-        for (int r = 1; r <= 13; r++) {
+        for (int r = 1; r <= 10; r++) {
             char buffer[10];
             sprintf(buffer, "P%d%02d", f, r);
-            roomBeds[string(buffer)] = {"1", "2", "3", "4"};
+            roomBeds.insert(string(buffer), standardBeds);
         }
     }
 
+    // Quét qua danh sách bệnh nhân nội trú để trừ đi giường đã có người
     vector<Patient**> allPats = patients.getAllPointers();
     for (auto pPtr : allPats) {
         if (Inpatient* inpat = dynamic_cast<Inpatient*>(*pPtr)) {
             string r = inpat->getRoomNumber();
             string b = inpat->getBedNumber();
-            
-            if (!r.empty() && r != "Chua xep" && r != "Da xuat vien" && roomBeds.count(r)) {
-                auto& beds = roomBeds[r];
-                beds.erase(std::remove(beds.begin(), beds.end(), b), beds.end());
+
+            if (!r.empty() && r != "Chua xep" && r != "Da xuat vien" && !roomBeds.contains(r)) {
+                roomBeds.insert(r, standardBeds);
+            }
+            if (!r.empty() && r != "Chua xep" && r != "Da xuat vien") {
+                roomBeds.removeBedFromRoom(r, b); // Trừ đi giường b khỏi phòng r
             }
         }
     }
 
-    for (auto it = roomBeds.begin(); it != roomBeds.end(); ) {
-        if (it->second.empty()) {
-            it = roomBeds.erase(it);
-        } else {
-            ++it;
-        }
+    // Trả về danh sách những phòng còn trống dưới dạng mảng cấu trúc RoomInfo
+    map<string, vector<string>> availableRooms;
+    for (const RoomInfo& room : roomBeds.getValidRooms()) {
+        availableRooms.emplace(room.first, room.second);
     }
-    return roomBeds;
+    return availableRooms;
 }
 
 int Database::updateInpatientBed(string patientId, string room, string bed) {
     Patient* pat = findPatientById(patientId);
     if (!pat) return -1; 
-    
+
     Inpatient* inpat = dynamic_cast<Inpatient*>(pat);
     if (!inpat) return -2; 
+    if (inpat->getRoomNumber() == "Da xuat vien") return -5;
     if (inpat->getRoomNumber() == room && inpat->getBedNumber() == bed) {
         return 1;
     }
-    vector<Patient**> allPats = patients.getAllPointers();
-    int occupancyCount = 0;
-    
-    for (auto pPtr : allPats) {
-        if (Inpatient* other = dynamic_cast<Inpatient*>(*pPtr)) {
-            if (other->getRoomNumber() == room) {
-                occupancyCount++;
-                if (other->getBedNumber() == bed && other->getId() != patientId) {
-                    return -3; 
+
+    bool roomAvailable = false;
+    bool bedAvailable = false;
+    for (const auto& roomInfo : getAvailableRoomMap()) {
+        if (roomInfo.first == room) {
+            roomAvailable = true;
+            for (const string& availableBed : roomInfo.second) {
+                if (availableBed == bed) {
+                    bedAvailable = true;
+                    break;
                 }
             }
+            break;
         }
     }
-
-    if (occupancyCount >= 4 && inpat->getRoomNumber() != room) {
-        return -4; 
-    }
+    if (!roomAvailable) return -4;
+    if (!bedAvailable) return -3;
 
     inpat->setRoomNumber(room);
     inpat->setBedNumber(bed);
@@ -1373,16 +1591,22 @@ int Database::updateInpatientBed(string patientId, string room, string bed) {
 int Database::dischargeInpatientFromQT(string patientId, string dischargeDate) {
     Patient* pat = findPatientById(patientId);
     if (!pat) return -1;
-    
+
     Inpatient* inpat = dynamic_cast<Inpatient*>(pat);
     if (!inpat) return -2; 
     if (inpat->getRoomNumber() == "Da xuat vien" || inpat->getRoomNumber().empty() || inpat->getRoomNumber() == "Chua xep") {
         return -3; 
     }
+    for (const Appointment& appointment : appointments) {
+        if (appointment.getPatientId() == patientId &&
+            (appointment.getStatus() == "Pending" || appointment.getStatus() == "Waiting")) {
+            return -4;
+        }
+    }
 
     inpat->setRoomNumber("Da xuat vien");
     inpat->setBedNumber("0");
     inpat->setDischargeDate(dischargeDate);
-    
+
     return 1;
 }

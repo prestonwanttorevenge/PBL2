@@ -14,8 +14,7 @@ class Login : public QMainWindow
     Q_OBJECT
 
 public:
-    // Hàm khởi tạo chỉ nhận Database&, khớp với lệnh gọi từ lúc Đăng xuất
-    explicit Login(Database& db, QWidget *parent = nullptr);
+    explicit Login(Database& db, AuthService& authService, QWidget *parent = nullptr);
     ~Login();
 
 private slots:
@@ -24,7 +23,7 @@ private slots:
 private:
     Ui::Login *ui;
     Database& db;
-    AuthService auth; // Tự động ôm AuthService bên trong Login
+    AuthService& auth;
 };
 
 #endif // LOGIN_H

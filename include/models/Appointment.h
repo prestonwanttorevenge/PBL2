@@ -11,6 +11,7 @@ private:
     std::string specialty;
     std::string day;
     std::string time;
+    std::string appointmentDate;
     std::string status;
 
 public:
@@ -21,9 +22,11 @@ public:
                 const std::string& spec = "-1",
                 const std::string& day = "",
                 const std::string& time = "",
-                const std::string& stat = "Pending")
+                const std::string& stat = "Pending",
+                const std::string& date = "")
         : appointmentId(aId), patientId(pId), doctorId(dId),
-        receptionistId(rId), day(day), time(time), status(stat) {}
+        receptionistId(rId), specialty(spec), day(day), time(time),
+        appointmentDate(date), status(stat) {}
 
     ~Appointment() {}
 
@@ -39,15 +42,16 @@ public:
 
     // Bổ sung hàm khớp với giao diện DoctorMenu.cpp
     std::string getAppointmentDate() const {
-        if (time.empty()) return day;
-        return day + " " + time;
+        if (appointmentDate.empty()) return day;
+        return appointmentDate;
     }
-    std::string getDate() const { return day; }
+    std::string getDate() const { return appointmentDate; }
 
     // Setters
     void setDayOfWeek(const std::string& day) { this->day = day; }
     void setTimeSlot(const std::string& time) { this->time = time; }
     void setStatus(const std::string& st) { this->status = st; }
+    void setAppointmentDate(const std::string& date) { appointmentDate = date; }
 };
 
 #endif // APPOINTMENT_H

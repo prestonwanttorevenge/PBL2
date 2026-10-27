@@ -8,11 +8,11 @@
 
 using namespace std;
 
-Login::Login(Database& database, QWidget *parent) :
+Login::Login(Database& database, AuthService& authService, QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::Login),
     db(database),
-    auth(database)
+    auth(authService)
 {
     ui->setupUi(this);
     this->setAttribute(Qt::WA_DeleteOnClose); // Giải phóng RAM khi đóng form
@@ -46,11 +46,6 @@ void Login::on_btnLogin_clicked() {
         return;
     }
 
-    if (!loggedInUser->getIsActive()) {
-        QMessageBox::warning(this, "Tài khoản bị khóa", "Tài khoản của bạn đã bị khóa. Vui lòng liên hệ Admin!");
-        return;
-    }
-
     string role = loggedInUser->getRole();
 
     // Khởi tạo các Menu & Xóa sạch RAM khi Menu đóng
@@ -61,6 +56,11 @@ void Login::on_btnLogin_clicked() {
         this->close();
     }
     else if (role == "BacSi" || role == "Doctor") {
+        if (db.findDoctorById(loggedInUser->getId()) == nullptr) {
+            QMessageBox::critical(this, "Lỗi phân quyền", "Tài khoản chưa được liên kết với hồ sơ bác sĩ.");
+            auth.logout();
+            return;
+        }
         DoctorMenu *docMenu = new DoctorMenu(this->db, this->auth);
         docMenu->setAttribute(Qt::WA_DeleteOnClose);
         docMenu->show();
@@ -73,12 +73,13 @@ void Login::on_btnLogin_clicked() {
         this->close();
     }
     else if (role == "QuanLyKho" || role == "DuocSi") {
-        InventoryMenu *invMenu = new InventoryMenu(this->db);
+        InventoryMenu *invMenu = new InventoryMenu(this->db, this->auth);
         invMenu->setAttribute(Qt::WA_DeleteOnClose);
         invMenu->show();
         this->close();
     }
     else {
         QMessageBox::critical(this, "Lỗi Phân Quyền", "Quyền không hợp lệ!");
+        auth.logout();
     }
 }

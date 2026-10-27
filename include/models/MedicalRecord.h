@@ -9,6 +9,8 @@ struct PrescriptionDetail {
     std::string medicineId;
     std::string dosage;     
     int quantity;  
+    double unitPrice;
+    bool dispensed;
 };
 
 class MedicalRecord {
@@ -41,6 +43,10 @@ public:
     void inputData();
     void displayData() const;
     void addMedicine(std::string mId, std::string dose, int qty);
+    void addMedicine(std::string mId, std::string dose, int qty, double price, bool isDispensed = false);
+    bool hasMedicine(const std::string& medicineId) const;
+    bool isMedicineDispensed(const std::string& medicineId) const;
+    bool markMedicineDispensed(const std::string& medicineId);
 };
 
 #endif

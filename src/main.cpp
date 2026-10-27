@@ -134,8 +134,9 @@ int main(int argc, char *argv[]) {
 
     Database db;
     db.loadAllData();
+    AuthService auth(db);
 
-    Login *w = new Login(db);
+    Login *w = new Login(db, auth);
     w->show();
 
     int result = a.exec(); 

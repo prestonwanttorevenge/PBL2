@@ -28,6 +28,36 @@ void MedicalRecord::displayData() const {
 }
 
 void MedicalRecord::addMedicine(std::string mId, std::string dose, int qty) {
-    PrescriptionDetail pd = {mId, dose, qty};
+    PrescriptionDetail pd = {mId, dose, qty, 0.0, false};
     prescriptions.push_back(pd);
+}
+
+void MedicalRecord::addMedicine(std::string mId, std::string dose, int qty, double price, bool isDispensed) {
+    PrescriptionDetail pd = {mId, dose, qty, price, isDispensed};
+    prescriptions.push_back(pd);
+}
+
+bool MedicalRecord::hasMedicine(const std::string& medicineId) const {
+    for (const PrescriptionDetail& prescription : prescriptions) {
+        if (prescription.medicineId == medicineId) return true;
+    }
+    return false;
+}
+
+bool MedicalRecord::isMedicineDispensed(const std::string& medicineId) const {
+    for (const PrescriptionDetail& prescription : prescriptions) {
+        if (prescription.medicineId == medicineId) return prescription.dispensed;
+    }
+    return false;
+}
+
+bool MedicalRecord::markMedicineDispensed(const std::string& medicineId) {
+    for (PrescriptionDetail& prescription : prescriptions) {
+        if (prescription.medicineId == medicineId) {
+            if (prescription.dispensed) return false;
+            prescription.dispensed = true;
+            return true;
+        }
+    }
+    return false;
 }

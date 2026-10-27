@@ -39,6 +39,20 @@
     
     <item><widget class="QTableWidget" name="tableMedicines" /></item>
     <item>
+     <layout class="QHBoxLayout" name="horizontalLayoutPrescriptionQueue">
+      <item><widget class="QLabel" name="lblPrescriptionQueue">
+       <property name="text"><string>Đơn thuốc chờ cấp phát</string></property>
+      </widget></item>
+      <item><spacer name="horizontalSpacerPrescription">
+       <property name="orientation"><enum>Qt::Horizontal</enum></property>
+      </spacer></item>
+      <item><widget class="QPushButton" name="btnDispensePrescription">
+       <property name="text"><string>Cấp phát thuốc đã chọn</string></property>
+      </widget></item>
+     </layout>
+    </item>
+    <item><widget class="QTableWidget" name="tablePendingPrescriptions" /></item>
+    <item>
      <layout class="QHBoxLayout" name="horizontalLayoutBottom">
       <item><spacer name="horizontalSpacer"><property name="orientation"><enum>Qt::Horizontal</enum></property></spacer></item>
       <item><widget class="QPushButton" name="btnLogout"><property name="text"><string>Đăng Xuất</string></property></widget></item>

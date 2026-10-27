@@ -16,7 +16,8 @@ public:
     virtual ~Patient() override{}
     virtual string getType() const = 0;
     bool hasBHYT() const {
-    return (BHYT != "Không");
+    return !BHYT.empty() && BHYT != "Không" && BHYT != "Khong" &&
+           BHYT != "khong" && BHYT != "No" && BHYT != "no";
 }
     string getMedicalRecordId() const;
     string getBHYT() const;
