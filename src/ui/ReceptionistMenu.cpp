@@ -2,12 +2,16 @@
 #include "ui_ReceptionistMenu.h"
 #include "services/Database.h"
 #include "ui/Login.h"
+#include "ui/ClinicStyle.h"
 #include <QMessageBox>
 #include <QTableWidgetItem>
 #include <QComboBox>
 #include <QRegularExpressionValidator>
 #include <QRegularExpression>
 #include <QDate>
+#include <QCalendarWidget>
+#include <QHeaderView>
+#include <QLocale>
 #include "services/AuthService.h"
 
 using namespace std;
@@ -22,8 +26,16 @@ string weekdayName(int dayOfWeek) {
 ReceptionistMenu::ReceptionistMenu(Database& database, AuthService& authService, QWidget *parent)
     : QMainWindow(parent), ui(new Ui::ReceptionistMenu), db(database), auth(authService) {
     ui->setupUi(this);
+    applyClinicStyle(this);
     ui->dateAppointment->setMinimumDate(QDate::currentDate());
     ui->dateAppointment->setDate(QDate::currentDate());
+    ui->dateAppointment->setMaximumDate(QDate::currentDate().addYears(2));
+    ui->dateAppointment->setMinimumWidth(150);
+    ui->dateAppointment->setCalendarPopup(true);
+    ui->dateAppointment->calendarWidget()->setGridVisible(true);
+    ui->dateAppointment->calendarWidget()->setFirstDayOfWeek(Qt::Monday);
+    ui->dateAppointment->calendarWidget()->setLocale(QLocale(QLocale::Vietnamese, QLocale::Vietnam));
+    ui->dateAppointment->calendarWidget()->setMinimumSize(320, 260);
 
     QRegularExpression rx("^[0-9]{10,11}$");
     QValidator *validator = new QRegularExpressionValidator(rx, this);
@@ -358,9 +370,14 @@ void ReceptionistMenu::loadPendingAppointments() {
 void ReceptionistMenu::on_cbPendingAppointments_currentIndexChanged(int index) {
     const bool isScheduled = index >= 0 &&
         ui->cbPendingAppointments->itemData(index, Qt::UserRole + 1).toString() == "Scheduled";
-    const bool isToday = index >= 0 &&
-        ui->cbPendingAppointments->currentText().contains(
-            QDate::currentDate().toString("dd/MM/yyyy"));
+    const string appointmentId = index >= 0
+        ? ui->cbPendingAppointments->itemData(index, Qt::UserRole).toString().toStdString()
+        : "";
+    Appointment* appointment = appointmentId.empty() ? nullptr : db.findAppointmentById(appointmentId);
+    const QDate appointmentDate = appointment == nullptr
+        ? QDate()
+        : QDate::fromString(QString::fromStdString(appointment->getAppointmentDate()), "dd/MM/yyyy");
+    const bool isToday = appointmentDate.isValid() && appointmentDate == QDate::currentDate();
     ui->btnCheckInAppointment->setEnabled(isScheduled && isToday);
 }
 

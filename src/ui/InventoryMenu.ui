@@ -1,64 +1,58 @@
-<?xml version='1.0' encoding='utf-8'?>
+<?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
  <class>InventoryMenu</class>
  <widget class="QMainWindow" name="InventoryMenu">
-  <property name="geometry"><rect><x>0</x><y>0</y><width>900</width><height>600</height></rect></property>
-  <property name="windowTitle"><string>Quản Lý Kho Thuốc - Inventory Menu</string></property>
+  <property name="geometry"><rect><x>0</x><y>0</y><width>1200</width><height>800</height></rect></property>
+  <property name="minimumSize"><size><width>1000</width><height>650</height></size></property>
+  <property name="windowTitle"><string>Dược | Quản lý kho thuốc</string></property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="verticalLayoutMain">
+    <property name="leftMargin"><number>20</number></property><property name="topMargin"><number>16</number></property><property name="rightMargin"><number>20</number></property><property name="bottomMargin"><number>16</number></property><property name="spacing"><number>14</number></property>
     <item>
-     <layout class="QHBoxLayout" name="horizontalLayoutInputs">
-      <!-- MỚI: Thêm cbMedPrefix để chọn nhóm thuốc BHYT -->
-      <item><widget class="QComboBox" name="cbMedPrefix">
-        <item><property name="text"><string>B1 - Thuốc cơ bản (BHYT trả 100%)</string></property></item>
-        <item><property name="text"><string>B2 - Thuốc đặc trị (BHYT trả 50%)</string></property></item>
-        <item><property name="text"><string>B3 - Thuốc khác (BHYT trả 80%)</string></property></item>
-        <item><property name="text"><string>DV - Thuốc ngoài danh mục BHYT</string></property></item>
-      </widget></item>
-      
-      <!-- Giữ lại ô txtMedId chỉ để bấm xóa/cập nhật -->
-      <item><widget class="QLineEdit" name="txtMedId">
-         <property name="placeholderText"><string>Mã Thuốc</string></property>
-         <property name="readOnly"><bool>true</bool></property>
-      </widget></item>
-      
-      <item><widget class="QLineEdit" name="txtMedName"><property name="placeholderText"><string>Tên Thuốc</string></property></widget></item>
-      <item><widget class="QLineEdit" name="txtDosage"><property name="placeholderText"><string>Liều lượng / Dạng</string></property></widget></item>
-      <item><widget class="QLineEdit" name="txtPrice"><property name="placeholderText"><string>Đơn giá</string></property></widget></item>
-      <item><widget class="QSpinBox" name="spinBoxQty"><property name="value"><number>1</number></property></widget></item>
-      <item><widget class="QPushButton" name="btnImportMedicine"><property name="text"><string>Nhập Thuốc Vào Kho</string></property></widget></item>
+     <layout class="QHBoxLayout" name="layoutHeader">
+      <item><layout class="QVBoxLayout" name="layoutHeaderTitle"><item><widget class="QLabel" name="lblPageTitle"><property name="text"><string>Quản lý kho thuốc</string></property><property name="styleSheet"><string>font-size: 20pt; font-weight: 700; color: #17365d;</string></property></widget></item><item><widget class="QLabel" name="lblPageSubtitle"><property name="text"><string>Kiểm soát tồn kho và cấp phát theo đơn đã được bác sĩ duyệt</string></property><property name="styleSheet"><string>color: #64748b;</string></property></widget></item></layout></item>
+      <item><spacer name="headerSpacer"><property name="orientation"><enum>Qt::Horizontal</enum></property></spacer></item>
+      <item><widget class="QPushButton" name="btnLogout"><property name="text"><string>Đăng xuất</string></property></widget></item>
      </layout>
     </item>
-    
     <item>
-     <layout class="QHBoxLayout" name="horizontalLayoutSearch">
-      <item><widget class="QLabel" name="lblSearchIcon"><property name="text"><string>🔍 Tra cứu:</string></property></widget></item>
-      <item><widget class="QLineEdit" name="txtSearchMed"><property name="placeholderText"><string>Gõ Mã Thuốc hoặc Tên Thuốc để tìm kiếm nhanh...</string></property></widget></item>
-     </layout>
-    </item>
-    
-    <item><widget class="QTableWidget" name="tableMedicines" /></item>
-    <item>
-     <layout class="QHBoxLayout" name="horizontalLayoutPrescriptionQueue">
-      <item><widget class="QLabel" name="lblPrescriptionQueue">
-       <property name="text"><string>Đơn thuốc chờ cấp phát</string></property>
-      </widget></item>
-      <item><spacer name="horizontalSpacerPrescription">
-       <property name="orientation"><enum>Qt::Horizontal</enum></property>
-      </spacer></item>
-      <item><widget class="QPushButton" name="btnDispensePrescription">
-       <property name="text"><string>Cấp phát thuốc đã chọn</string></property>
-      </widget></item>
-     </layout>
-    </item>
-    <item><widget class="QTableWidget" name="tablePendingPrescriptions" /></item>
-    <item>
-     <layout class="QHBoxLayout" name="horizontalLayoutBottom">
-      <item><spacer name="horizontalSpacer"><property name="orientation"><enum>Qt::Horizontal</enum></property></spacer></item>
-      <item><widget class="QPushButton" name="btnLogout"><property name="text"><string>Đăng Xuất</string></property></widget></item>
-     </layout>
+     <widget class="QTabWidget" name="tabInventory">
+      <property name="currentIndex"><number>0</number></property>
+      <widget class="QWidget" name="tabStock">
+       <attribute name="title"><string>Tồn kho &amp; nhập thuốc</string></attribute>
+       <layout class="QVBoxLayout" name="layoutStock"><property name="spacing"><number>12</number></property>
+        <item>
+         <widget class="QGroupBox" name="groupImportMedicine">
+          <property name="title"><string>Nhập mới hoặc bổ sung tồn kho</string></property>
+          <layout class="QGridLayout" name="gridLayoutInputs"><property name="horizontalSpacing"><number>10</number></property><property name="verticalSpacing"><number>10</number></property>
+           <item row="0" column="0"><widget class="QComboBox" name="cbMedPrefix"><item><property name="text"><string>B1 - Thuốc cơ bản</string></property></item><item><property name="text"><string>B2 - Thuốc đặc trị</string></property></item><item><property name="text"><string>B3 - Thuốc khác</string></property></item><item><property name="text"><string>DV - Ngoài BHYT</string></property></item></widget></item>
+           <item row="0" column="1"><widget class="QLineEdit" name="txtMedName"><property name="placeholderText"><string>Tên thuốc</string></property></widget></item>
+           <item row="0" column="2"><widget class="QLineEdit" name="txtDosage"><property name="placeholderText"><string>Hàm lượng / dạng thuốc</string></property></widget></item>
+           <item row="1" column="0"><widget class="QLineEdit" name="txtPrice"><property name="placeholderText"><string>Đơn giá (VNĐ)</string></property></widget></item>
+           <item row="1" column="1"><widget class="QSpinBox" name="spinBoxQty"><property name="minimum"><number>1</number></property><property name="value"><number>1</number></property><property name="prefix"><string>Số lượng: </string></property></widget></item>
+           <item row="1" column="2"><widget class="QPushButton" name="btnImportMedicine"><property name="text"><string>Nhập / bổ sung kho</string></property></widget></item>
+          </layout>
+         </widget>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="layoutSearch"><item><widget class="QLabel" name="lblSearchIcon"><property name="text"><string>Tra cứu</string></property></widget></item><item><widget class="QLineEdit" name="txtSearchMed"><property name="placeholderText"><string>Tìm theo mã hoặc tên thuốc...</string></property></widget></item></layout>
+        </item>
+        <item><widget class="QTableWidget" name="tableMedicines"><property name="alternatingRowColors"><bool>true</bool></property><property name="selectionBehavior"><enum>QAbstractItemView::SelectRows</enum></property><property name="editTriggers"><set>QAbstractItemView::NoEditTriggers</set></property></widget></item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="tabDispense">
+       <attribute name="title"><string>Đơn chờ cấp phát</string></attribute>
+       <layout class="QVBoxLayout" name="layoutDispense"><property name="spacing"><number>12</number></property>
+        <item><widget class="QLabel" name="lblPrescriptionQueue"><property name="text"><string>Chỉ xác nhận cấp phát sau khi kiểm tra đúng bệnh nhân, thuốc và số lượng.</string></property><property name="wordWrap"><bool>true</bool></property><property name="styleSheet"><string>color: #64748b;</string></property></widget></item>
+        <item><widget class="QTableWidget" name="tablePendingPrescriptions"><property name="alternatingRowColors"><bool>true</bool></property><property name="selectionBehavior"><enum>QAbstractItemView::SelectRows</enum></property><property name="editTriggers"><set>QAbstractItemView::NoEditTriggers</set></property></widget></item>
+        <item><widget class="QPushButton" name="btnDispensePrescription"><property name="text"><string>Xác nhận cấp phát đơn đang chọn</string></property><property name="minimumHeight"><number>42</number></property></widget></item>
+       </layout>
+      </widget>
+     </widget>
     </item>
    </layout>
   </widget>
  </widget>
+ <resources/>
+ <connections/>
 </ui>

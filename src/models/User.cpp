@@ -8,8 +8,13 @@ void User::inputData() {
     cin >> userId;
     cin.ignore();
     
-    cout << "Nhap Username: ";
-    getline(cin, username);
+    do {
+        cout << "Nhap Username (3-32 ky tu khong dau, chi dung chu, so, ., _ hoac -): ";
+        getline(cin, username);
+        if (!isValidUsername(username)) {
+            cout << "Ten dang nhap khong hop le. Vui long nhap lai.\n";
+        }
+    } while (!isValidUsername(username));
     
     cout << "Nhap Mat khau: ";
     string plainPass;

@@ -1,6 +1,7 @@
 #include "ui/DoctorMenu.h"
 #include "ui_DoctorMenu.h"
 #include "ui/Login.h"
+#include "ui/ClinicStyle.h"
 #include "services/Database.h"
 #include <QMessageBox>
 #include <QTableWidgetItem>
@@ -12,6 +13,7 @@ using namespace std;
 DoctorMenu::DoctorMenu(Database& database, AuthService& authService, QWidget *parent)
     : QMainWindow(parent), ui(new Ui::DoctorMenu), db(database), auth(authService) {
     ui->setupUi(this);
+    applyClinicStyle(this);
     
     connect(ui->tableAppointments, &QTableWidget::itemClicked, this, &DoctorMenu::on_tableAppointments_itemClicked);
     connect(ui->cbMedPrefixFilter, &QComboBox::currentTextChanged, this, &DoctorMenu::on_cbMedPrefixFilter_currentTextChanged);

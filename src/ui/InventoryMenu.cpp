@@ -1,6 +1,7 @@
 #include "ui/InventoryMenu.h"
 #include "ui_InventoryMenu.h"
 #include "ui/Login.h"
+#include "ui/ClinicStyle.h"
 #include <QMessageBox>
 #include <QTableWidgetItem>
 #include <QRegularExpressionValidator>
@@ -16,6 +17,7 @@ InventoryMenu::InventoryMenu(Database& database, AuthService& authService, QWidg
     auth(authService)
 {
     ui->setupUi(this);
+    applyClinicStyle(this);
 
     // --- NÂNG CẤP UX: KHÓA CHỈ CHO NHẬP SỐ DƯƠNG VÀO Ô GIÁ TIỀN ---
     QRegularExpression rxPrice("^[0-9]*\\.?[0-9]+$");

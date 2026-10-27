@@ -53,7 +53,7 @@ string Database::generateUserId(const string& role) {
     string prefix = "U";
     if (role == "Admin") prefix = "ADMIN";
     else if (role == "Receptionist") prefix = "RECEP";
-    else if (role == "QuanLyKho") prefix = "KHO";
+    else if (role == "Inventory" || role == "QuanLyKho" || role == "DuocSi") prefix = "KHO";
 
     string id;
     do {
@@ -265,6 +265,7 @@ void Database::loadAllData() {
             getline(ss, fullName, ';');
             getline(ss, role, ';');
             getline(ss, activestr, ';');
+            if (role == "QuanLyKho" || role == "DuocSi") role = "Inventory";
 
             bool isActive = false;
             if (activestr == "1" || activestr == "true") { isActive = true; }
@@ -874,6 +875,7 @@ string Database::updateMedicalRecordFromQT(string apptId, string symp, string di
 // CÁC HÀM ĐĂNG NHẬP VÀ THÊM DỮ LIỆU KHÁC
 // ==========================================
 User* Database::loginFromQT(string username, string password) {
+    if (!User::isValidUsername(username)) return nullptr;
     if (users.isEmpty() && username == "admin" && password == "admin123") {
         User defaultAdmin("ADMIN01", "admin", "", "Quan Tri Vien", "Admin", true);
         defaultAdmin.setPassword("admin123");
@@ -891,7 +893,7 @@ User* Database::loginFromQT(string username, string password) {
 }
 
 int Database::addUserFromQT(string id, string username, string plainPassword, string fullName, string role) {
-    if (id.empty() || username.empty() || plainPassword.empty() || fullName.empty() ||
+    if (id.empty() || !User::isValidUsername(username) || plainPassword.empty() || fullName.empty() ||
         users.search(id) != nullptr) return -1;
     vector<User*> allUsers = users.getAllPointers();
     for (size_t i = 0; i < allUsers.size(); i++) {
@@ -907,7 +909,7 @@ int Database::addDoctorWithAccount(string id, string name, string dob, string ge
                                    string specialty, int expYears, string username, string plainPassword,
                                    string workDay, string workShift) {
     if (id.empty() || name.empty() || dob.empty() || gender.empty() || phone.empty() ||
-        specialty.empty() || expYears < 0 || username.empty() || plainPassword.empty() ||
+        specialty.empty() || expYears < 0 || !User::isValidUsername(username) || plainPassword.empty() ||
         workDay.empty() || workShift.empty() || doctors.search(id) != nullptr ||
         users.search(id) != nullptr) return -1;
     vector<User*> allUsers = users.getAllPointers();

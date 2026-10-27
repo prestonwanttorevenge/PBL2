@@ -1,20 +1,112 @@
 #include "ui/AdminMenu.h"
 #include "ui_AdminMenu.h"
 #include "ui/Login.h"
+#include "ui/ClinicStyle.h"
 #include <QMessageBox>
 #include <QTableWidgetItem>
 #include <QRegularExpressionValidator>
 #include <QRegularExpression>
+#include <QPainter>
+#include <QPaintEvent>
+#include <QVBoxLayout>
+#include <QHeaderView>
+#include <QSplitter>
+#include <QLocale>
 #include <string>
 #include <vector>
 
 using std::string;
 using std::vector;
 
+class RevenueChart : public QWidget {
+public:
+    explicit RevenueChart(QWidget* parent = nullptr) : QWidget(parent) {
+        setMinimumHeight(235);
+    }
+
+    void setData(const vector<double>& values, const vector<QString>& labels) {
+        values_ = values;
+        labels_ = labels;
+        update();
+    }
+
+protected:
+    void paintEvent(QPaintEvent*) override {
+        QPainter painter(this);
+        painter.setRenderHint(QPainter::Antialiasing);
+        painter.fillRect(rect(), QColor("#ffffff"));
+
+        const QRect plot = rect().adjusted(76, 26, -18, -38);
+        if (values_.empty() || plot.width() <= 0 || plot.height() <= 0) {
+            painter.setPen(QColor("#64748b"));
+            painter.drawText(rect(), Qt::AlignCenter, QString::fromUtf8("Chưa có hóa đơn để thống kê"));
+            return;
+        }
+
+        double maximum = 0.0;
+        for (double value : values_) {
+            if (value > maximum) maximum = value;
+        }
+        if (maximum <= 0.0) maximum = 1.0;
+        maximum *= 1.15;
+
+        const QLocale vietnamese(QLocale::Vietnamese, QLocale::Vietnam);
+        painter.setFont(QFont(QStringLiteral("Segoe UI"), 8));
+        painter.setPen(QColor("#64748b"));
+        painter.drawText(QRect(0, 0, rect().width(), 20), Qt::AlignLeft | Qt::AlignVCenter,
+                         QString::fromUtf8("VNĐ"));
+        for (int line = 0; line <= 4; ++line) {
+            const int y = plot.bottom() - (plot.height() * line / 4);
+            const double amount = maximum * line / 4.0;
+            painter.setPen(QColor("#e6edf5"));
+            painter.drawLine(plot.left(), y, plot.right(), y);
+            painter.setPen(QColor("#64748b"));
+            painter.drawText(QRect(0, y - 9, plot.left() - 10, 18), Qt::AlignRight | Qt::AlignVCenter,
+                             vietnamese.toString(amount, 'f', 0));
+        }
+
+        const double slotWidth = static_cast<double>(plot.width()) / values_.size();
+        for (size_t index = 0; index < values_.size(); ++index) {
+            const double barHeight = values_[index] / maximum * plot.height();
+            const double barWidth = slotWidth * 0.56;
+            const double x = plot.left() + slotWidth * index + (slotWidth - barWidth) / 2.0;
+            const double y = plot.bottom() - barHeight;
+            const QRectF bar(x, y, barWidth, barHeight);
+            painter.setPen(Qt::NoPen);
+            painter.setBrush(index % 2 == 0 ? QColor("#57b99a") : QColor("#6aa9dd"));
+            painter.drawRoundedRect(bar, 4, 4);
+
+            const QString valueLabel = values_[index] >= 1000000.0
+                ? vietnamese.toString(values_[index] / 1000000.0, 'f', 1) + QString::fromUtf8(" tr")
+                : vietnamese.toString(values_[index] / 1000.0, 'f', 0) + QStringLiteral(" k");
+            painter.setPen(QColor("#334155"));
+            painter.drawText(QRectF(plot.left() + slotWidth * index, qMax<double>(plot.top(), y - 21),
+                                    slotWidth, 18), Qt::AlignHCenter | Qt::AlignVCenter, valueLabel);
+
+            const QString label = index < labels_.size() ? labels_[index] : QString::number(index + 1);
+            painter.setPen(QColor("#64748b"));
+            painter.drawText(QRectF(plot.left() + slotWidth * index, plot.bottom() + 6,
+                                    slotWidth, 20), Qt::AlignHCenter | Qt::AlignTop, label);
+        }
+    }
+
+private:
+    vector<double> values_;
+    vector<QString> labels_;
+};
+
 AdminMenu::AdminMenu(Database& database, AuthService& authService, QWidget *parent)
     : QMainWindow(parent), ui(new Ui::AdminMenu), db(database), auth(authService)
 {
     ui->setupUi(this);
+    applyClinicStyle(this);
+    revenueChart = new RevenueChart(ui->revenueChartHost);
+    QVBoxLayout* chartLayout = new QVBoxLayout(ui->revenueChartHost);
+    chartLayout->setContentsMargins(0, 0, 0, 0);
+    chartLayout->addWidget(revenueChart);
+    ui->revenueSplitter->setStretchFactor(0, 3);
+    ui->revenueSplitter->setStretchFactor(1, 4);
+    ui->revenueSplitter->setSizes({320, 400});
 
     // --- KIỂM SOÁT ĐẦU VÀO BẰNG REGEX ---
     QRegularExpression rxPhone("^[0-9]{10,11}$");
@@ -23,6 +115,13 @@ AdminMenu::AdminMenu(Database& database, AuthService& authService, QWidget *pare
     QRegularExpression rxPrice("^[0-9]*\\.?[0-9]+$");
     ui->txtMedPrice->setValidator(new QRegularExpressionValidator(rxPrice, this));
     ui->txtServicePrice->setValidator(new QRegularExpressionValidator(rxPrice, this));
+    const QRegularExpression usernamePattern("^[A-Za-z0-9._-]{3,32}$");
+    ui->txtUsername->setMaxLength(32);
+    ui->txtDocUsername->setMaxLength(32);
+    ui->txtUsername->setValidator(new QRegularExpressionValidator(usernamePattern, this));
+    ui->txtDocUsername->setValidator(new QRegularExpressionValidator(usernamePattern, this));
+    ui->txtUsername->setPlaceholderText(QString::fromUtf8("Tài khoản không dấu"));
+    ui->txtDocUsername->setPlaceholderText(QString::fromUtf8("Tài khoản không dấu"));
 
     QStringList specialties = {
         QString::fromUtf8("Khoa Khám bệnh"),
@@ -135,7 +234,7 @@ void AdminMenu::on_btnAddUser_clicked() {
         ui->txtPassword->clear();
     } else {
         QMessageBox::critical(this, "Không thể tạo tài khoản",
-                              "Thông tin tài khoản không hợp lệ hoặc mã tài khoản đã tồn tại.");
+                              "Thông tin chưa hợp lệ, mã tài khoản đã tồn tại hoặc tên đăng nhập phải dùng 3–32 ký tự Latin không dấu.");
     }
 }
 
@@ -193,7 +292,7 @@ void AdminMenu::on_btnAddDoctor_clicked() {
         ui->txtDocPassword->clear();
     } else {
         QMessageBox::critical(this, "Không thể thêm bác sĩ",
-                              "Thông tin bác sĩ, tài khoản hoặc lịch làm việc không hợp lệ.");
+                              "Thông tin bác sĩ hoặc lịch làm việc chưa hợp lệ. Tên đăng nhập phải gồm 3–32 ký tự Latin không dấu.");
     }
 }
 
@@ -425,9 +524,15 @@ void AdminMenu::on_btnViewRevenue_clicked() {
     int totalPatients = db.getPatients().getAllPointers().size();
     ui->lblTotalPatients->setText(QString::number(totalPatients) + " người");
     
-    // (Tùy chọn) Đếm số Lượt khám đã hoàn thành và xuất hóa đơn thành công
-    int totalVisits = db.getInvoices().size(); 
-    // ui->lblTotalVisits->setText(QString::number(totalVisits) + " lượt");
+    vector<double> revenueValues;
+    vector<QString> invoiceLabels;
+    const vector<Invoice>& invoices = db.getInvoices();
+    const size_t firstVisible = invoices.size() > 12 ? invoices.size() - 12 : 0;
+    for (size_t index = firstVisible; index < invoices.size(); ++index) {
+        revenueValues.push_back(invoices[index].getTotalAmount());
+        invoiceLabels.push_back(QString::number(index + 1));
+    }
+    revenueChart->setData(revenueValues, invoiceLabels);
 
     // ==========================================
     // 3. LÀM MỚI BẢNG (Nếu có)

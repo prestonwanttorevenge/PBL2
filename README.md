@@ -21,6 +21,13 @@ Hệ thống quản lý bệnh viện được xây dựng bằng ngôn ngữ **
 
 Các file CSV bổ sung trường ngày hẹn, mã lượt khám trên hóa đơn, giá tại thời điểm kê và trạng thái cấp phát thuốc. Bộ đọc vẫn chấp nhận các dòng CSV cũ thiếu các trường mới.
 
+## Giao diện và kiểm thử
+
+- Tên đăng nhập mới chỉ chấp nhận 3–32 ký tự ASCII không dấu: chữ Latin, chữ số, dấu chấm, gạch dưới hoặc gạch nối.
+- Các màn hình được chia theo nhóm công việc để giảm số thao tác hiển thị cùng lúc; lịch hẹn dùng lịch dạng lưới và hiển thị ngày `dd/MM/yyyy`.
+- Màn hình doanh thu hiển thị tổng tiền, số hồ sơ và biểu đồ giá trị 12 hóa đơn gần nhất. Biểu đồ theo thứ tự hóa đơn vì dữ liệu hóa đơn hiện chưa lưu ngày lập.
+- Kiểm thử cấu trúc cây đỏ-đen, cây phòng/giường và bộ đếm bằng `ctest --test-dir <build-directory> --output-on-failure`.
+
 > Đây là đồ án quản lý mô phỏng, không phải hồ sơ bệnh án điện tử dùng trong điều trị thực tế. Danh mục/chi trả BHYT là quy tắc minh họa; dự án chưa có xác thực danh tính bệnh nhân, ký số, nhật ký kiểm toán, thanh toán thực tế, quản lý lô/hạn dùng thuốc hoặc tích hợp hệ thống y tế.
 
 ## 📂 Cấu trúc thư mục dự án

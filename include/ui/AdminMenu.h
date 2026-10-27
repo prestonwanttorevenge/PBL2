@@ -10,6 +10,8 @@ QT_BEGIN_NAMESPACE
 namespace Ui { class AdminMenu; }
 QT_END_NAMESPACE
 
+class RevenueChart;
+
 class AdminMenu : public QMainWindow {
     Q_OBJECT
 
@@ -48,6 +50,7 @@ private:
     Ui::AdminMenu *ui;
     Database& db;
     AuthService& auth;
+    RevenueChart* revenueChart;
     void refreshDoctorTable();
     void refreshUserTable();
     void refreshMedicineTable(); 

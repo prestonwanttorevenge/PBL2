@@ -4,7 +4,10 @@
 #include "ui/DoctorMenu.h"
 #include "ui/ReceptionistMenu.h"
 #include "ui/InventoryMenu.h"
+#include "ui/ClinicStyle.h"
 #include <QMessageBox>
+#include <QRegularExpression>
+#include <QRegularExpressionValidator>
 
 using namespace std;
 
@@ -15,6 +18,11 @@ Login::Login(Database& database, AuthService& authService, QWidget *parent) :
     auth(authService)
 {
     ui->setupUi(this);
+    applyClinicStyle(this);
+    ui->txtUsername->setMaxLength(32);
+    ui->txtUsername->setPlaceholderText(QString::fromUtf8("Tài khoản không dấu (3–32 ký tự)"));
+    ui->txtUsername->setValidator(new QRegularExpressionValidator(
+        QRegularExpression("^[A-Za-z0-9._-]{3,32}$"), this));
     this->setAttribute(Qt::WA_DeleteOnClose); // Giải phóng RAM khi đóng form
 }
 
@@ -72,7 +80,7 @@ void Login::on_btnLogin_clicked() {
         recMenu->show();
         this->close();
     }
-    else if (role == "QuanLyKho" || role == "DuocSi") {
+    else if (role == "Inventory" || role == "QuanLyKho" || role == "DuocSi") {
         InventoryMenu *invMenu = new InventoryMenu(this->db, this->auth);
         invMenu->setAttribute(Qt::WA_DeleteOnClose);
         invMenu->show();

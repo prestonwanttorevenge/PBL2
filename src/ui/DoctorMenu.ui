@@ -1,94 +1,81 @@
-<?xml version='1.0' encoding='utf-8'?>
+<?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
  <class>DoctorMenu</class>
  <widget class="QMainWindow" name="DoctorMenu">
-  <property name="geometry"><rect><x>0</x><y>0</y><width>1000</width><height>700</height></rect></property>
-  <property name="windowTitle"><string>Giao Diện Bác Sĩ - Doctor Menu</string></property>
+  <property name="geometry"><rect><x>0</x><y>0</y><width>1280</width><height>820</height></rect></property>
+  <property name="minimumSize"><size><width>1050</width><height>680</height></size></property>
+  <property name="windowTitle"><string>Bác sĩ | Hàng đợi khám</string></property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QHBoxLayout" name="horizontalLayoutMain">
+   <layout class="QVBoxLayout" name="verticalLayoutMain">
+    <property name="leftMargin"><number>20</number></property><property name="topMargin"><number>16</number></property><property name="rightMargin"><number>20</number></property><property name="bottomMargin"><number>16</number></property><property name="spacing"><number>14</number></property>
     <item>
-     <widget class="QTableWidget" name="tableAppointments" />
+     <layout class="QHBoxLayout" name="layoutHeader">
+      <item><layout class="QVBoxLayout" name="layoutHeaderTitle"><item><widget class="QLabel" name="lblPageTitle"><property name="text"><string>Hàng đợi khám</string></property><property name="styleSheet"><string>font-size: 20pt; font-weight: 700; color: #17365d;</string></property></widget></item><item><widget class="QLabel" name="lblPageSubtitle"><property name="text"><string>Chọn bệnh nhân để ghi nhận khám, chỉ định và kê đơn</string></property><property name="styleSheet"><string>color: #64748b;</string></property></widget></item></layout></item>
+      <item><spacer name="headerSpacer"><property name="orientation"><enum>Qt::Horizontal</enum></property></spacer></item>
+      <item><widget class="QPushButton" name="btnViewSchedule"><property name="text"><string>Lịch trực</string></property></widget></item>
+      <item><widget class="QPushButton" name="btnLogout"><property name="text"><string>Đăng xuất</string></property></widget></item>
+     </layout>
     </item>
     <item>
-     <layout class="QVBoxLayout" name="verticalLayoutRightPanel">
-      
-      <item><widget class="QPushButton" name="btnCancelAppointment"><property name="text"><string>Hủy Lịch Hẹn (Đang chọn trên bảng)</string></property></widget></item>
-      <item><spacer name="verticalSpacer0"><property name="orientation"><enum>Qt::Vertical</enum></property></spacer></item>
-
-      <item><widget class="QLineEdit" name="txtAppointmentId">
-        <property name="placeholderText"><string>Mã Lịch Hẹn (Chọn từ bảng)</string></property>
-        <property name="readOnly"><bool>true</bool></property>
-      </widget></item>
-      
-      <item><widget class="QLineEdit" name="txtRecordId">
-        <property name="placeholderText"><string>Mã Bệnh Án (Lễ tân đã cấp sẵn)</string></property>
-        <property name="readOnly"><bool>true</bool></property>
-      </widget></item>
-
-      <item><widget class="QLineEdit" name="txtSymptoms"><property name="placeholderText"><string>Triệu chứng</string></property></widget></item>
-      <item><widget class="QLineEdit" name="txtDiagnosis"><property name="placeholderText"><string>Chẩn đoán</string></property></widget></item>
-      <item><widget class="QLineEdit" name="txtNotes"><property name="placeholderText"><string>Ghi chú thêm</string></property></widget></item>
-      
+     <layout class="QHBoxLayout" name="horizontalLayoutMain">
+      <property name="spacing"><number>16</number></property>
       <item>
-       <layout class="QHBoxLayout" name="horizontalLayoutSaveRecord">
-        <item><widget class="QPushButton" name="btnCreateMedicalRecord"><property name="text"><string>Lưu Bệnh Án</string></property></widget></item>
-        <item><widget class="QPushButton" name="btnWaitResult"><property name="text"><string>Lưu &amp;&amp; Chờ KQ CLS</string></property></widget></item>
-       </layout>
+       <widget class="QGroupBox" name="groupQueue">
+        <property name="minimumWidth"><number>510</number></property><property name="title"><string>Bệnh nhân chờ khám</string></property>
+        <layout class="QVBoxLayout" name="layoutQueue">
+         <item><widget class="QTableWidget" name="tableAppointments"><property name="alternatingRowColors"><bool>true</bool></property><property name="selectionBehavior"><enum>QAbstractItemView::SelectRows</enum></property><property name="editTriggers"><set>QAbstractItemView::NoEditTriggers</set></property></widget></item>
+         <item><widget class="QPushButton" name="btnCancelAppointment"><property name="text"><string>Hủy lịch đang chọn</string></property></widget></item>
+        </layout>
+       </widget>
       </item>
-      <item><spacer name="verticalSpacer1"><property name="orientation"><enum>Qt::Vertical</enum></property></spacer></item>
-      
-      <!-- PHẦN CHỈ ĐỊNH DỊCH VỤ -->
       <item>
-       <layout class="QHBoxLayout" name="horizontalLayoutService">
-        <item><widget class="QComboBox" name="cbService"/></item>
-        <item><widget class="QPushButton" name="btnAssignService"><property name="text"><string>Chỉ Định DV</string></property></widget></item>
-       </layout>
-      </item>
-      <item><spacer name="verticalSpacer1_2"><property name="orientation"><enum>Qt::Vertical</enum></property></spacer></item>
-
-      <item>
-       <layout class="QHBoxLayout" name="horizontalLayoutFilter">
-        <item><widget class="QLabel" name="lblFilter"><property name="text"><string>Nhóm Thuốc:</string></property></widget></item>
-        <item><widget class="QComboBox" name="cbMedPrefixFilter">
-          <item><property name="text"><string>Tất cả</string></property></item>
-          <item><property name="text"><string>B1 - Miễn phí 100%</string></property></item>
-          <item><property name="text"><string>B2 - Hỗ trợ 50%</string></property></item>
-          <item><property name="text"><string>B3 - Đồng chi trả 20%</string></property></item>
-          <item><property name="text"><string>DV - Dịch vụ (Tự túc)</string></property></item>
-        </widget></item>
-       </layout>
-      </item>
-
-      <item><widget class="QComboBox" name="cbMedicine" /></item>
-      <item><widget class="QLineEdit" name="txtDosage"><property name="placeholderText"><string>Liều dùng (VD: 2 viên/ngày)</string></property></widget></item>
-      <item>
-       <layout class="QHBoxLayout" name="horizontalLayoutPrescribe">
-        <item><widget class="QSpinBox" name="spinBoxQuantity"><property name="value"><number>1</number></property></widget></item>
-        <item><widget class="QPushButton" name="btnPrescribeMedicine"><property name="text"><string>Kê Đơn Thuốc</string></property></widget></item>
-       </layout>
-      </item>
-      <item><spacer name="verticalSpacer2"><property name="orientation"><enum>Qt::Vertical</enum></property></spacer></item>
-      
-      <!-- KHU VỰC TRÍCH XUẤT VÀ DUYỆT XUẤT VIỆN -->
-      <item><widget class="QLineEdit" name="txtPatientId_History"><property name="placeholderText"><string>Mã Bệnh Nhân (Để xem lịch sử hoặc cho xuất viện)</string></property></widget></item>
-      <item>
-       <layout class="QHBoxLayout" name="horizontalLayoutHistoryAndDischarge">
-        <item><widget class="QPushButton" name="btnViewPatientHistory"><property name="text"><string>Lịch Sử Khám</string></property></widget></item>
-        <!-- NÚT DUYỆT XUẤT VIỆN MỚI ĐƯỢC THÊM VÀO ĐÂY -->
-        <item><widget class="QPushButton" name="btnDischargePatient"><property name="text"><string>Duyệt Xuất Viện</string></property></widget></item>
-       </layout>
-      </item>
-      
-      <item><spacer name="verticalSpacer3"><property name="orientation"><enum>Qt::Vertical</enum></property></spacer></item>
-      <item>
-       <layout class="QHBoxLayout" name="horizontalLayoutLogout">
-        <item><widget class="QPushButton" name="btnViewSchedule"><property name="text"><string>Xem Lịch Trực</string></property></widget></item>
-        <item><widget class="QPushButton" name="btnLogout"><property name="text"><string>Đăng Xuất</string></property></widget></item>
-       </layout>
+       <widget class="QTabWidget" name="tabDoctorTasks">
+        <property name="minimumWidth"><number>440</number></property><property name="currentIndex"><number>0</number></property>
+        <widget class="QWidget" name="tabExamination">
+         <attribute name="title"><string>Khám &amp; CLS</string></attribute>
+         <layout class="QVBoxLayout" name="layoutExamination"><property name="spacing"><number>12</number></property>
+          <item><widget class="QLabel" name="lblEncounterHint"><property name="text"><string>Ghi nhận nội dung khám. Nếu cần cận lâm sàng, chỉ định dịch vụ và lưu trạng thái chờ kết quả.</string></property><property name="wordWrap"><bool>true</bool></property><property name="styleSheet"><string>color: #64748b;</string></property></widget></item>
+          <item><widget class="QLineEdit" name="txtAppointmentId"><property name="readOnly"><bool>true</bool></property><property name="placeholderText"><string>Mã lịch hẹn (chọn từ hàng đợi)</string></property></widget></item>
+          <item><widget class="QLineEdit" name="txtRecordId"><property name="readOnly"><bool>true</bool></property><property name="placeholderText"><string>Mã bệnh án</string></property></widget></item>
+          <item><widget class="QLineEdit" name="txtSymptoms"><property name="placeholderText"><string>Triệu chứng</string></property></widget></item>
+          <item><widget class="QLineEdit" name="txtDiagnosis"><property name="placeholderText"><string>Chẩn đoán</string></property></widget></item>
+          <item><widget class="QLineEdit" name="txtNotes"><property name="placeholderText"><string>Ghi chú lâm sàng</string></property></widget></item>
+          <item><layout class="QHBoxLayout" name="layoutRecordActions"><item><widget class="QPushButton" name="btnCreateMedicalRecord"><property name="text"><string>Hoàn tất khám</string></property></widget></item><item><widget class="QPushButton" name="btnWaitResult"><property name="text"><string>Lưu, chờ CLS</string></property></widget></item></layout></item>
+          <item><widget class="QFrame" name="separatorService"><property name="frameShape"><enum>QFrame::HLine</enum></property><property name="frameShadow"><enum>QFrame::Plain</enum></property></widget></item>
+          <item><widget class="QComboBox" name="cbService"/></item>
+          <item><widget class="QPushButton" name="btnAssignService"><property name="text"><string>Chỉ định dịch vụ CLS</string></property></widget></item>
+          <item><spacer name="examinationSpacer"><property name="orientation"><enum>Qt::Vertical</enum></property></spacer></item>
+         </layout>
+        </widget>
+        <widget class="QWidget" name="tabPrescription">
+         <attribute name="title"><string>Kê đơn</string></attribute>
+         <layout class="QVBoxLayout" name="layoutPrescription"><property name="spacing"><number>12</number></property>
+          <item><widget class="QLabel" name="lblPrescriptionHint"><property name="text"><string>Kê đơn sau khi hoàn tất khám. Tồn kho chỉ giảm khi Dược xác nhận cấp phát.</string></property><property name="wordWrap"><bool>true</bool></property><property name="styleSheet"><string>color: #64748b;</string></property></widget></item>
+          <item><widget class="QComboBox" name="cbMedPrefixFilter"><item><property name="text"><string>Tất cả</string></property></item><item><property name="text"><string>B1 - Miễn phí 100%</string></property></item><item><property name="text"><string>B2 - Hỗ trợ 50%</string></property></item><item><property name="text"><string>B3 - Đồng chi trả 20%</string></property></item><item><property name="text"><string>DV - Dịch vụ (Tự túc)</string></property></item></widget></item>
+          <item><widget class="QComboBox" name="cbMedicine"/></item>
+          <item><widget class="QLineEdit" name="txtDosage"><property name="placeholderText"><string>Liều dùng (ví dụ: 2 viên/ngày)</string></property></widget></item>
+          <item><widget class="QSpinBox" name="spinBoxQuantity"><property name="minimum"><number>1</number></property><property name="value"><number>1</number></property><property name="prefix"><string>Số lượng: </string></property></widget></item>
+          <item><widget class="QPushButton" name="btnPrescribeMedicine"><property name="text"><string>Thêm vào đơn thuốc</string></property><property name="minimumHeight"><number>42</number></property></widget></item>
+          <item><spacer name="prescriptionSpacer"><property name="orientation"><enum>Qt::Vertical</enum></property></spacer></item>
+         </layout>
+        </widget>
+        <widget class="QWidget" name="tabPatient">
+         <attribute name="title"><string>Hồ sơ bệnh nhân</string></attribute>
+         <layout class="QVBoxLayout" name="layoutPatient"><property name="spacing"><number>12</number></property>
+          <item><widget class="QLabel" name="lblPatientHistoryHint"><property name="text"><string>Tra cứu tiền sử khám hoặc xác nhận xuất viện cho bệnh nhân nội trú.</string></property><property name="wordWrap"><bool>true</bool></property><property name="styleSheet"><string>color: #64748b;</string></property></widget></item>
+          <item><widget class="QLineEdit" name="txtPatientId_History"><property name="placeholderText"><string>Mã bệnh nhân</string></property></widget></item>
+          <item><widget class="QPushButton" name="btnViewPatientHistory"><property name="text"><string>Xem lịch sử khám</string></property></widget></item>
+          <item><widget class="QPushButton" name="btnDischargePatient"><property name="text"><string>Duyệt xuất viện</string></property></widget></item>
+          <item><spacer name="patientSpacer"><property name="orientation"><enum>Qt::Vertical</enum></property></spacer></item>
+         </layout>
+        </widget>
+       </widget>
       </item>
      </layout>
     </item>
    </layout>
   </widget>
  </widget>
+ <resources/>
+ <connections/>
 </ui>
