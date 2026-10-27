@@ -18,6 +18,7 @@ InventoryMenu::InventoryMenu(Database& database, AuthService& authService, QWidg
 {
     ui->setupUi(this);
     applyClinicStyle(this);
+    setMinimumSize(820, 600);
 
     // --- NÂNG CẤP UX: KHÓA CHỈ CHO NHẬP SỐ DƯƠNG VÀO Ô GIÁ TIỀN ---
     QRegularExpression rxPrice("^[0-9]*\\.?[0-9]+$");

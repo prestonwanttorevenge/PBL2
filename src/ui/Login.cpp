@@ -23,6 +23,9 @@ Login::Login(Database& database, AuthService& authService, QWidget *parent) :
     ui->txtUsername->setPlaceholderText(QString::fromUtf8("Tài khoản không dấu (3–32 ký tự)"));
     ui->txtUsername->setValidator(new QRegularExpressionValidator(
         QRegularExpression("^[A-Za-z0-9._-]{3,32}$"), this));
+    connect(ui->txtUsername, &QLineEdit::returnPressed, this, [this]() { ui->txtPassword->setFocus(); });
+    connect(ui->txtPassword, &QLineEdit::returnPressed, this, &Login::on_btnLogin_clicked);
+    ui->txtUsername->setFocus();
     this->setAttribute(Qt::WA_DeleteOnClose); // Giải phóng RAM khi đóng form
 }
 

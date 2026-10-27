@@ -100,6 +100,7 @@ AdminMenu::AdminMenu(Database& database, AuthService& authService, QWidget *pare
 {
     ui->setupUi(this);
     applyClinicStyle(this);
+    setMinimumSize(820, 600);
     revenueChart = new RevenueChart(ui->revenueChartHost);
     QVBoxLayout* chartLayout = new QVBoxLayout(ui->revenueChartHost);
     chartLayout->setContentsMargins(0, 0, 0, 0);

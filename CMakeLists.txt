@@ -15,10 +15,10 @@ find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
 
 # Tự động gom tất cả file C++, file Header, file UI và file Resource .qrc
-file(GLOB_RECURSE SRC_FILES "src/*.cpp")
-file(GLOB_RECURSE HEADER_FILES "include/*.h")
-file(GLOB_RECURSE UI_FILES "src/ui/*.ui")
-file(GLOB_RECURSE QRC_FILES "*.qrc")
+file(GLOB_RECURSE SRC_FILES CONFIGURE_DEPENDS "src/*.cpp")
+file(GLOB_RECURSE HEADER_FILES CONFIGURE_DEPENDS "include/*.h")
+file(GLOB_RECURSE UI_FILES CONFIGURE_DEPENDS "src/ui/*.ui")
+file(GLOB_RECURSE QRC_FILES CONFIGURE_DEPENDS "*.qrc")
 
 # Khởi tạo ứng dụng
 add_executable(PBL2_App ${SRC_FILES} ${HEADER_FILES} ${UI_FILES} ${QRC_FILES})

@@ -12,6 +12,9 @@
 #include <QCalendarWidget>
 #include <QHeaderView>
 #include <QLocale>
+#include <QHBoxLayout>
+#include <QResizeEvent>
+#include <QSplitter>
 #include "services/AuthService.h"
 
 using namespace std;
@@ -24,9 +27,24 @@ string weekdayName(int dayOfWeek) {
 }
 
 ReceptionistMenu::ReceptionistMenu(Database& database, AuthService& authService, QWidget *parent)
-    : QMainWindow(parent), ui(new Ui::ReceptionistMenu), db(database), auth(authService) {
+    : QMainWindow(parent), ui(new Ui::ReceptionistMenu), db(database), auth(authService),
+      contentSplitter(nullptr) {
     ui->setupUi(this);
     applyClinicStyle(this);
+    setMinimumSize(820, 600);
+    ui->tabReceptionTasks->setMinimumWidth(0);
+    ui->tabReceptionTasks->setMaximumWidth(QWIDGETSIZE_MAX);
+    ui->groupPatientDirectory->setMinimumWidth(0);
+    ui->horizontalLayoutMain->removeWidget(ui->tabReceptionTasks);
+    ui->horizontalLayoutMain->removeWidget(ui->groupPatientDirectory);
+    contentSplitter = new QSplitter(Qt::Horizontal, ui->centralwidget);
+    contentSplitter->setChildrenCollapsible(false);
+    contentSplitter->addWidget(ui->tabReceptionTasks);
+    contentSplitter->addWidget(ui->groupPatientDirectory);
+    contentSplitter->setStretchFactor(0, 1);
+    contentSplitter->setStretchFactor(1, 1);
+    ui->horizontalLayoutMain->addWidget(contentSplitter);
+
     ui->dateAppointment->setMinimumDate(QDate::currentDate());
     ui->dateAppointment->setDate(QDate::currentDate());
     ui->dateAppointment->setMaximumDate(QDate::currentDate().addYears(2));
@@ -80,6 +98,15 @@ ReceptionistMenu::ReceptionistMenu(Database& database, AuthService& authService,
 
 ReceptionistMenu::~ReceptionistMenu() {
     delete ui;
+}
+
+void ReceptionistMenu::resizeEvent(QResizeEvent *event) {
+    QMainWindow::resizeEvent(event);
+    if (contentSplitter != nullptr) {
+        contentSplitter->setOrientation(width() < 980
+                                            ? Qt::Vertical
+                                            : Qt::Horizontal);
+    }
 }
 
 // ==========================================

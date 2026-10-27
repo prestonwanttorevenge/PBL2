@@ -13,12 +13,18 @@ QT_BEGIN_NAMESPACE
 namespace Ui { class ReceptionistMenu; }
 QT_END_NAMESPACE
 
+class QResizeEvent;
+class QSplitter;
+
 class ReceptionistMenu : public QMainWindow {
     Q_OBJECT
 
 public:
     explicit ReceptionistMenu(Database& database, AuthService& authService, QWidget *parent = nullptr);
     ~ReceptionistMenu();
+
+protected:
+    void resizeEvent(QResizeEvent *event) override;
 
 private slots:
     void updateAvailableDoctors();
@@ -41,6 +47,7 @@ private:
     Ui::ReceptionistMenu *ui;
     Database& db;
     AuthService& auth;
+    QSplitter* contentSplitter;
     std::map<std::string, std::vector<std::string>> currentRoomMap;
 
     void refreshPatientTable();

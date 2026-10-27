@@ -7,13 +7,29 @@
 #include <QTableWidgetItem>
 #include <QColor>
 #include <QDate> 
+#include <QHBoxLayout>
+#include <QResizeEvent>
+#include <QSplitter>
 
 using namespace std;
 
 DoctorMenu::DoctorMenu(Database& database, AuthService& authService, QWidget *parent)
-    : QMainWindow(parent), ui(new Ui::DoctorMenu), db(database), auth(authService) {
+    : QMainWindow(parent), ui(new Ui::DoctorMenu), db(database), auth(authService), contentSplitter(nullptr) {
     ui->setupUi(this);
     applyClinicStyle(this);
+    setMinimumSize(820, 600);
+
+    ui->groupQueue->setMinimumWidth(0);
+    ui->tabDoctorTasks->setMinimumWidth(0);
+    ui->horizontalLayoutMain->removeWidget(ui->groupQueue);
+    ui->horizontalLayoutMain->removeWidget(ui->tabDoctorTasks);
+    contentSplitter = new QSplitter(Qt::Horizontal, ui->centralwidget);
+    contentSplitter->setChildrenCollapsible(false);
+    contentSplitter->addWidget(ui->groupQueue);
+    contentSplitter->addWidget(ui->tabDoctorTasks);
+    contentSplitter->setStretchFactor(0, 1);
+    contentSplitter->setStretchFactor(1, 1);
+    ui->horizontalLayoutMain->addWidget(contentSplitter);
     
     connect(ui->tableAppointments, &QTableWidget::itemClicked, this, &DoctorMenu::on_tableAppointments_itemClicked);
     connect(ui->cbMedPrefixFilter, &QComboBox::currentTextChanged, this, &DoctorMenu::on_cbMedPrefixFilter_currentTextChanged);
@@ -32,6 +48,15 @@ DoctorMenu::DoctorMenu(Database& database, AuthService& authService, QWidget *pa
 
 DoctorMenu::~DoctorMenu() {
     delete ui;
+}
+
+void DoctorMenu::resizeEvent(QResizeEvent *event) {
+    QMainWindow::resizeEvent(event);
+    if (contentSplitter != nullptr) {
+        contentSplitter->setOrientation(width() < 980
+                                            ? Qt::Vertical
+                                            : Qt::Horizontal);
+    }
 }
 
 void DoctorMenu::on_tableAppointments_itemClicked(QTableWidgetItem *item) {

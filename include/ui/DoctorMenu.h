@@ -10,12 +10,18 @@ QT_BEGIN_NAMESPACE
 namespace Ui { class DoctorMenu; }
 QT_END_NAMESPACE
 
+class QResizeEvent;
+class QSplitter;
+
 class DoctorMenu : public QMainWindow {
     Q_OBJECT
 
 public:
     explicit DoctorMenu(Database& database, AuthService& authService, QWidget *parent = nullptr);
     ~DoctorMenu();
+
+protected:
+    void resizeEvent(QResizeEvent *event) override;
 
 private slots:
     void on_btnLogout_clicked();
@@ -34,6 +40,7 @@ private:
     Ui::DoctorMenu *ui;
     Database& db;
     AuthService& auth;
+    QSplitter* contentSplitter;
     
     void loadPatientQueue();
     void loadMedicineComboBox(const QString& filterPrefix = "Tất cả");
