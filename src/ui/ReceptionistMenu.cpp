@@ -281,10 +281,6 @@ void ReceptionistMenu::on_btnBookAppointment_clicked() {
     else if (result == -1) {
         QMessageBox::critical(this, QString::fromUtf8("Lỗi"), QString::fromUtf8("Hồ sơ Bệnh nhân không tồn tại."));
     }
-    else if (result == -4) {
-        QMessageBox::warning(this, QString::fromUtf8("Trùng lịch"),
-                             QString::fromUtf8("Bác sĩ đã có lịch hẹn ở ngày và ca này."));
-    }
     else if (result == -5) {
         QMessageBox::warning(this, QString::fromUtf8("Trùng lịch"),
                              QString::fromUtf8("Bệnh nhân đã có lịch hẹn khác cùng ngày và ca."));
