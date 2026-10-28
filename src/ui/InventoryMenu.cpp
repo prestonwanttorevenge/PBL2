@@ -103,7 +103,8 @@ void InventoryMenu::refreshPrescriptionQueue() {
     int row = 0;
     for (MedicalRecord& record : db.getMedicalRecords()) {
         Appointment* appointment = db.findAppointmentById(record.getAppointmentId());
-        if (appointment == nullptr || appointment->getStatus() != "Completed") continue;
+        if (appointment == nullptr ||
+            (appointment->getStatus() != "Waiting" && appointment->getStatus() != "Completed")) continue;
 
         // Chỉ đưa đơn chưa cấp của lượt khám đã hoàn tất vào hàng đợi.
         for (const PrescriptionDetail& prescription : record.getPrescriptions()) {

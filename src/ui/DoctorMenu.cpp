@@ -217,14 +217,14 @@ void DoctorMenu::on_btnPrescribeMedicine_clicked() {
         return;
     }
 
-    // === LỚP KHIÊN ÉP BUỘC CHỜ KẾT QUẢ CLS: ĐÃ ĐƯỢC KHÔI PHỤC ===
+    // Chỉ kê cho lượt đã khám xong hoặc đã quay lại từ CLS.
     string apptId = ui->txtAppointmentId->text().toStdString();
     Appointment* appt = db.findAppointmentById(apptId);
 
     if (appt != nullptr && record != nullptr) {
-        if (appt->getStatus() != "Completed") {
+        if (appt->getStatus() != "Completed" && appt->getStatus() != "Waiting") {
             QMessageBox::critical(this, QString::fromUtf8("Cảnh Báo Vi Phạm Quy Trình"), 
-                QString::fromUtf8("Chỉ được kê đơn sau khi đã hoàn tất khám và cập nhật kết quả cận lâm sàng (nếu có)."));
+                QString::fromUtf8("Chỉ kê đơn sau khi hoàn tất khám hoặc chọn hồ sơ đã quay lại từ CLS."));
             return; 
         }
     }

@@ -50,7 +50,7 @@
         <widget class="QWidget" name="tabPrescription">
          <attribute name="title"><string>Kê đơn</string></attribute>
          <layout class="QVBoxLayout" name="layoutPrescription"><property name="spacing"><number>12</number></property>
-          <item><widget class="QLabel" name="lblPrescriptionHint"><property name="text"><string>Kê đơn sau khi hoàn tất khám. Tồn kho chỉ giảm khi Dược xác nhận cấp phát.</string></property><property name="wordWrap"><bool>true</bool></property><property name="styleSheet"><string>color: #64748b;</string></property></widget></item>
+          <item><widget class="QLabel" name="lblPrescriptionHint"><property name="text"><string>Kê đơn sau khi khám hoặc khi bệnh nhân quay lại từ CLS. Tồn kho chỉ giảm khi Dược xác nhận cấp phát.</string></property><property name="wordWrap"><bool>true</bool></property><property name="styleSheet"><string>color: #64748b;</string></property></widget></item>
           <item><widget class="QComboBox" name="cbMedPrefixFilter"><item><property name="text"><string>Tất cả</string></property></item><item><property name="text"><string>B1 - Miễn phí 100%</string></property></item><item><property name="text"><string>B2 - Hỗ trợ 50%</string></property></item><item><property name="text"><string>B3 - Đồng chi trả 20%</string></property></item><item><property name="text"><string>DV - Dịch vụ (Tự túc)</string></property></item></widget></item>
           <item><widget class="QComboBox" name="cbMedicine"/></item>
           <item><widget class="QLineEdit" name="txtDosage"><property name="placeholderText"><string>Liều dùng (ví dụ: 2 viên/ngày)</string></property></widget></item>

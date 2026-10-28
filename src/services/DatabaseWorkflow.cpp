@@ -1,5 +1,6 @@
 #include "services/Database.h"
 #include "utils/AppointmentQueue.h"
+#include <algorithm>
 #include <cstdio>
 #include <string>
 #include <vector>
@@ -148,7 +149,8 @@ int Database::prescribeMedicineFromQT(string recordId, string medId, string dosa
     if (qty <= 0 || dosage.empty()) return -4;
     if (med->getStock() < qty) return -3;
     Appointment* appointment = findAppointmentById(record->getAppointmentId());
-    if (appointment == nullptr || appointment->getStatus() != "Completed") return -5;
+    if (appointment == nullptr ||
+        (appointment->getStatus() != "Waiting" && appointment->getStatus() != "Completed")) return -5;
     if (record->hasMedicine(medId)) return -6;
     record->addMedicine(medId, dosage, qty, med->getUnitPrice(), false);
     return 1;
@@ -158,7 +160,8 @@ int Database::dispensePrescriptionFromQT(string recordId, string medicineId) {
     MedicalRecord* record = findMedicalRecordById(recordId);
     if (record == nullptr) return -1;
     Appointment* appointment = findAppointmentById(record->getAppointmentId());
-    if (appointment == nullptr || appointment->getStatus() != "Completed") return -2;
+    if (appointment == nullptr ||
+        (appointment->getStatus() != "Waiting" && appointment->getStatus() != "Completed")) return -2;
     if (!record->hasMedicine(medicineId)) return -5;
     if (record->isMedicineDispensed(medicineId)) return -4;
 
@@ -176,6 +179,11 @@ int Database::dispensePrescriptionFromQT(string recordId, string medicineId) {
 
     // Chỉ trừ kho sau khi cờ cấp phát được đặt thành công.
     medicine->setStock(medicine->getStock() - quantity);
+    const vector<PrescriptionDetail>& prescriptions = record->getPrescriptions();
+    if (std::all_of(prescriptions.begin(), prescriptions.end(),
+                    [](const PrescriptionDetail& prescription) { return prescription.dispensed; })) {
+        appointment->setStatus("Completed");
+    }
     saveAllData();
     return 1;
 }
