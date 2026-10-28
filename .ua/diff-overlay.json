@@ -1,0 +1,25 @@
+{
+  "version": "1.0.0",
+  "baseBranch": "4bd2f7caedc4768675584e5cd12cca4353519a29",
+  "generatedAt": "2026-10-28T12:06:00+07:00",
+  "changedFiles": [
+    "CMakeLists.txt",
+    "README.md",
+    "include/utils/AppointmentQueue.h",
+    "src/services/DatabaseWorkflow.cpp",
+    "src/ui/DoctorMenu.cpp",
+    "src/ui/DoctorMenu.ui",
+    "src/ui/InventoryMenu.cpp",
+    "src/ui/ReceptionistMenu.cpp",
+    "tests/workflow_smoke.cpp"
+  ],
+  "changedNodeIds": [
+    "file:CMakeLists.txt",
+    "file:README.md",
+    "ui:DoctorMenu",
+    "ui:ReceptionistMenu"
+  ],
+  "affectedNodeIds": [
+    "module:ui"
+  ]
+}
