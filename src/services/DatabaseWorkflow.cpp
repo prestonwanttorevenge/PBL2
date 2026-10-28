@@ -1,10 +1,52 @@
 #include "services/Database.h"
 #include "utils/AppointmentQueue.h"
+#include "utils/Constants.h"
 #include <algorithm>
 #include <cstdio>
+#include <ctime>
 #include <string>
 #include <vector>
 #include <map>
+
+namespace {
+bool getWeekdayFromDate(const string& date, string& weekday, int& dateKey) {
+    if (date.size() != 10 || date[2] != '/' || date[5] != '/') return false;
+    for (size_t index = 0; index < date.size(); ++index) {
+        if (index != 2 && index != 5 && (date[index] < '0' || date[index] > '9')) {
+            return false;
+        }
+    }
+
+    const int day = stoi(date.substr(0, 2));
+    const int month = stoi(date.substr(3, 2));
+    const int year = stoi(date.substr(6, 4));
+    if (year == 0 || month < 1 || month > 12) return false;
+
+    static const int daysInMonth[] = {31, 28, 31, 30, 31, 30,
+                                      31, 31, 30, 31, 30, 31};
+    const bool isLeapYear = year % 4 == 0 && (year % 100 != 0 || year % 400 == 0);
+    const int maxDay = daysInMonth[month - 1] + (month == 2 && isLeapYear ? 1 : 0);
+    if (day < 1 || day > maxDay) return false;
+
+    static const int monthOffsets[] = {0, 3, 2, 5, 0, 3, 5, 1, 4, 6, 2, 4};
+    const int adjustedYear = year - (month < 3 ? 1 : 0);
+    const int dayOfWeek =
+        (adjustedYear + adjustedYear / 4 - adjustedYear / 100 + adjustedYear / 400 +
+         monthOffsets[month - 1] + day) % 7;
+    weekday = dayOfWeek == 0 ? "Chủ nhật" : "Thứ " + to_string(dayOfWeek + 1);
+    dateKey = year * 10000 + month * 100 + day;
+    return true;
+}
+
+bool isTodayOrFutureDate(int dateKey) {
+    const time_t now = time(nullptr);
+    const tm* localNow = localtime(&now);
+    if (localNow == nullptr) return false;
+    const int todayKey = (localNow->tm_year + 1900) * 10000 +
+                         (localNow->tm_mon + 1) * 100 + localNow->tm_mday;
+    return dateKey >= todayKey;
+}
+}
 
 bool Database::addPatientFromGUI(string name, string dob, string gender, string phone,
                                  string BH, bool isNoiTru, string admissionDate) {
@@ -29,7 +71,12 @@ int Database::bookAppointmentFromQT(string patientId, string doctorId, string re
     if (findPatientById(patientId) == nullptr) return -1; 
     Doctor* doc = findDoctorById(doctorId);
     if (doc == nullptr) return -2; 
-    if (appointmentDate.empty() || specialty.empty() || doc->getSpecialty() != specialty) return -3;
+    string actualWeekday;
+    int appointmentDateKey = 0;
+    if (!getWeekdayFromDate(appointmentDate, actualWeekday, appointmentDateKey) ||
+        !isTodayOrFutureDate(appointmentDateKey) || day != actualWeekday ||
+        !Constants::isMedicalSpecialty(specialty) ||
+        doc->getSpecialty() != specialty) return -3;
 
     bool isAvailable = false;
     for (const auto& shift : doc->getSchedule()) {
@@ -205,10 +252,15 @@ int Database::createInvoiceFromQT(string patientId, double& outTotalFee) {
 
     Appointment* targetAppointment = nullptr;
     bool hasAlreadyBilledVisit = false;
+    bool hasVisitWaitingForInventory = false;
     for (auto it = appointments.rbegin(); it != appointments.rend(); ++it) {
         if (it->getPatientId() != patientId) continue;
         if (it->getStatus() == "Billed") {
             hasAlreadyBilledVisit = true;
+            continue;
+        }
+        if (it->getStatus() == "WaitingInventory") {
+            hasVisitWaitingForInventory = true;
             continue;
         }
         if (it->getStatus() == "Completed") {
@@ -216,7 +268,10 @@ int Database::createInvoiceFromQT(string patientId, double& outTotalFee) {
             break;
         }
     }
-    if (targetAppointment == nullptr) return hasAlreadyBilledVisit ? -4 : -2;
+    if (targetAppointment == nullptr) {
+        if (hasVisitWaitingForInventory) return -5;
+        return hasAlreadyBilledVisit ? -4 : -2;
+    }
     // Mỗi lượt khám chỉ được gắn với một hóa đơn.
     for (const Invoice& invoice : invoices) {
         if (invoice.getAppointmentId() == targetAppointment->getAppointmentId()) return -4;
