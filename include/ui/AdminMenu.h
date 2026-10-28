@@ -10,6 +10,7 @@ QT_BEGIN_NAMESPACE
 namespace Ui { class AdminMenu; }
 QT_END_NAMESPACE
 
+// Biểu đồ doanh thu được vẽ riêng để không phụ thuộc thêm thư viện chart.
 class RevenueChart;
 
 class AdminMenu : public QMainWindow {

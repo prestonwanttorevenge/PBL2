@@ -228,6 +228,7 @@ void DoctorMenu::on_btnPrescribeMedicine_clicked() {
         }
     }
     
+    // Kê đơn sau khi lượt khám hoàn tất; tồn kho sẽ trừ ở bước cấp phát.
     int result = db.prescribeMedicineFromQT(recordId, medId, dosage, qty);
 
     if (result == 1) {

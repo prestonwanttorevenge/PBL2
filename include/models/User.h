@@ -16,6 +16,7 @@ private:
     bool isActive; 
 
 public:
+    // Tên đăng nhập chỉ nhận chữ ASCII, số và . _ - trong độ dài cho phép.
     static bool isValidUsername(const string& value) {
         if (value.size() < 3 || value.size() > 32) return false;
         for (unsigned char character : value) {
@@ -38,6 +39,7 @@ public:
     string getFullName() const{return fullName; }
     string getRole() const{return roleName; }
     bool getIsActive() const{return isActive; }
+    // Cho phép Admin khóa hoặc mở tài khoản.
     void setIsActive(bool active) { isActive = active; }
     bool authenticate(const string& inputPassword) const {
         return bcrypt::validatePassword(inputPassword, this->passwordHash);

@@ -3,6 +3,7 @@
 
 #include <QWidget>
 
+// Dùng chung một giao diện cho các màn hình theo vai trò.
 inline void applyClinicStyle(QWidget* widget) {
     widget->setStyleSheet(QStringLiteral(
         "QMainWindow, QWidget#centralwidget { background: #f3f6fb; color: #1f2937; "

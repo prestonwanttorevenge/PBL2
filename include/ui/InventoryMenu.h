@@ -19,6 +19,7 @@ public:
 
 private slots:
     void on_btnImportMedicine_clicked();
+    // Xác nhận cấp thuốc từ hàng đợi đơn chưa cấp.
     void on_btnDispensePrescription_clicked();
     void on_btnLogout_clicked();
     void on_txtSearchMed_textChanged(const QString &arg1); // MỚI: Tự tìm kiếm khi gõ

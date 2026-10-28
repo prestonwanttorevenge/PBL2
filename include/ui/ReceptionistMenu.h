@@ -35,6 +35,7 @@ private slots:
     void on_btnSearchPatient_clicked();
     void on_cbSpecialty_currentIndexChanged(const QString &specialtyText);
     void on_btnCancelAppointment_clicked();
+    // Check-in chỉ bật cho lịch hẹn đến ngày hôm nay.
     void on_btnCheckInAppointment_clicked();
     void on_cbPendingAppointments_currentIndexChanged(int index);
     void loadPendingAppointments();

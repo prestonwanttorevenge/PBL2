@@ -134,6 +134,7 @@ int main(int argc, char *argv[]) {
 
     Database db;
     db.loadAllData();
+    // Giữ một phiên xác thực dùng chung cho Login và các menu.
     AuthService auth(db);
 
     Login *w = new Login(db, auth);

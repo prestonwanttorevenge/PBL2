@@ -8,6 +8,7 @@
 #include <vector>
 
 int main() {
+    // Kiểm tra cấu trúc cây, phòng/giường, bộ đếm và username.
     assert(User::isValidUsername("admin_01"));
     assert(User::isValidUsername("Nurse-01"));
     assert(!User::isValidUsername("người_dùng"));

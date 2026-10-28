@@ -11,6 +11,7 @@ private:
     std::string specialty;
     std::string day;
     std::string time;
+    // Ngày cụ thể tách riêng thứ trong tuần và ca trực.
     std::string appointmentDate;
     std::string status;
 
@@ -42,6 +43,7 @@ public:
 
     // Bổ sung hàm khớp với giao diện DoctorMenu.cpp
     std::string getAppointmentDate() const {
+        // Dòng CSV cũ chưa có ngày cụ thể nên dùng lại giá trị day.
         if (appointmentDate.empty()) return day;
         return appointmentDate;
     }

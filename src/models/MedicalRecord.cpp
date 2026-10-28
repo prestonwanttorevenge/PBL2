@@ -54,6 +54,7 @@ bool MedicalRecord::isMedicineDispensed(const std::string& medicineId) const {
 bool MedicalRecord::markMedicineDispensed(const std::string& medicineId) {
     for (PrescriptionDetail& prescription : prescriptions) {
         if (prescription.medicineId == medicineId) {
+            // Từ chối cấp lại nếu đơn đã được xác nhận trước đó.
             if (prescription.dispensed) return false;
             prescription.dispensed = true;
             return true;

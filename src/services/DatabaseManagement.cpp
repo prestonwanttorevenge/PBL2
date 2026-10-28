@@ -63,6 +63,7 @@ bool Database::deleteUserFromQT(const std::string& id) {
                 ++activeAdmins;
             }
         }
+        // Luôn giữ lại ít nhất một Admin đang hoạt động.
         if (user->getIsActive() && activeAdmins <= 1) return false;
     }
     users.remove(id); 
@@ -81,6 +82,7 @@ bool Database::setUserActiveFromQT(const std::string& id, bool active) {
                 ++activeAdmins;
             }
         }
+        // Không để thao tác khóa làm mất Admin hoạt động cuối cùng.
         if (activeAdmins <= 1) return false;
     }
     user->setIsActive(active);

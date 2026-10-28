@@ -4,6 +4,7 @@ AuthService::AuthService(Database& database) : db(database), currentUser(nullptr
 AuthService::~AuthService() {}
 
 bool AuthService::login(const std::string& inputUsername, const std::string& inputPassword) {
+    // Xóa phiên cũ trước khi thử đăng nhập để tránh giữ nhầm quyền.
     currentUser = nullptr;
     User* user = db.loginFromQT(inputUsername, inputPassword);
 

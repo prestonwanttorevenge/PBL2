@@ -15,6 +15,7 @@ public:
     Patient(Patient &);
     virtual ~Patient() override{}
     virtual string getType() const = 0;
+    // Chấp nhận các cách ghi phổ biến cho trường hợp không có BHYT.
     bool hasBHYT() const {
     return !BHYT.empty() && BHYT != "Không" && BHYT != "Khong" &&
            BHYT != "khong" && BHYT != "No" && BHYT != "no";
