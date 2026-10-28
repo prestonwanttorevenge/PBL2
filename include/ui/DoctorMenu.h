@@ -35,8 +35,10 @@ private slots:
     void on_btnAssignService_clicked(); 
     void on_btnWaitResult_clicked();
     void on_tableAppointments_itemClicked(QTableWidgetItem *item);
+    void on_tableInpatients_itemClicked(QTableWidgetItem *item);
     void on_cbMedPrefixFilter_currentTextChanged(const QString &arg1);
     void on_btnDischargePatient_clicked();
+    void on_btnRefreshInpatients_clicked();
 
 private:
     Ui::DoctorMenu *ui;
@@ -45,6 +47,7 @@ private:
     QSplitter* contentSplitter;
     
     void loadPatientQueue();
+    void loadInpatientDischargeQueue();
     void loadMedicineComboBox(const QString& filterPrefix = "Tất cả");
 };
 
