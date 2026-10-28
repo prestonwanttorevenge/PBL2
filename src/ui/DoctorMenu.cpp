@@ -340,12 +340,20 @@ void DoctorMenu::on_btnAssignService_clicked() {
         return;
     }
 
+    MedicalRecord* record = db.findMedicalRecordById(recordId);
+    if (record == nullptr || ui->txtDiagnosis->text().trimmed().isEmpty()) {
+        QMessageBox::warning(this, "Thiếu chẩn đoán", "Nhập chẩn đoán trước khi thêm dịch vụ CLS.");
+        return;
+    }
+
+    record->setSymptoms(ui->txtSymptoms->text().toStdString());
+    record->setDiagnosis(ui->txtDiagnosis->text().toStdString());
+    record->setNotes(ui->txtNotes->text().toStdString());
     int result = db.assignServiceFromQT(recordId, serviceId);
 
     if (result == 1) {
-        db.saveAllData(); 
-        QMessageBox::information(this, "Thành công", "Đã chỉ định Dịch vụ thành công!");
-        loadPatientQueue();
+        QMessageBox::information(this, "Đã thêm dịch vụ",
+                                 "Dịch vụ đã được thêm vào hồ sơ. Sau khi chỉ định xong, bấm Lưu, chờ CLS.");
     } else if (result == -3) {
         QMessageBox::warning(this, "Cảnh báo", "Dịch vụ này đã được chỉ định rồi!");
     } else if (result == -4) {
@@ -371,6 +379,9 @@ void DoctorMenu::on_btnWaitResult_clicked() {
     if (!updatedRecordId.empty()) {
         QMessageBox::information(this, "Thành công", "Đã lưu hồ sơ. Bệnh nhân đang đi làm xét nghiệm Cận lâm sàng!");
         loadPatientQueue(); 
+    } else {
+        QMessageBox::warning(this, "Chưa thể lưu",
+                             "Kiểm tra chẩn đoán, dịch vụ CLS đã chỉ định và thứ tự hàng đợi.");
     }
 }
 

@@ -73,14 +73,15 @@ int Database::checkInAppointmentFromQT(const string& appointmentId, const string
 string Database::updateMedicalRecordFromQT(string apptId, string symp, string diag, string notes, string status) {
     Appointment* appt = findAppointmentById(apptId);
     if (appt == nullptr) return "";
-    if (appt->getStatus() == "Pending" && !isNextPendingAppointment(appointments, *appt)) return "";
     if (diag.empty() || (status != "Completed" && status != "Waiting") ||
-        appt->getStatus() == "Canceled" || appt->getStatus() == "Cancelled" ||
-        appt->getStatus() == "Billed") return "";
+        (appt->getStatus() != "Pending" && appt->getStatus() != "Waiting")) return "";
+    if (appt->getStatus() == "Pending" && !isNextPendingAppointment(appointments, *appt)) return "";
 
     for (auto& record : medicalRecords) {
         if (record.getAppointmentId() == apptId) {
-            if (status == "Waiting" && record.getAssignedServices().empty()) return "";
+            const bool hasServices = !record.getAssignedServices().empty();
+            if (status == "Waiting" && (appt->getStatus() != "Pending" || !hasServices)) return "";
+            if (status == "Completed" && appt->getStatus() == "Pending" && hasServices) return "";
             record.setSymptoms(symp);
             record.setDiagnosis(diag);
             record.setNotes(notes);
@@ -101,10 +102,8 @@ int Database::assignServiceFromQT(string recordId, string serviceId) {
     if (record == nullptr) return -1;
     if (services.search(serviceId) == nullptr) return -2;
     Appointment* appointment = findAppointmentById(record->getAppointmentId());
-    if (appointment == nullptr || appointment->getStatus() == "Canceled" ||
-        appointment->getStatus() == "Cancelled" || appointment->getStatus() == "Billed" ||
-        (appointment->getStatus() != "Pending" && appointment->getStatus() != "Waiting" &&
-         appointment->getStatus() != "Completed")) return -4;
+    if (appointment == nullptr || appointment->getStatus() != "Pending" ||
+        !isNextPendingAppointment(appointments, *appointment)) return -4;
     if (record->getDiagnosis().empty()) return -5;
     if (!record->getPrescriptions().empty()) return -4;
     for (const Invoice& invoice : invoices) {
@@ -116,7 +115,6 @@ int Database::assignServiceFromQT(string recordId, string serviceId) {
     }
 
     record->addService(serviceId);
-    appointment->setStatus("Waiting");
     return 1;
 }
 
