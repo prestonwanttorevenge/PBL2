@@ -104,9 +104,11 @@ void InventoryMenu::refreshPrescriptionQueue() {
     for (MedicalRecord& record : db.getMedicalRecords()) {
         Appointment* appointment = db.findAppointmentById(record.getAppointmentId());
         if (appointment == nullptr ||
-            (appointment->getStatus() != "Waiting" && appointment->getStatus() != "Completed")) continue;
+            (appointment->getStatus() != "WaitingInventory" &&
+             appointment->getStatus() != "Waiting" &&
+             appointment->getStatus() != "Completed")) continue;
 
-        // Chỉ đưa đơn chưa cấp của lượt khám đã hoàn tất vào hàng đợi.
+        // Chỉ đưa thuốc chưa cấp vào hàng đợi.
         for (const PrescriptionDetail& prescription : record.getPrescriptions()) {
             if (prescription.dispensed) continue;
 

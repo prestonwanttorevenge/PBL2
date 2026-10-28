@@ -110,10 +110,13 @@ int main() {
 
     assert(!database.updateMedicalRecordFromQT(nextId, "Symptom", "Diagnosis", "", "Completed").empty());
     assert(database.prescribeMedicineFromQT(clsRecord->getRecordId(), "M1", "1 per day", 2) == 1);
+    assert(clsAppointment->getStatus() == "WaitingInventory");
+    assert(database.cancelAppointmentFromQT(clsId) == -5);
+    assert(clsAppointment->getStatus() == "WaitingInventory");
     assert(database.prescribeMedicineFromQT(clsRecord->getRecordId(), "M2", "2 per day", 1) == 1);
-    assert(clsAppointment->getStatus() == "Waiting");
+    assert(clsAppointment->getStatus() == "WaitingInventory");
     assert(database.dispensePrescriptionFromQT(clsRecord->getRecordId(), "M1") == 1);
-    assert(clsAppointment->getStatus() == "Waiting");
+    assert(clsAppointment->getStatus() == "WaitingInventory");
     assert(database.dispensePrescriptionFromQT(clsRecord->getRecordId(), "M1") == -4);
     assert(database.dispensePrescriptionFromQT(clsRecord->getRecordId(), "M2") == 1);
     assert(clsAppointment->getStatus() == "Completed");
