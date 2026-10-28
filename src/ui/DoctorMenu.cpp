@@ -3,6 +3,7 @@
 #include "ui/Login.h"
 #include "ui/ClinicStyle.h"
 #include "services/Database.h"
+#include "utils/AppointmentQueue.h"
 #include <QMessageBox>
 #include <QTableWidgetItem>
 #include <QColor>
@@ -385,7 +386,8 @@ void DoctorMenu::loadPatientQueue() {
     for (const auto& appt : appts) {
         User* currentUser = auth.getCurrentUser();
         if (currentUser == nullptr || appt.getDoctorId() != currentUser->getId()) continue;
-        if (appt.getStatus() == "Pending" || appt.getStatus() == "Waiting") {
+        if (appt.getStatus() == "Waiting" ||
+            (appt.getStatus() == "Pending" && isNextPendingAppointment(appts, appt))) {
             ui->tableAppointments->insertRow(row);
             
             QTableWidgetItem *item0 = new QTableWidgetItem(QString::fromStdString(appt.getAppointmentId()));

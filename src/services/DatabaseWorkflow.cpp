@@ -1,4 +1,5 @@
 #include "services/Database.h"
+#include "utils/AppointmentQueue.h"
 #include <cstdio>
 #include <string>
 #include <vector>
@@ -43,7 +44,6 @@ int Database::bookAppointmentFromQT(string patientId, string doctorId, string re
             appt.getTimeSlot() == time &&
             appt.getStatus() != "Canceled" &&
             appt.getStatus() != "Cancelled") {
-            if (appt.getDoctorId() == doctorId) return -4;
             if (appt.getPatientId() == patientId) return -5;
         }
     }
@@ -73,6 +73,7 @@ int Database::checkInAppointmentFromQT(const string& appointmentId, const string
 string Database::updateMedicalRecordFromQT(string apptId, string symp, string diag, string notes, string status) {
     Appointment* appt = findAppointmentById(apptId);
     if (appt == nullptr) return "";
+    if (appt->getStatus() == "Pending" && !isNextPendingAppointment(appointments, *appt)) return "";
     if (diag.empty() || (status != "Completed" && status != "Waiting") ||
         appt->getStatus() == "Canceled" || appt->getStatus() == "Cancelled" ||
         appt->getStatus() == "Billed") return "";

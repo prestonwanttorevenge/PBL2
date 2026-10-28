@@ -13,8 +13,8 @@ Hệ thống quản lý bệnh viện được xây dựng bằng ngôn ngữ **
 ## Quy trình nghiệp vụ hiện có
 
 1. **Lễ tân** tạo hồ sơ bệnh nhân với họ tên, ngày sinh, giới tính, số điện thoại và thông tin BHYT; chọn bác sĩ theo chuyên khoa, ngày làm việc và ca trực; đặt lịch theo ngày cụ thể.
-2. Lịch mới ở trạng thái `Scheduled`. Lễ tân xác nhận bệnh nhân đến đúng ngày hẹn để chuyển lịch sang `Pending` (chờ khám). Hủy lịch không xóa lịch sử.
-3. **Bác sĩ** chỉ xem hàng đợi của mình. Bác sĩ ghi nhận chẩn đoán; nếu cần cận lâm sàng thì chỉ định dịch vụ, lịch chuyển sang `Waiting`; sau khi ghi nhận kết quả và hoàn tất hồ sơ, lịch chuyển sang `Completed`.
+2. Lịch mới ở trạng thái `Scheduled`. Nhiều bệnh nhân có thể đặt cùng bác sĩ/ngày/ca; lễ tân xác nhận bệnh nhân đến đúng ngày hẹn để chuyển lịch sang `Pending`. Bác sĩ tiếp nhận lần lượt theo thứ tự đặt lịch; lượt trước chuyển sang `Waiting` hoặc `Completed` thì lượt `Pending` tiếp theo mới vào hàng khám. Hủy lịch không xóa lịch sử.
+3. **Bác sĩ** chỉ xem lượt đang khám kế tiếp và các hồ sơ đang chờ CLS của mình. Bác sĩ ghi nhận chẩn đoán, thêm các dịch vụ CLS cần thiết rồi lưu hồ sơ sang `Waiting`; khi hoàn tất khám/CLS, lịch chuyển sang `Completed`.
 4. Bác sĩ kê đơn trên hồ sơ đã hoàn tất. **Kho thuốc** xem hàng đợi đơn chưa cấp, xác nhận cấp phát rồi mới trừ tồn kho. Đơn đã cấp phát không thể cấp lần nữa.
 5. **Lễ tân** chỉ lập hóa đơn cho lượt khám `Completed`, sau khi thuốc trong đơn đã được cấp phát. Lượt khám chuyển sang `Billed` và không thể lập hóa đơn trùng.
 6. **Admin** quản lý tài khoản, khóa/mở tài khoản, bác sĩ (kèm ít nhất một ca trực), thuốc, dịch vụ và tổng tiền hóa đơn đã lập.
