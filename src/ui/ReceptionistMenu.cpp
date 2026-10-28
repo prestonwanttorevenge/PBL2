@@ -440,6 +440,9 @@ void ReceptionistMenu::on_btnCancelAppointment_clicked() {
         if (result == 1) {
             QMessageBox::information(this, QString::fromUtf8("Thành công"), QString::fromUtf8("Đã vô hiệu hóa Lịch hẹn thành công."));
             loadPendingAppointments(); 
+        } else if (result == -5) {
+            QMessageBox::warning(this, QString::fromUtf8("Đang chờ cấp thuốc"),
+                                 QString::fromUtf8("Không thể hủy lượt khám khi đơn thuốc vẫn đang chờ Inventory cấp."));
         } 
         else {
             QMessageBox::critical(this, QString::fromUtf8("Lỗi"), QString::fromUtf8("Gián đoạn hệ thống. Không thể hủy lịch hẹn này."));

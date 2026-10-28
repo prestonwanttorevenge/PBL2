@@ -217,23 +217,26 @@ void DoctorMenu::on_btnPrescribeMedicine_clicked() {
         return;
     }
 
-    // Chỉ kê cho lượt đã khám xong hoặc đã quay lại từ CLS.
-    string apptId = ui->txtAppointmentId->text().toStdString();
+    // Lấy lượt khám từ bệnh án để vẫn hoạt động sau khi hoàn tất khám.
+    const string apptId = record == nullptr ? "" : record->getAppointmentId();
     Appointment* appt = db.findAppointmentById(apptId);
 
-    if (appt != nullptr && record != nullptr) {
-        if (appt->getStatus() != "Completed" && appt->getStatus() != "Waiting") {
-            QMessageBox::critical(this, QString::fromUtf8("Cảnh Báo Vi Phạm Quy Trình"), 
-                QString::fromUtf8("Chỉ kê đơn sau khi hoàn tất khám hoặc chọn hồ sơ đã quay lại từ CLS."));
-            return; 
-        }
+    if (appt == nullptr ||
+        (appt->getStatus() != "Completed" && appt->getStatus() != "Waiting" &&
+         appt->getStatus() != "WaitingInventory")) {
+        QMessageBox::critical(this, QString::fromUtf8("Cảnh Báo Vi Phạm Quy Trình"),
+            QString::fromUtf8("Chỉ kê đơn cho lượt khám đã hoàn tất hoặc đang chờ cấp thuốc."));
+        return;
     }
     
     // Kê đơn sau khi lượt khám hoàn tất; tồn kho sẽ trừ ở bước cấp phát.
     int result = db.prescribeMedicineFromQT(recordId, medId, dosage, qty);
 
     if (result == 1) {
-        db.saveAllData(); 
+        ui->txtAppointmentId->setText(QString::fromStdString(apptId));
+        ui->txtSymptoms->setText(QString::fromStdString(record->getSymptoms()));
+        ui->txtDiagnosis->setText(QString::fromStdString(record->getDiagnosis()));
+        ui->txtNotes->setText(QString::fromStdString(record->getNotes()));
         QMessageBox::information(this, QString::fromUtf8("Kê đơn"), QString::fromUtf8("Đã thêm thuốc vào Bệnh án [") + QString::fromStdString(recordId) + QString::fromUtf8("] thành công!"));
         ui->txtDosage->clear();
         ui->spinBoxQuantity->setValue(1);
@@ -245,7 +248,8 @@ void DoctorMenu::on_btnPrescribeMedicine_clicked() {
         else if(filterText.startsWith("B3")) currentFilter = "B3";
         else if(filterText.startsWith("DV")) currentFilter = "DV";
         
-        loadMedicineComboBox(currentFilter); 
+        loadMedicineComboBox(currentFilter);
+        loadPatientQueue();
     } 
     else if (result == -1) {
         QMessageBox::critical(this, QString::fromUtf8("Lỗi"), QString::fromUtf8("Mã Bệnh án không tồn tại!"));
@@ -327,6 +331,9 @@ void DoctorMenu::on_btnCancelAppointment_clicked() {
         } else if (result == -3) {
             QMessageBox::warning(this, "Đang thực hiện",
                                  "Không thể hủy lịch khi bệnh nhân đang chờ kết quả cận lâm sàng.");
+        } else if (result == -5) {
+            QMessageBox::warning(this, "Đang chờ cấp thuốc",
+                                 "Không thể hủy lượt khám khi đơn thuốc vẫn đang chờ Inventory cấp.");
         }
     }
 }
@@ -398,6 +405,7 @@ void DoctorMenu::loadPatientQueue() {
         User* currentUser = auth.getCurrentUser();
         if (currentUser == nullptr || appt.getDoctorId() != currentUser->getId()) continue;
         if (appt.getStatus() == "Waiting" ||
+            appt.getStatus() == "WaitingInventory" ||
             (appt.getStatus() == "Pending" && isNextPendingAppointment(appts, appt))) {
             ui->tableAppointments->insertRow(row);
             
@@ -419,16 +427,39 @@ void DoctorMenu::loadPatientQueue() {
             QString timeStr = QString::fromStdString(date + " - " + appt.getTimeSlot());
             QTableWidgetItem *item3 = new QTableWidgetItem(timeStr);
             
-            QString statusText = (appt.getStatus() == "Pending") ? QString::fromUtf8("Chờ Khám") : QString::fromUtf8("Chờ Kết Quả CLS");
+            QString statusText;
+            if (appt.getStatus() == "Pending") {
+                statusText = QString::fromUtf8("Chờ Khám");
+            } else if (appt.getStatus() == "WaitingInventory") {
+                statusText = QString::fromUtf8("Chờ Inventory cấp thuốc");
+            } else {
+                statusText = QString::fromUtf8("Chờ Kết Quả CLS");
+            }
             QTableWidgetItem *item4 = new QTableWidgetItem(statusText);
             
             // ĐÃ KHÔI PHỤC NGUYÊN TRẠNG BẢNG MÀU UI
-            QColor bg = (appt.getStatus() == "Pending") ? QColor(255, 243, 205) : QColor(217, 237, 247); 
-            QColor fg = (appt.getStatus() == "Pending") ? QColor(133, 100, 4) : QColor(12, 84, 96);
+            const bool waitingInventory = appt.getStatus() == "WaitingInventory";
+            QColor bg = waitingInventory ? QColor(242, 244, 247)
+                                         : (appt.getStatus() == "Pending" ? QColor(255, 243, 205)
+                                                                          : QColor(217, 237, 247));
+            QColor fg = waitingInventory ? QColor(107, 114, 128)
+                                         : (appt.getStatus() == "Pending" ? QColor(133, 100, 4)
+                                                                          : QColor(12, 84, 96));
             
             item0->setBackground(bg); item1->setBackground(bg); item2->setBackground(bg);
             item3->setBackground(bg); item4->setBackground(bg);
             item4->setForeground(fg);
+            if (waitingInventory) {
+                item0->setForeground(fg);
+                item1->setForeground(fg);
+                item2->setForeground(fg);
+                item3->setForeground(fg);
+                item0->setToolTip(QString::fromUtf8("Đơn đang chờ Inventory duyệt cấp thuốc."));
+                item1->setToolTip(item0->toolTip());
+                item2->setToolTip(item0->toolTip());
+                item3->setToolTip(item0->toolTip());
+                item4->setToolTip(item0->toolTip());
+            }
 
             ui->tableAppointments->setItem(row, 0, item0);
             ui->tableAppointments->setItem(row, 1, item1);
@@ -459,16 +490,20 @@ void DoctorMenu::on_btnDischargePatient_clicked() {
 
         if (result == 1) {
             string currentApptId = ui->txtAppointmentId->text().toStdString();
+            bool waitingInventory = false;
             if (!currentApptId.empty()) {
                 Appointment* appt = db.findAppointmentById(currentApptId);
                 if (appt != nullptr && appt->getPatientId() == patientId) {
-                    appt->setStatus("Completed");
+                    waitingInventory = appt->getStatus() == "WaitingInventory";
+                    if (!waitingInventory) appt->setStatus("Completed");
                 }
             }
 
             db.saveAllData(); 
             QMessageBox::information(this, QString::fromUtf8("Thành công"), 
-                                     QString::fromUtf8("Đã phê duyệt xuất viện và hoàn tất ca khám!\nKhông gian lưu trú đã được thu hồi."));
+                                     waitingInventory
+                                         ? QString::fromUtf8("Đã phê duyệt xuất viện và thu hồi giường.\nHồ sơ vẫn chờ Inventory cấp thuốc.")
+                                         : QString::fromUtf8("Đã phê duyệt xuất viện và hoàn tất ca khám!\nKhông gian lưu trú đã được thu hồi."));
             
             ui->txtPatientId_History->clear();
             ui->txtAppointmentId->clear();

@@ -150,9 +150,13 @@ int Database::prescribeMedicineFromQT(string recordId, string medId, string dosa
     if (med->getStock() < qty) return -3;
     Appointment* appointment = findAppointmentById(record->getAppointmentId());
     if (appointment == nullptr ||
-        (appointment->getStatus() != "Waiting" && appointment->getStatus() != "Completed")) return -5;
+        (appointment->getStatus() != "Waiting" &&
+         appointment->getStatus() != "WaitingInventory" &&
+         appointment->getStatus() != "Completed")) return -5;
     if (record->hasMedicine(medId)) return -6;
     record->addMedicine(medId, dosage, qty, med->getUnitPrice(), false);
+    appointment->setStatus("WaitingInventory");
+    saveAllData();
     return 1;
 }
 
@@ -161,7 +165,9 @@ int Database::dispensePrescriptionFromQT(string recordId, string medicineId) {
     if (record == nullptr) return -1;
     Appointment* appointment = findAppointmentById(record->getAppointmentId());
     if (appointment == nullptr ||
-        (appointment->getStatus() != "Waiting" && appointment->getStatus() != "Completed")) return -2;
+        (appointment->getStatus() != "Waiting" &&
+         appointment->getStatus() != "WaitingInventory" &&
+         appointment->getStatus() != "Completed")) return -2;
     if (!record->hasMedicine(medicineId)) return -5;
     if (record->isMedicineDispensed(medicineId)) return -4;
 
@@ -180,9 +186,13 @@ int Database::dispensePrescriptionFromQT(string recordId, string medicineId) {
     // Chỉ trừ kho sau khi cờ cấp phát được đặt thành công.
     medicine->setStock(medicine->getStock() - quantity);
     const vector<PrescriptionDetail>& prescriptions = record->getPrescriptions();
-    if (std::all_of(prescriptions.begin(), prescriptions.end(),
-                    [](const PrescriptionDetail& prescription) { return prescription.dispensed; })) {
+    const bool allDispensed = std::all_of(
+        prescriptions.begin(), prescriptions.end(),
+        [](const PrescriptionDetail& prescription) { return prescription.dispensed; });
+    if (allDispensed) {
         appointment->setStatus("Completed");
+    } else {
+        appointment->setStatus("WaitingInventory");
     }
     saveAllData();
     return 1;
@@ -338,6 +348,7 @@ int Database::cancelAppointmentFromQT(string apptId) {
     if (appt == nullptr) return -1; 
     if (appt->getStatus() == "Completed" || appt->getStatus() == "Billed") return -2;
     if (appt->getStatus() == "Waiting") return -3;
+    if (appt->getStatus() == "WaitingInventory") return -5;
     if (appt->getStatus() == "Canceled" || appt->getStatus() == "Cancelled") return -4;
     appt->setStatus("Canceled");
     saveAllData(); 
