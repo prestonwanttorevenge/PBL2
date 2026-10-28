@@ -34,16 +34,16 @@
         <widget class="QWidget" name="tabExamination">
          <attribute name="title"><string>Khám &amp; CLS</string></attribute>
          <layout class="QVBoxLayout" name="layoutExamination"><property name="spacing"><number>12</number></property>
-          <item><widget class="QLabel" name="lblEncounterHint"><property name="text"><string>Ghi nhận nội dung khám. Nếu cần cận lâm sàng, chỉ định dịch vụ và lưu trạng thái chờ kết quả.</string></property><property name="wordWrap"><bool>true</bool></property><property name="styleSheet"><string>color: #64748b;</string></property></widget></item>
+          <item><widget class="QLabel" name="lblEncounterHint"><property name="text"><string>Ghi triệu chứng, chẩn đoán và thêm các dịch vụ CLS cần thiết; sau đó lưu hồ sơ để chuyển sang chờ kết quả.</string></property><property name="wordWrap"><bool>true</bool></property><property name="styleSheet"><string>color: #64748b;</string></property></widget></item>
           <item><widget class="QLineEdit" name="txtAppointmentId"><property name="readOnly"><bool>true</bool></property><property name="placeholderText"><string>Mã lịch hẹn (chọn từ hàng đợi)</string></property></widget></item>
           <item><widget class="QLineEdit" name="txtRecordId"><property name="readOnly"><bool>true</bool></property><property name="placeholderText"><string>Mã bệnh án</string></property></widget></item>
           <item><widget class="QLineEdit" name="txtSymptoms"><property name="placeholderText"><string>Triệu chứng</string></property></widget></item>
           <item><widget class="QLineEdit" name="txtDiagnosis"><property name="placeholderText"><string>Chẩn đoán</string></property></widget></item>
           <item><widget class="QLineEdit" name="txtNotes"><property name="placeholderText"><string>Ghi chú lâm sàng</string></property></widget></item>
-          <item><layout class="QHBoxLayout" name="layoutRecordActions"><item><widget class="QPushButton" name="btnCreateMedicalRecord"><property name="text"><string>Hoàn tất khám</string></property></widget></item><item><widget class="QPushButton" name="btnWaitResult"><property name="text"><string>Lưu, chờ CLS</string></property></widget></item></layout></item>
+          <item><layout class="QHBoxLayout" name="layoutRecordActions"><item><widget class="QPushButton" name="btnCreateMedicalRecord"><property name="text"><string>Hoàn tất khám</string></property></widget></item><item><widget class="QPushButton" name="btnWaitResult"><property name="text"><string>Lưu hồ sơ, chờ CLS</string></property></widget></item></layout></item>
           <item><widget class="QFrame" name="separatorService"><property name="frameShape"><enum>QFrame::HLine</enum></property><property name="frameShadow"><enum>QFrame::Plain</enum></property></widget></item>
           <item><widget class="QComboBox" name="cbService"/></item>
-          <item><widget class="QPushButton" name="btnAssignService"><property name="text"><string>Chỉ định dịch vụ CLS</string></property></widget></item>
+          <item><widget class="QPushButton" name="btnAssignService"><property name="text"><string>Thêm dịch vụ CLS</string></property></widget></item>
           <item><spacer name="examinationSpacer"><property name="orientation"><enum>Qt::Vertical</enum></property></spacer></item>
          </layout>
         </widget>
