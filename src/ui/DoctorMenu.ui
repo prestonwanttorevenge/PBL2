@@ -62,7 +62,10 @@
         <widget class="QWidget" name="tabPatient">
          <attribute name="title"><string>Hồ sơ bệnh nhân</string></attribute>
          <layout class="QVBoxLayout" name="layoutPatient"><property name="spacing"><number>12</number></property>
-          <item><widget class="QLabel" name="lblPatientHistoryHint"><property name="text"><string>Tra cứu tiền sử khám hoặc xác nhận xuất viện cho bệnh nhân nội trú.</string></property><property name="wordWrap"><bool>true</bool></property><property name="styleSheet"><string>color: #64748b;</string></property></widget></item>
+          <item><widget class="QLabel" name="lblPatientHistoryHint"><property name="text"><string>Chọn bệnh nhân nội trú chưa xuất viện trong danh sách để xem hồ sơ hoặc duyệt xuất viện.</string></property><property name="wordWrap"><bool>true</bool></property><property name="styleSheet"><string>color: #64748b;</string></property></widget></item>
+          <item><widget class="QTableWidget" name="tableInpatients"><property name="minimumHeight"><number>180</number></property><property name="alternatingRowColors"><bool>true</bool></property><property name="selectionBehavior"><enum>QAbstractItemView::SelectRows</enum></property><property name="editTriggers"><set>QAbstractItemView::NoEditTriggers</set></property></widget></item>
+          <item><widget class="QLabel" name="lblNoInpatients"><property name="text"><string>Hiện không có bệnh nhân nội trú cần duyệt xuất viện.</string></property><property name="alignment"><set>Qt::AlignCenter</set></property><property name="styleSheet"><string>color: #64748b;</string></property></widget></item>
+          <item><widget class="QPushButton" name="btnRefreshInpatients"><property name="text"><string>Làm mới danh sách nội trú</string></property></widget></item>
           <item><widget class="QLineEdit" name="txtPatientId_History"><property name="placeholderText"><string>Mã bệnh nhân</string></property></widget></item>
           <item><widget class="QPushButton" name="btnViewPatientHistory"><property name="text"><string>Xem lịch sử khám</string></property></widget></item>
           <item><widget class="QPushButton" name="btnDischargePatient"><property name="text"><string>Duyệt xuất viện</string></property></widget></item>

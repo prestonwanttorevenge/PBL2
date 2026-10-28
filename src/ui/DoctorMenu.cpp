@@ -6,6 +6,7 @@
 #include "utils/AppointmentQueue.h"
 #include <QMessageBox>
 #include <QTableWidgetItem>
+#include <QHeaderView>
 #include <QColor>
 #include <QDate> 
 #include <QHBoxLayout>
@@ -33,9 +34,11 @@ DoctorMenu::DoctorMenu(Database& database, AuthService& authService, QWidget *pa
     ui->horizontalLayoutMain->addWidget(contentSplitter);
     
     connect(ui->tableAppointments, &QTableWidget::itemClicked, this, &DoctorMenu::on_tableAppointments_itemClicked);
+    connect(ui->tableInpatients, &QTableWidget::itemClicked, this, &DoctorMenu::on_tableInpatients_itemClicked);
     connect(ui->cbMedPrefixFilter, &QComboBox::currentTextChanged, this, &DoctorMenu::on_cbMedPrefixFilter_currentTextChanged);
     
     loadPatientQueue();
+    loadInpatientDischargeQueue();
     loadMedicineComboBox("Tất cả"); 
     
     // Tải danh sách Dịch vụ Cận lâm sàng
@@ -84,6 +87,41 @@ void DoctorMenu::on_tableAppointments_itemClicked(QTableWidgetItem *item) {
             }
         }
     }
+}
+
+void DoctorMenu::on_tableInpatients_itemClicked(QTableWidgetItem *item) {
+    if (item == nullptr || item->row() < 0) return;
+    ui->txtPatientId_History->setText(ui->tableInpatients->item(item->row(), 0)->text());
+}
+
+void DoctorMenu::loadInpatientDischargeQueue() {
+    ui->tableInpatients->setColumnCount(4);
+    ui->tableInpatients->setHorizontalHeaderLabels(
+        {"Mã bệnh nhân", "Họ tên", "Phòng - giường", "Ngày nhập viện"});
+    ui->tableInpatients->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    ui->tableInpatients->setRowCount(0);
+
+    int row = 0;
+    for (Patient** patientPointer : db.getPatients().getAllPointers()) {
+        Patient* patient = *patientPointer;
+        Inpatient* inpatient = dynamic_cast<Inpatient*>(patient);
+        if (inpatient == nullptr || inpatient->getRoomNumber().empty() ||
+            inpatient->getRoomNumber() == "Chua xep" ||
+            inpatient->getRoomNumber() == "Da xuat vien") continue;
+
+        ui->tableInpatients->insertRow(row);
+        ui->tableInpatients->setItem(row, 0,
+            new QTableWidgetItem(QString::fromStdString(inpatient->getId())));
+        ui->tableInpatients->setItem(row, 1,
+            new QTableWidgetItem(QString::fromStdString(inpatient->getFullName())));
+        ui->tableInpatients->setItem(row, 2,
+            new QTableWidgetItem(QString::fromStdString(
+                inpatient->getRoomNumber() + " - " + inpatient->getBedNumber())));
+        ui->tableInpatients->setItem(row, 3,
+            new QTableWidgetItem(QString::fromStdString(inpatient->getAdmissionDate())));
+        ++row;
+    }
+    ui->lblNoInpatients->setVisible(row == 0);
 }
 
 void DoctorMenu::on_cbMedPrefixFilter_currentTextChanged(const QString &text) {
@@ -489,13 +527,12 @@ void DoctorMenu::on_btnDischargePatient_clicked() {
         int result = db.dischargeInpatientFromQT(patientId, currentDate.toStdString());
 
         if (result == 1) {
-            string currentApptId = ui->txtAppointmentId->text().toStdString();
             bool waitingInventory = false;
-            if (!currentApptId.empty()) {
-                Appointment* appt = db.findAppointmentById(currentApptId);
-                if (appt != nullptr && appt->getPatientId() == patientId) {
-                    waitingInventory = appt->getStatus() == "WaitingInventory";
-                    if (!waitingInventory) appt->setStatus("Completed");
+            for (const Appointment& appointment : db.getAppointments()) {
+                if (appointment.getPatientId() == patientId &&
+                    appointment.getStatus() == "WaitingInventory") {
+                    waitingInventory = true;
+                    break;
                 }
             }
 
@@ -503,11 +540,10 @@ void DoctorMenu::on_btnDischargePatient_clicked() {
             QMessageBox::information(this, QString::fromUtf8("Thành công"), 
                                      waitingInventory
                                          ? QString::fromUtf8("Đã phê duyệt xuất viện và thu hồi giường.\nHồ sơ vẫn chờ Inventory cấp thuốc.")
-                                         : QString::fromUtf8("Đã phê duyệt xuất viện và hoàn tất ca khám!\nKhông gian lưu trú đã được thu hồi."));
+                                         : QString::fromUtf8("Đã phê duyệt xuất viện và thu hồi giường."));
             
             ui->txtPatientId_History->clear();
-            ui->txtAppointmentId->clear();
-            loadPatientQueue();
+            loadInpatientDischargeQueue();
         } 
         else if (result == -2) {
             QMessageBox::warning(this, QString::fromUtf8("Từ chối"), QString::fromUtf8("Đây là bệnh nhân Ngoại trú. Quy trình giải phóng giường không áp dụng."));
@@ -519,4 +555,8 @@ void DoctorMenu::on_btnDischargePatient_clicked() {
                                  QString::fromUtf8("Cần hoàn tất các kết quả cận lâm sàng trước khi xuất viện."));
         } 
     }
+}
+
+void DoctorMenu::on_btnRefreshInpatients_clicked() {
+    loadInpatientDischargeQueue();
 }

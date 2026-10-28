@@ -66,7 +66,7 @@ B2_014;Pantoprazole 40mg;12000;1 viên/ngày trước bữa sáng 30 phút;159
 B2_015;Ciprofloxacin 500mg;9000;1 viên/lần, ngày 2 lần sau ăn;233
 B2_016;Levofloxacin 500mg;18000;1 viên/ngày;246
 B2_017;Cefuroxime Axetil 500mg;15000;1 viên/lần, ngày 2 lần sau ăn;226
-B2_018;Cefdinir 300mg;22000;1 viên/lần, ngày 2 lần;252
+B2_018;Cefdinir 300mg;22000;1 viên/lần, ngày 2 lần;242
 B2_019;Cefpodoxime 200mg;20000;1 viên/lần, ngày 2 lần;246
 B2_020;Azithromycin 500mg;18000;1 viên/ngày, uống trong 3 ngày;258
 B2_021;Clarithromycin 500mg;25000;1 viên/lần, ngày 2 lần;198
@@ -111,7 +111,7 @@ B3_009;Insulin Mixtard 30 Flexpen;195000;Tiêm dưới da trước bữa ăn 30 
 B3_010;Liraglutide (Victoza 6mg/ml);1.85e+06;Tiêm dưới da 1 lần/ngày;81
 B3_011;Tradjenta 5mg (Linagliptin);32000;1 viên/ngày;94
 B3_012;Janumet 50/1000mg;22000;1 viên/lần, ngày 2 lần;91
-B3_013;Nexium 40mg lọ tiêm truyền;210000;Tiêm tĩnh mạch chậm hoặc truyền;106
+B3_013;Nexium 40mg lọ tiêm truyền;210000;Tiêm tĩnh mạch chậm hoặc truyền;96
 B3_014;Meropenem 1g lọ tiêm truyền;240000;Truyền tĩnh mạch mỗi 8 giờ;144
 B3_015;Imipenem + Cilastatin 500mg;260000;Truyền tĩnh mạch mỗi 6-8 giờ;146
 B3_016;Vancomycin 500mg lọ tiêm truyền;180000;Truyền tĩnh mạch chậm;129
