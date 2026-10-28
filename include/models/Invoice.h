@@ -11,6 +11,7 @@ class Invoice {
 private:
     string invoiceId;
     string patientId;
+    // Gắn hóa đơn với lượt khám để tránh thanh toán trùng lượt.
     string appointmentId;
     double consultationFee; 
     double medicineFee;     

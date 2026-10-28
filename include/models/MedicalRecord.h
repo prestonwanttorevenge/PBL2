@@ -9,6 +9,7 @@ struct PrescriptionDetail {
     std::string medicineId;
     std::string dosage;     
     int quantity;  
+    // Giữ giá lúc kê và trạng thái cấp phát của từng thuốc.
     double unitPrice;
     bool dispensed;
 };

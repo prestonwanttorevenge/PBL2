@@ -465,6 +465,7 @@ void Database::loadAllData() {
             continue;
         }
 
+        // Gắn hóa đơn cũ chưa có appointmentId với lượt hoàn tất gần nhất của bệnh nhân.
         for (auto it = appointments.rbegin(); it != appointments.rend(); ++it) {
             if (it->getPatientId() == invoice.getPatientId() && it->getStatus() == "Completed") {
                 invoice.setAppointmentId(it->getAppointmentId());

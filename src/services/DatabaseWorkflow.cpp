@@ -63,6 +63,7 @@ int Database::checkInAppointmentFromQT(const string& appointmentId, const string
     Appointment* appointment = findAppointmentById(appointmentId);
     if (appointment == nullptr) return -1;
     if (appointment->getStatus() != "Scheduled") return -2;
+    // Chỉ check-in đúng ngày đã đặt.
     if (appointment->getAppointmentDate() != currentDate) return -3;
     appointment->setStatus("Pending");
     saveAllData();
@@ -174,6 +175,7 @@ int Database::dispensePrescriptionFromQT(string recordId, string medicineId) {
     if (quantity <= 0 || medicine->getStock() < quantity) return -3;
     if (!record->markMedicineDispensed(medicineId)) return -4;
 
+    // Chỉ trừ kho sau khi cờ cấp phát được đặt thành công.
     medicine->setStock(medicine->getStock() - quantity);
     saveAllData();
     return 1;
@@ -198,6 +200,7 @@ int Database::createInvoiceFromQT(string patientId, double& outTotalFee) {
         }
     }
     if (targetAppointment == nullptr) return hasAlreadyBilledVisit ? -4 : -2;
+    // Mỗi lượt khám chỉ được gắn với một hóa đơn.
     for (const Invoice& invoice : invoices) {
         if (invoice.getAppointmentId() == targetAppointment->getAppointmentId()) return -4;
     }

@@ -23,6 +23,7 @@ private slots:
 private:
     Ui::Login *ui;
     Database& db;
+    // Dùng chung phiên đăng nhập giữa form Login và các menu.
     AuthService& auth;
 };
 

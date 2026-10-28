@@ -19,6 +19,7 @@ Login::Login(Database& database, AuthService& authService, QWidget *parent) :
 {
     ui->setupUi(this);
     applyClinicStyle(this);
+    // Giới hạn nhập trùng với quy tắc kiểm tra trong User.
     ui->txtUsername->setMaxLength(32);
     ui->txtUsername->setPlaceholderText(QString::fromUtf8("Tài khoản không dấu (3–32 ký tự)"));
     ui->txtUsername->setValidator(new QRegularExpressionValidator(

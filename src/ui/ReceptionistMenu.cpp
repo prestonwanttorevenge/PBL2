@@ -246,6 +246,7 @@ void ReceptionistMenu::on_btnBookAppointment_clicked() {
     string patientId = ui->txtBookPatientId->text().toStdString();
     const QDate selectedDate = ui->dateAppointment->date();
     string day = weekdayName(selectedDate.dayOfWeek());
+    // Lưu cả thứ làm việc lẫn ngày cụ thể của lịch hẹn.
     string appointmentDate = selectedDate.toString("dd/MM/yyyy").toStdString();
     string time = ui->cbShift->currentText().toStdString();
 
@@ -405,6 +406,7 @@ void ReceptionistMenu::on_cbPendingAppointments_currentIndexChanged(int index) {
         ? QDate()
         : QDate::fromString(QString::fromStdString(appointment->getAppointmentDate()), "dd/MM/yyyy");
     const bool isToday = appointmentDate.isValid() && appointmentDate == QDate::currentDate();
+    // Chỉ bật check-in cho lịch mới đặt trong đúng ngày hôm nay.
     ui->btnCheckInAppointment->setEnabled(isScheduled && isToday);
 }
 

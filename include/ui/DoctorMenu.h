@@ -21,6 +21,7 @@ public:
     ~DoctorMenu();
 
 protected:
+    // Đổi bố cục khi cửa sổ hẹp để hàng đợi vẫn dễ đọc.
     void resizeEvent(QResizeEvent *event) override;
 
 private slots:
@@ -30,6 +31,7 @@ private slots:
     void on_btnPrescribeMedicine_clicked();
     void on_btnViewPatientHistory_clicked();
     void on_btnCancelAppointment_clicked();
+    // Chỉ định dịch vụ và chuyển lượt khám sang chờ kết quả.
     void on_btnAssignService_clicked(); 
     void on_btnWaitResult_clicked();
     void on_tableAppointments_itemClicked(QTableWidgetItem *item);

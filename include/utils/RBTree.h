@@ -3,6 +3,7 @@
 
 #include <vector>
 
+// Cây đỏ-đen tổng quát, giữ dữ liệu có khóa luôn cân bằng sau thêm/xóa.
 template <typename Key, typename Value>
 class RBTree {
 private:

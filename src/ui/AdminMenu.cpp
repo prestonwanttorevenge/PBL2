@@ -32,6 +32,7 @@ public:
 
 protected:
     void paintEvent(QPaintEvent*) override {
+        // Vẽ các cột trực tiếp từ dữ liệu hóa đơn gần nhất.
         QPainter painter(this);
         painter.setRenderHint(QPainter::Antialiasing);
         painter.fillRect(rect(), QColor("#ffffff"));

@@ -1,86 +1,93 @@
-﻿  |-- .qtcreator
-  |-- .ua
-  |-- .vscode
-  |-- data
-  |-- include
-  |-- resources
-  |-- src
-  |-- .gitignore
-  |-- CMakeLists.txt
-  |-- README.md
-  |-- resources.qrc
-    |-- CMakeLists.txt.user
-    |-- config.json
-    |-- knowledge-graph.json
-    |-- settings.json
-    |-- data_appointments.csv
-    |-- data_doctor_schedules.csv
-    |-- data_invoice_details.csv
-    |-- data_prescription_details.csv
-    |-- data_services.csv
-    |-- doctors.csv
-    |-- doctorScheduleFile.csv
-    |-- invoices.csv
-    |-- medical_records.csv
-    |-- medicines.csv
-    |-- patients.csv
-    |-- users.csv
-    |-- models
-    |-- services
-    |-- ui
-    |-- utils
-      |-- Appointment.h
-      |-- bcrypt.h
-      |-- Doctor.h
-      |-- Inpatient.h
-      |-- Invoice.h
-      |-- InvoiceDetail.h
-      |-- MedicalRecord.h
-      |-- Medicine.h
-      |-- node_blf.h
-      |-- openbsd.h
-      |-- Outpatient.h
-      |-- Patient.h
-      |-- Person.h
-      |-- Service.h
-      |-- User.h
-      |-- AuthService.h
-      |-- BST.h
-      |-- Database.h
-      |-- AdminMenu.h
-      |-- DoctorMenu.h
-      |-- InventoryMenu.h
-      |-- Login.h
-      |-- ReceptionistMenu.h
-      |-- Constants.h
-      |-- Helper.h
-    |-- style.qss
-    |-- models
-    |-- services
-    |-- ui
-    |-- utils
-    |-- main.cpp
-      |-- bcrypt.cpp
-      |-- blowfish.cpp
-      |-- Doctor.cpp
-      |-- Inpatient.cpp
-      |-- Invoice.cpp
-      |-- MedicalRecord.cpp
-      |-- Medicine.cpp
-      |-- Outpatient.cpp
-      |-- Patient.cpp
-      |-- Person.cpp
-      |-- User.cpp
-      |-- AuthService.cpp
-      |-- Database.cpp
-      |-- AdminMenu.cpp
-      |-- AdminMenu.ui
-      |-- DoctorMenu.cpp
-      |-- DoctorMenu.ui
-      |-- InventoryMenu.cpp
-      |-- InventoryMenu.ui
-      |-- Login.cpp
-      |-- Login.ui
-      |-- ReceptionistMenu.cpp
-      |-- ReceptionistMenu.ui
-      |-- Helper.cpp
+PBL2/
+|-- .vscode/
+|   `-- settings.json
+|-- data/
+|   |-- data_appointments.csv
+|   |-- data_doctor_schedules.csv
+|   |-- data_invoice_details.csv
+|   |-- data_prescription_details.csv
+|   |-- data_services.csv
+|   |-- doctors.csv
+|   |-- invoices.csv
+|   |-- medical_records.csv
+|   |-- medicines.csv
+|   |-- patients.csv
+|   `-- users.csv
+|-- include/
+|   |-- models/
+|   |   |-- Appointment.h
+|   |   |-- Doctor.h
+|   |   |-- Inpatient.h
+|   |   |-- Invoice.h
+|   |   |-- InvoiceDetail.h
+|   |   |-- MedicalRecord.h
+|   |   |-- Medicine.h
+|   |   |-- Outpatient.h
+|   |   |-- Patient.h
+|   |   |-- Person.h
+|   |   |-- Service.h
+|   |   |-- User.h
+|   |   |-- bcrypt.h
+|   |   |-- node_blf.h
+|   |   `-- openbsd.h
+|   |-- services/
+|   |   |-- AuthService.h
+|   |   |-- BST.h
+|   |   `-- Database.h
+|   |-- ui/
+|   |   |-- AdminMenu.h
+|   |   |-- ClinicStyle.h
+|   |   |-- DoctorMenu.h
+|   |   |-- InventoryMenu.h
+|   |   |-- Login.h
+|   |   `-- ReceptionistMenu.h
+|   `-- utils/
+|       |-- Constants.h
+|       |-- CustomMap.h
+|       |-- Helper.h
+|       `-- RBTree.h
+|-- resources/
+|   `-- style.qss
+|-- src/
+|   |-- main.cpp
+|   |-- models/
+|   |   |-- Doctor.cpp
+|   |   |-- Inpatient.cpp
+|   |   |-- Invoice.cpp
+|   |   |-- MedicalRecord.cpp
+|   |   |-- Medicine.cpp
+|   |   |-- Outpatient.cpp
+|   |   |-- Patient.cpp
+|   |   |-- Person.cpp
+|   |   |-- User.cpp
+|   |   |-- bcrypt.cpp
+|   |   `-- blowfish.cpp
+|   |-- services/
+|   |   |-- AuthService.cpp
+|   |   |-- Database.cpp
+|   |   |-- DatabaseManagement.cpp
+|   |   `-- DatabaseWorkflow.cpp
+|   |-- ui/
+|   |   |-- AdminMenu.cpp
+|   |   |-- AdminMenu.ui
+|   |   |-- DoctorMenu.cpp
+|   |   |-- DoctorMenu.ui
+|   |   |-- InventoryMenu.cpp
+|   |   |-- InventoryMenu.ui
+|   |   |-- Login.cpp
+|   |   |-- Login.ui
+|   |   |-- ReceptionistMenu.cpp
+|   |   `-- ReceptionistMenu.ui
+|   `-- utils/
+|       `-- Helper.cpp
+|-- tests/
+|   `-- algorithm_smoke.cpp
+|-- .gitignore
+|-- CMakeLists.txt
+|-- README.md
+|-- benchmark_results.csv
+|-- resources.qrc
+`-- tree.txt
+
+Generated output and local-only folders (for example .git/, build/, bin/,
+.qtcreator/, and .ua/) are intentionally omitted.

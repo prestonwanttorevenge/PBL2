@@ -4,6 +4,7 @@
 #include <vector>
 using namespace std;
 
+// Bộ đếm nhỏ theo nhóm, lưu cặp khóa/giá trị trong hai vector song song.
 struct CounterMap {
     vector<string> keys;
     vector<int> values;
@@ -31,6 +32,8 @@ struct RoomInfo {
         second = s;
     }
 };
+
+// Node phòng chứa các giường còn trống trong cây tìm kiếm theo tên phòng.
 struct RoomNode {
     string roomName;
     vector<string> availableBeds;

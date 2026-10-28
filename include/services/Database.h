@@ -26,6 +26,7 @@ private:
     int doctorCounter = 0;
     int medicalRecordCounter = 0;
 
+    // Bộ đếm ID theo nhóm; các danh mục chính được tra cứu theo khóa trong RBTree.
     CounterMap userCounters;
     CounterMap medicineCounters;
     CounterMap serviceCounters;
@@ -42,6 +43,7 @@ private:
     string medicalRecordFile = "data/medical_records.csv";
     string prescriptionDetailFile = "data/data_prescription_details.csv";
 
+    // Giữ thứ tự theo ID và tìm kiếm/xóa nhanh theo khóa.
     RBTree<string, Doctor> doctors;
     RBTree<string, Patient*> patients;
     RBTree<string, Medicine> medicines;
@@ -95,6 +97,7 @@ public:
     bool addPatientFromGUI(string name, string dob, string gender, string phone,
                            string BH, bool isNoiTru, string admissionDate);
     int bookAppointmentFromQT(string patientId, string doctorId, string receptionistId, string specialty, string day, string time, string appointmentDate);
+    // Chỉ xác nhận đến khi lịch Scheduled đúng ngày hiện tại.
     int checkInAppointmentFromQT(const string& appointmentId, const string& currentDate);
     string updateMedicalRecordFromQT(string apptId, string symp, string diag, string notes, string status = "Completed");
     User* loginFromQT(string username, string password);
@@ -108,6 +111,7 @@ public:
     double calculateTotalRevenue();
     vector<Doctor*> getAvailableDoctors(string day, string shift);
     int prescribeMedicineFromQT(string recordId, string medId, string dosage, int qty);
+    // Cấp phát và trừ tồn kho sau khi kho xác nhận.
     int dispensePrescriptionFromQT(string recordId, string medicineId);
     int createInvoiceFromQT(string patientId, double& outTotalFee);
     vector<MedicalRecord*> getPatientHistory(string patientId);

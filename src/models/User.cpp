@@ -8,6 +8,7 @@ void User::inputData() {
     cin >> userId;
     cin.ignore();
     
+    // Bắt nhập lại cho đến khi username đúng quy tắc dùng chung.
     do {
         cout << "Nhap Username (3-32 ky tu khong dau, chi dung chu, so, ., _ hoac -): ";
         getline(cin, username);
