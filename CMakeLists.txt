@@ -31,6 +31,17 @@ if(BUILD_TESTING)
     add_executable(PBL2_AlgorithmTests tests/algorithm_smoke.cpp)
     target_include_directories(PBL2_AlgorithmTests PRIVATE include)
     add_test(NAME PBL2_AlgorithmTests COMMAND PBL2_AlgorithmTests)
+
+    file(GLOB_RECURSE MODEL_SOURCE_FILES CONFIGURE_DEPENDS "src/models/*.cpp")
+    add_executable(PBL2_WorkflowTests
+        tests/workflow_smoke.cpp
+        src/services/Database.cpp
+        src/services/DatabaseManagement.cpp
+        src/services/DatabaseWorkflow.cpp
+        ${MODEL_SOURCE_FILES}
+    )
+    target_include_directories(PBL2_WorkflowTests PRIVATE include)
+    add_test(NAME PBL2_WorkflowTests COMMAND PBL2_WorkflowTests)
 endif()
 
 # Tự động copy thư mục "data" từ thư mục gốc vào thư mục chứa file chạy (.exe) mỗi khi Build
