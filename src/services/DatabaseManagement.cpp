@@ -1,4 +1,6 @@
 #include "services/Database.h"
+#include "utils/Constants.h"
+#include <cmath>
 #include <iostream>
 #include <string>
 #include <vector>
@@ -169,7 +171,8 @@ int Database::addDoctorWithAccount(string id, string name, string dob, string ge
                                    string specialty, int expYears, string username, string plainPassword,
                                    string workDay, string workShift) {
     if (id.empty() || name.empty() || dob.empty() || gender.empty() || phone.empty() ||
-        specialty.empty() || expYears < 0 || !User::isValidUsername(username) || plainPassword.empty() ||
+        !Constants::isMedicalSpecialty(specialty) || expYears < 0 ||
+        !User::isValidUsername(username) || plainPassword.empty() ||
         workDay.empty() || workShift.empty() || doctors.search(id) != nullptr ||
         users.search(id) != nullptr) return -1;
     vector<User*> allUsers = users.getAllPointers();
@@ -186,7 +189,9 @@ int Database::addDoctorWithAccount(string id, string name, string dob, string ge
 }
 
 int Database::addMedicineFromQT(string prefix, string medicineName, double unitPrice, string dosage, int addQty, string& outId) {
-    if (medicineName.empty() || unitPrice < 0.0 || addQty <= 0) return -2;
+    if ((prefix != "B1" && prefix != "B2" && prefix != "B3" && prefix != "DV") ||
+        medicineName.empty() || dosage.empty() || !std::isfinite(unitPrice) ||
+        unitPrice < 0.0 || addQty <= 0) return -2;
     vector<Medicine*> allMeds = medicines.getAllPointers();
     for (auto med : allMeds) {
         if (med->getMedicineName() == medicineName) {
@@ -203,7 +208,8 @@ int Database::addMedicineFromQT(string prefix, string medicineName, double unitP
 }
 
 int Database::addServiceFromQT(string prefix, string name, double price, string& outId) {
-    if (name.empty() || price < 0.0) return -2;
+    if ((prefix != "S1" && prefix != "S2" && prefix != "S3") ||
+        name.empty() || !std::isfinite(price) || price < 0.0) return -2;
     vector<Service*> allSrv = services.getAllPointers();
     for (auto srv : allSrv) {
         if (srv->getServiceName() == name) {

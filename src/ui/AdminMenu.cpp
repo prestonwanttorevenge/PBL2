@@ -2,6 +2,7 @@
 #include "ui_AdminMenu.h"
 #include "ui/Login.h"
 #include "ui/ClinicStyle.h"
+#include "utils/Constants.h"
 #include <QMessageBox>
 #include <QTableWidgetItem>
 #include <QRegularExpressionValidator>
@@ -125,22 +126,10 @@ AdminMenu::AdminMenu(Database& database, AuthService& authService, QWidget *pare
     ui->txtUsername->setPlaceholderText(QString::fromUtf8("Tài khoản không dấu"));
     ui->txtDocUsername->setPlaceholderText(QString::fromUtf8("Tài khoản không dấu"));
 
-    QStringList specialties = {
-        QString::fromUtf8("Khoa Khám bệnh"),
-        QString::fromUtf8("Khoa Hồi sức cấp cứu"),
-        QString::fromUtf8("Khoa Nội tổng hợp"),
-        QString::fromUtf8("Khoa Truyền nhiễm"),
-        QString::fromUtf8("Khoa Nhi"),
-        QString::fromUtf8("Khoa Ngoại tổng hợp"),
-        QString::fromUtf8("Khoa Phụ sản"),
-        QString::fromUtf8("Liên chuyên khoa (Tai - Mũi - Họng, Răng - Hàm - Mặt, Mắt)"),
-        QString::fromUtf8("Khoa Xét nghiệm (Huyết học, Hóa sinh, Vi sinh)"),
-        QString::fromUtf8("Khoa Chẩn đoán hình ảnh"),
-        QString::fromUtf8("Khoa Giải phẫu bệnh"),
-        QString::fromUtf8("Khoa Chống nhiễm khuẩn"),
-        QString::fromUtf8("Khoa Dược"),
-        QString::fromUtf8("Khoa Dinh dưỡng")
-    };
+    QStringList specialties;
+    for (const string& specialty : Constants::medicalSpecialties()) {
+        specialties.append(QString::fromUtf8(specialty.c_str()));
+    }
     ui->cbDocSpecialty->addItems(specialties);
     ui->cbDocWorkDay->addItems({
         QString::fromUtf8("Thứ 2"), QString::fromUtf8("Thứ 3"),

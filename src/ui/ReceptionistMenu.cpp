@@ -3,6 +3,7 @@
 #include "services/Database.h"
 #include "ui/Login.h"
 #include "ui/ClinicStyle.h"
+#include "utils/Constants.h"
 #include <QMessageBox>
 #include <QTableWidgetItem>
 #include <QComboBox>
@@ -59,22 +60,10 @@ ReceptionistMenu::ReceptionistMenu(Database& database, AuthService& authService,
     QValidator *validator = new QRegularExpressionValidator(rx, this);
     ui->txtPatientPhone->setValidator(validator);
 
-    QStringList specialties = {
-        QString::fromUtf8("Khoa Khám bệnh"),
-        QString::fromUtf8("Khoa Hồi sức cấp cứu"),
-        QString::fromUtf8("Khoa Nội tổng hợp"),
-        QString::fromUtf8("Khoa Truyền nhiễm"),
-        QString::fromUtf8("Khoa Nhi"),
-        QString::fromUtf8("Khoa Ngoại tổng hợp"),
-        QString::fromUtf8("Khoa Phụ sản"),
-        QString::fromUtf8("Liên chuyên khoa (Tai - Mũi - Họng, Răng - Hàm - Mặt, Mắt)"),
-        QString::fromUtf8("Khoa Xét nghiệm (Huyết học, Hóa sinh, Vi sinh)"),
-        QString::fromUtf8("Khoa Chẩn đoán hình ảnh"),
-        QString::fromUtf8("Khoa Giải phẫu bệnh"),
-        QString::fromUtf8("Khoa Chống nhiễm khuẩn"),
-        QString::fromUtf8("Khoa Dược"),
-        QString::fromUtf8("Khoa Dinh dưỡng")
-    };
+    QStringList specialties;
+    for (const string& specialty : Constants::medicalSpecialties()) {
+        specialties.append(QString::fromUtf8(specialty.c_str()));
+    }
     ui->cbSpecialty->addItems(specialties);
 
     // KẾT NỐI TÍN HIỆU (SIGNALS & SLOTS)
