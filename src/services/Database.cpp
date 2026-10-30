@@ -6,6 +6,29 @@
 #include <iomanip> 
 #include <cctype>
 #include <cstdio>
+#include <ctime>
+
+namespace {
+// Ghi qua file tạm rồi mới thay file thật, tránh mất dữ liệu khi ghi lỗi giữa chừng.
+void commitTempFile(const string& path) {
+    std::remove(path.c_str());
+    std::rename((path + ".tmp").c_str(), path.c_str());
+}
+
+void discardTempFile(const string& path) {
+    std::remove((path + ".tmp").c_str());
+}
+
+int parseDateKey(const string& date) {
+    if (date.size() != 10 || date[2] != '/' || date[5] != '/') return 0;
+    try {
+        return stoi(date.substr(6, 4)) * 10000 + stoi(date.substr(3, 2)) * 100 +
+               stoi(date.substr(0, 2));
+    } catch (...) {
+        return 0;
+    }
+}
+}
 
 Database::Database() {
 }
@@ -18,8 +41,11 @@ Database::~Database() {
 }
 void Database::sanitizeInput(string& input) {
     for (size_t i = 0; i < input.length(); i++) {
+        // Dấu ';' và ký tự xuống dòng sẽ làm lệch cột/dòng CSV.
         if (input[i] == ';') {
             input[i] = ',';
+        } else if (input[i] == '\n' || input[i] == '\r') {
+            input[i] = ' ';
         }
     }
 }
@@ -133,6 +159,8 @@ void Database::loadAllData() {
 
     std::ifstream fSched(doctorScheduleFile);
     if (fSched.is_open()) {
+        // Nạp lại nhiều lần không được nhân đôi lịch trực.
+        for (Doctor* existingDoctor : doctors.getAllPointers()) existingDoctor->clearSchedule();
         std::string line;
         while (std::getline(fSched, line)) {
             if (line.empty()) continue;
@@ -382,6 +410,25 @@ void Database::loadAllData() {
             appointments.push_back(Appointment(aId, pId, dId, rId, spec, day, time, status, date));
         }
         fAppt.close();
+
+        // Chuẩn hóa dữ liệu cũ: lịch tương lai chưa check-in phải là Scheduled;
+        // lịch đã quá ngày mà bệnh nhân không đến thì tự hủy để không chặn hàng đợi.
+        const time_t now = time(nullptr);
+        const tm* localNow = localtime(&now);
+        if (localNow != nullptr) {
+            const int todayKey = (localNow->tm_year + 1900) * 10000 +
+                                 (localNow->tm_mon + 1) * 100 + localNow->tm_mday;
+            for (Appointment& appointment : appointments) {
+                const int dateKey = parseDateKey(appointment.getAppointmentDate());
+                if (dateKey == 0) continue;
+                if (appointment.getStatus() == "Pending" && dateKey > todayKey) {
+                    appointment.setStatus("Scheduled");
+                } else if ((appointment.getStatus() == "Pending" ||
+                            appointment.getStatus() == "Scheduled") && dateKey < todayKey) {
+                    appointment.setStatus("Canceled");
+                }
+            }
+        }
     }
 
     ifstream fMedRec(medicalRecordFile);
@@ -490,7 +537,7 @@ void Database::saveAllData() {
         users.insert("ADMIN01", defaultAdmin);
     }
 
-    ofstream fsrv(serviceFile);
+    ofstream fsrv(serviceFile + ".tmp");
     if (fsrv.is_open()) {
         vector<Service*> allSrv = services.getAllPointers();
         for (size_t i = 0; i < allSrv.size(); i++) {
@@ -498,10 +545,12 @@ void Database::saveAllData() {
                  << allSrv[i]->getServiceName() << ";"
                  << allSrv[i]->getPrice() << "\n";
         }
+        const bool ok = fsrv.good();
         fsrv.close();
+        if (ok) commitTempFile(serviceFile); else discardTempFile(serviceFile);
     }
 
-    ofstream fappt(appointmentFile);
+    ofstream fappt(appointmentFile + ".tmp");
     if (fappt.is_open()) {
         for (const auto& appt : appointments){
             fappt << appt.getAppointmentId() << ";"
@@ -514,10 +563,12 @@ void Database::saveAllData() {
                   << appt.getStatus() << ";"
                   << appt.getAppointmentDate() << "\n";
         }
+        const bool ok = fappt.good();
         fappt.close();
+        if (ok) commitTempFile(appointmentFile); else discardTempFile(appointmentFile);
     }
 
-    ofstream fmed(medicineFile);
+    ofstream fmed(medicineFile + ".tmp");
     if (fmed.is_open()) {
         vector<Medicine*> allMed = medicines.getAllPointers();
         for (size_t i = 0; i < allMed.size(); i++) {
@@ -527,11 +578,13 @@ void Database::saveAllData() {
                  << allMed[i]->getDosage() << ";"
                  << allMed[i]->getStock() << "\n";
         }
+        const bool ok = fmed.good();
         fmed.close();
+        if (ok) commitTempFile(medicineFile); else discardTempFile(medicineFile);
     }
 
-    ofstream fMedRec(medicalRecordFile);
-    ofstream fPresc(prescriptionDetailFile); 
+    ofstream fMedRec(medicalRecordFile + ".tmp");
+    ofstream fPresc(prescriptionDetailFile + ".tmp");
 
     if (fMedRec.is_open() && fPresc.is_open()) {
         for (const auto& record : medicalRecords) {
@@ -555,12 +608,25 @@ void Database::saveAllData() {
                        << (rx.dispensed ? "1" : "0") << "\n";
             }
         }
+        const bool ok = fMedRec.good() && fPresc.good();
         fMedRec.close();
         fPresc.close();
+        if (ok) {
+            commitTempFile(medicalRecordFile);
+            commitTempFile(prescriptionDetailFile);
+        } else {
+            discardTempFile(medicalRecordFile);
+            discardTempFile(prescriptionDetailFile);
+        }
+    } else {
+        fMedRec.close();
+        fPresc.close();
+        discardTempFile(medicalRecordFile);
+        discardTempFile(prescriptionDetailFile);
     }
 
-    std::ofstream fDoc(doctorFile);
-    std::ofstream fSched(doctorScheduleFile); 
+    std::ofstream fDoc(doctorFile + ".tmp");
+    std::ofstream fSched(doctorScheduleFile + ".tmp");
 
     if (fDoc.is_open() && fSched.is_open()) {
         vector<Doctor*> allDocs = doctors.getAllPointers();
@@ -581,11 +647,24 @@ void Database::saveAllData() {
                        << sched[j].timeSlot << "\n";
             }
         }
+        const bool ok = fDoc.good() && fSched.good();
         fDoc.close();
         fSched.close();
+        if (ok) {
+            commitTempFile(doctorFile);
+            commitTempFile(doctorScheduleFile);
+        } else {
+            discardTempFile(doctorFile);
+            discardTempFile(doctorScheduleFile);
+        }
+    } else {
+        fDoc.close();
+        fSched.close();
+        discardTempFile(doctorFile);
+        discardTempFile(doctorScheduleFile);
     }
 
-    ofstream fUser(userFile);
+    ofstream fUser(userFile + ".tmp");
     if (fUser.is_open()) {
         vector<User*> allUsers = users.getAllPointers();
         for (size_t i = 0; i < allUsers.size(); i++) {
@@ -596,11 +675,12 @@ void Database::saveAllData() {
                   << allUsers[i]->getRole() << ";"
                   << (allUsers[i]->getIsActive() ? "1" : "0") << "\n";
         }
+        const bool ok = fUser.good();
         fUser.close();
-
+        if (ok) commitTempFile(userFile); else discardTempFile(userFile);
     }
 
-    ofstream fPat(patientFile);
+    ofstream fPat(patientFile + ".tmp");
     if (fPat.is_open()) {
         vector<Patient**> allPats = patients.getAllPointers();
         for (size_t i = 0; i < allPats.size(); i++) {
@@ -633,11 +713,13 @@ void Database::saveAllData() {
                      << outpat->getClinicRoom() << "\n";
             }
         }
+        const bool ok = fPat.good();
         fPat.close();
+        if (ok) commitTempFile(patientFile); else discardTempFile(patientFile);
     }
 
-    ofstream fInv(invoiceFile);
-    ofstream fInvDetail(invoiceDetailsFile);
+    ofstream fInv(invoiceFile + ".tmp");
+    ofstream fInvDetail(invoiceDetailsFile + ".tmp");
 
     if (fInv.is_open() && fInvDetail.is_open()) {
         for (const auto& inv : invoices) {
@@ -654,7 +736,20 @@ void Database::saveAllData() {
                            << detail.getUnitPrice() << "\n";
             }
         }
+        const bool ok = fInv.good() && fInvDetail.good();
         fInv.close();
         fInvDetail.close();
+        if (ok) {
+            commitTempFile(invoiceFile);
+            commitTempFile(invoiceDetailsFile);
+        } else {
+            discardTempFile(invoiceFile);
+            discardTempFile(invoiceDetailsFile);
+        }
+    } else {
+        fInv.close();
+        fInvDetail.close();
+        discardTempFile(invoiceFile);
+        discardTempFile(invoiceDetailsFile);
     }
 }

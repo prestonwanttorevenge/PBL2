@@ -370,8 +370,16 @@ void DoctorMenu::on_btnCancelAppointment_clicked() {
             QMessageBox::warning(this, "Đang thực hiện",
                                  "Không thể hủy lịch khi bệnh nhân đang chờ kết quả cận lâm sàng.");
         } else if (result == -5) {
-            QMessageBox::warning(this, "Đang chờ cấp thuốc",
-                                 "Không thể hủy lượt khám khi đơn thuốc vẫn đang chờ Inventory cấp.");
+            const auto abandon = QMessageBox::question(this, "Đang chờ cấp thuốc",
+                "Không thể hủy lượt khám khi đơn thuốc đang chờ Inventory cấp.\n"
+                "Bệnh nhân không nhận phần thuốc chưa cấp? Bỏ các dòng thuốc chưa cấp và kết thúc lượt khám.",
+                QMessageBox::Yes | QMessageBox::No);
+            if (abandon == QMessageBox::Yes &&
+                db.abandonUndispensedPrescriptionsFromQT(apptId) >= 0) {
+                QMessageBox::information(this, "Thành công",
+                                         "Đã bỏ phần thuốc chưa cấp. Lượt khám chuyển sang hoàn tất.");
+                loadPatientQueue();
+            }
         }
     }
 }
@@ -391,10 +399,11 @@ void DoctorMenu::on_btnAssignService_clicked() {
         return;
     }
 
-    record->setSymptoms(ui->txtSymptoms->text().toStdString());
-    record->setDiagnosis(ui->txtDiagnosis->text().toStdString());
-    record->setNotes(ui->txtNotes->text().toStdString());
-    int result = db.assignServiceFromQT(recordId, serviceId);
+    // Database chỉ ghi nội dung bệnh án sau khi chỉ định hợp lệ.
+    int result = db.assignServiceFromQT(recordId, serviceId,
+                                        ui->txtSymptoms->text().toStdString(),
+                                        ui->txtDiagnosis->text().toStdString(),
+                                        ui->txtNotes->text().toStdString());
 
     if (result == 1) {
         QMessageBox::information(this, "Đã thêm dịch vụ",

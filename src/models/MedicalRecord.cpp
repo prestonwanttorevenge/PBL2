@@ -62,3 +62,16 @@ bool MedicalRecord::markMedicineDispensed(const std::string& medicineId) {
     }
     return false;
 }
+
+int MedicalRecord::removeUndispensedPrescriptions() {
+    int removed = 0;
+    for (auto it = prescriptions.begin(); it != prescriptions.end();) {
+        if (!it->dispensed) {
+            it = prescriptions.erase(it);
+            ++removed;
+        } else {
+            ++it;
+        }
+    }
+    return removed;
+}

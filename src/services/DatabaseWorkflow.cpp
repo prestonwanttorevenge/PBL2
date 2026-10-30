@@ -50,6 +50,11 @@ bool isTodayOrFutureDate(int dateKey) {
 
 bool Database::addPatientFromGUI(string name, string dob, string gender, string phone,
                                  string BH, bool isNoiTru, string admissionDate) {
+    sanitizeInput(name);
+    sanitizeInput(dob);
+    sanitizeInput(gender);
+    sanitizeInput(BH);
+    sanitizeInput(admissionDate);
     if (name.empty() || dob.empty() || gender.empty() || phone.size() < 10 || phone.size() > 11) {
         return false;
     }
@@ -71,6 +76,10 @@ int Database::bookAppointmentFromQT(string patientId, string doctorId, string re
     if (findPatientById(patientId) == nullptr) return -1; 
     Doctor* doc = findDoctorById(doctorId);
     if (doc == nullptr) return -2; 
+    // Tài khoản bác sĩ đã bị khóa thì không nhận thêm lịch hẹn.
+    User* doctorAccount = users.search(doctorId);
+    if (doctorAccount != nullptr && !doctorAccount->getIsActive()) return -2;
+    sanitizeInput(receptionistId);
     string actualWeekday;
     int appointmentDateKey = 0;
     if (!getWeekdayFromDate(appointmentDate, actualWeekday, appointmentDateKey) ||
@@ -98,7 +107,7 @@ int Database::bookAppointmentFromQT(string patientId, string doctorId, string re
 
     string newAppId = generateAppointmentId(); 
     appointments.push_back(Appointment(newAppId, patientId, doctorId, receptionistId,
-                                       specialty, day, time, "Pending", appointmentDate));
+                                       specialty, day, time, "Scheduled", appointmentDate));
 
     string newRecordId = generateMedicalRecordId(); 
     medicalRecords.push_back(MedicalRecord(newRecordId, newAppId, "", "", ""));
@@ -114,11 +123,18 @@ int Database::checkInAppointmentFromQT(const string& appointmentId, const string
     // Chỉ check-in đúng ngày đã đặt.
     if (appointment->getAppointmentDate() != currentDate) return -3;
     appointment->setStatus("Pending");
+    // Đưa lượt vừa check-in xuống cuối danh sách để thứ tự hàng đợi = thứ tự đến.
+    const size_t index = static_cast<size_t>(appointment - &appointments[0]);
+    std::rotate(appointments.begin() + index, appointments.begin() + index + 1,
+                appointments.end());
     saveAllData();
     return 1;
 }
 
 string Database::updateMedicalRecordFromQT(string apptId, string symp, string diag, string notes, string status) {
+    sanitizeInput(symp);
+    sanitizeInput(diag);
+    sanitizeInput(notes);
     Appointment* appt = findAppointmentById(apptId);
     if (appt == nullptr) return "";
     if (diag.empty() || (status != "Completed" && status != "Waiting") ||
@@ -166,6 +182,33 @@ int Database::assignServiceFromQT(string recordId, string serviceId) {
     return 1;
 }
 
+int Database::assignServiceFromQT(string recordId, string serviceId, string symp,
+                                  string diag, string notes) {
+    MedicalRecord* record = findMedicalRecordById(recordId);
+    if (record == nullptr) return -1;
+    sanitizeInput(symp);
+    sanitizeInput(diag);
+    sanitizeInput(notes);
+
+    // Chỉ giữ nội dung mới khi chỉ định thành công; thất bại thì khôi phục bệnh án.
+    const string oldSymptoms = record->getSymptoms();
+    const string oldDiagnosis = record->getDiagnosis();
+    const string oldNotes = record->getNotes();
+    record->setSymptoms(symp);
+    record->setDiagnosis(diag);
+    record->setNotes(notes);
+
+    const int result = assignServiceFromQT(recordId, serviceId);
+    if (result == 1) {
+        saveAllData();
+    } else {
+        record->setSymptoms(oldSymptoms);
+        record->setDiagnosis(oldDiagnosis);
+        record->setNotes(oldNotes);
+    }
+    return result;
+}
+
 double Database::calculateTotalRevenue() {
     double total = 0.0;
     for (const Invoice& invoice : invoices) {
@@ -178,6 +221,8 @@ vector<Doctor*> Database::getAvailableDoctors(string day, string shift) {
     vector<Doctor*> availableDocs;
     vector<Doctor*> allDocs = doctors.getAllPointers();
     for (size_t i = 0; i < allDocs.size(); i++) {
+        User* account = users.search(allDocs[i]->getId());
+        if (account != nullptr && !account->getIsActive()) continue;
         for (const auto& w : allDocs[i]->getSchedule()) {
             if (w.dayOfWeek == day && w.timeSlot == shift) {
                 availableDocs.push_back(allDocs[i]);
@@ -193,8 +238,16 @@ int Database::prescribeMedicineFromQT(string recordId, string medId, string dosa
     if (record == nullptr) return -1;
     Medicine* med = findMedicineById(medId);
     if (med == nullptr) return -2;
+    sanitizeInput(dosage);
     if (qty <= 0 || dosage.empty()) return -4;
-    if (med->getStock() < qty) return -3;
+    // Trừ phần thuốc đã được các đơn khác giữ chỗ nhưng chưa cấp phát.
+    int reservedQty = 0;
+    for (const MedicalRecord& other : medicalRecords) {
+        for (const PrescriptionDetail& rx : other.getPrescriptions()) {
+            if (!rx.dispensed && rx.medicineId == medId) reservedQty += rx.quantity;
+        }
+    }
+    if (med->getStock() - reservedQty < qty) return -3;
     Appointment* appointment = findAppointmentById(record->getAppointmentId());
     if (appointment == nullptr ||
         (appointment->getStatus() != "Waiting" &&
@@ -243,6 +296,21 @@ int Database::dispensePrescriptionFromQT(string recordId, string medicineId) {
     }
     saveAllData();
     return 1;
+}
+
+// Bệnh nhân không nhận phần thuốc còn lại: bỏ các dòng chưa cấp để lượt khám không bị kẹt.
+int Database::abandonUndispensedPrescriptionsFromQT(string apptId) {
+    Appointment* appointment = findAppointmentById(apptId);
+    if (appointment == nullptr) return -1;
+    if (appointment->getStatus() != "WaitingInventory") return -2;
+    for (MedicalRecord& record : medicalRecords) {
+        if (record.getAppointmentId() != apptId) continue;
+        const int removed = record.removeUndispensedPrescriptions();
+        appointment->setStatus("Completed");
+        saveAllData();
+        return removed;
+    }
+    return -1;
 }
 
 int Database::createInvoiceFromQT(string patientId, double& outTotalFee) {
@@ -352,14 +420,14 @@ int Database::createInvoiceFromQT(string patientId, double& outTotalFee) {
     if (!hasConsultationService && !consultationServiceId.empty()) {
         serviceIds.insert(serviceIds.begin(), consultationServiceId);
     }
-    if (serviceIds.empty()) {
-        serviceIds.push_back(consultationServiceId.empty() ? "S1_001" : consultationServiceId);
-    }
+    // Chưa cấu hình phí khám trong danh mục dịch vụ thì không được tự bịa giá.
+    if (serviceIds.empty()) return -6;
 
     int detailNumber = 1;
     for (const string& serviceId : serviceIds) {
         Service* service = services.search(serviceId);
-        const double listedPrice = service == nullptr ? 100000.0 : service->getPrice();
+        if (service == nullptr) return -6;
+        const double listedPrice = service->getPrice();
         const string prefix = serviceId.substr(0, serviceId.find('_'));
         double patientPrice = listedPrice;
         if (isBHYT && prefix == "S1") {
@@ -406,6 +474,14 @@ int Database::cancelAppointmentFromQT(string apptId) {
     if (appt->getStatus() == "WaitingInventory") return -5;
     if (appt->getStatus() == "Canceled" || appt->getStatus() == "Cancelled") return -4;
     appt->setStatus("Canceled");
+    for (auto it = medicalRecords.begin(); it != medicalRecords.end(); ++it) {
+        if (it->getAppointmentId() == apptId && it->getDiagnosis().empty() &&
+            it->getSymptoms().empty() && it->getNotes().empty() &&
+            it->getAssignedServices().empty() && it->getPrescriptions().empty()) {
+            medicalRecords.erase(it);
+            break;
+        }
+    }
     saveAllData(); 
     return 1; 
 }
