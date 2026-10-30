@@ -107,12 +107,16 @@ public:
                              string workDay, string workShift);
     int addMedicineFromQT(string prefix, string medicineName, double unitPrice, string dosage, int addQty, string& outId);
     int assignServiceFromQT(string recordId, string serviceId);
+    // Bản đầy đủ: chỉ ghi triệu chứng/chẩn đoán/ghi chú khi chỉ định hợp lệ rồi lưu file.
+    int assignServiceFromQT(string recordId, string serviceId, string symp, string diag, string notes);
     int addServiceFromQT(string prefix, string name, double price, string& outId);
     double calculateTotalRevenue();
     vector<Doctor*> getAvailableDoctors(string day, string shift);
     int prescribeMedicineFromQT(string recordId, string medId, string dosage, int qty);
     // Cấp phát và trừ tồn kho sau khi kho xác nhận.
     int dispensePrescriptionFromQT(string recordId, string medicineId);
+    // Bỏ các dòng thuốc chưa cấp (bệnh nhân không nhận) và kết thúc lượt chờ kho.
+    int abandonUndispensedPrescriptionsFromQT(string apptId);
     int createInvoiceFromQT(string patientId, double& outTotalFee);
     vector<MedicalRecord*> getPatientHistory(string patientId);
     int cancelAppointmentFromQT(string apptId);
