@@ -98,7 +98,7 @@ int Database::bookAppointmentFromQT(string patientId, string doctorId, string re
 
     string newAppId = generateAppointmentId(); 
     appointments.push_back(Appointment(newAppId, patientId, doctorId, receptionistId,
-                                       specialty, day, time, "Scheduled", appointmentDate));
+                                       specialty, day, time, "Pending", appointmentDate));
 
     string newRecordId = generateMedicalRecordId(); 
     medicalRecords.push_back(MedicalRecord(newRecordId, newAppId, "", "", ""));

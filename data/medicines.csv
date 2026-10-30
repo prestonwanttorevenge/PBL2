@@ -1,4 +1,4 @@
-B1_001;Paracetamol 500mg;1500;1-2 viên/lần, ngày 3 lần;585
+B1_001;Paracetamol 500mg;1500;1-2 viên/lần, ngày 3 lần;580
 B1_002;Paracetamol 650mg;2000;1 viên/lần, cách 4-6 giờ;148
 B1_003;Amoxicillin 500mg;3000;1 viên/lần, ngày 2-3 lần;112
 B1_004;Ibuprofen 400mg;2500;1 viên/lần, ngày 2 lần sau ăn;479
@@ -195,7 +195,7 @@ DV_043;Nước muối sinh lý NaCl 0.9% 500ml;10000;Súc miệng hoặc rửa v
 DV_044;Băng cá nhân Urgo Transparent Hộp 100 miếng;75000;Dán bảo vệ vết thương nhỏ;119
 DV_045;Băng gạc tiệt trùng Đông Tín 10x10cm;15000;Đắp lên vết thương trước khi quấn băng;130
 DV_046;Kẹo ngậm Strepsils Cool Hộp 100 viên;180000;Ngậm 1 viên cách mỗi 2-3 giờ;161
-DV_047;Kẹo ngậm Bảo Thanh Hộp 100 viên;140000;Ngậm 1 viên khi bị ho, đau họng;170
+DV_047;Kẹo ngậm Bảo Thanh Hộp 100 viên;140000;Ngậm 1 viên khi bị ho, đau họng;150
 DV_048;Sữa bột Ensure Gold 850g;820000;Pha 6 muỗng gạt vào 195ml nước ấm;177
 DV_049;Sữa bột Glucerna 850g cho người tiểu đường;890000;Pha 5 muỗng gạt vào 200ml nước ấm;69
 DV_050;Yến chưng sẵn Sanest Khánh Hòa Hộp 6 lọ;290000;Uống 1-2 lọ/ngày bổ dưỡng;189
