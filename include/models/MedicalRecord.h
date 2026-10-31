@@ -48,6 +48,7 @@ public:
     bool hasMedicine(const std::string& medicineId) const;
     bool isMedicineDispensed(const std::string& medicineId) const;
     bool markMedicineDispensed(const std::string& medicineId);
+    int removeUndispensedPrescriptions();
 };
 
 #endif
