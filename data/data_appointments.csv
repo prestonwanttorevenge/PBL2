@@ -225,4 +225,5 @@ APP0224;BN00204;BS11;RECEP02;Khoa Nội tổng hợp;Thứ 4;Sáng;Billed;28/10/
 APP0225;BN00205;BS13;RECEP02;Khoa Truyền nhiễm;Thứ 4;Chiều;Billed;28/10/2026
 APP0226;BN00196;BS15;RECEP02;Khoa Chẩn đoán hình ảnh;Thứ 4;Chiều;Pending;28/10/2026
 APP0227;BN00206;BS30;RECEP02;Liên chuyên khoa (Tai - Mũi - Họng, Răng - Hàm - Mặt, Mắt);Thứ 4;Sáng;Pending;28/10/2026
-APP0228;BN00207;BS36;RECEP02;Khoa Phụ sản;Thứ 6;Tối;Completed;30/10/2026
+APP0228;BN00207;BS36;RECEP02;Khoa Phụ sản;Thứ 6;Tối;Billed;30/10/2026
+APP0229;BN00208;BS17;RECEP02;Khoa Xét nghiệm (Huyết học, Hóa sinh, Vi sinh);Thứ 7;Chiều;Completed;31/10/2026
