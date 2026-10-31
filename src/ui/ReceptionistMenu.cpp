@@ -314,6 +314,10 @@ void ReceptionistMenu::on_btnCreateInvoice_clicked() {
         QMessageBox::warning(this, QString::fromUtf8("Chờ cấp phát"),
                              QString::fromUtf8("Cần cấp phát đủ thuốc theo đơn trước khi lập hóa đơn."));
     }
+    else if (result == -6) {
+        QMessageBox::warning(this, QString::fromUtf8("Thiếu danh mục dịch vụ"),
+                             QString::fromUtf8("Dịch vụ/phí khám chưa được cấu hình trong danh mục. Liên hệ Admin."));
+    }
 }
 
 void ReceptionistMenu::on_btnSearchPatient_clicked() {

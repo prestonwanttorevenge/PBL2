@@ -155,6 +155,9 @@ User* Database::loginFromQT(string username, string password) {
 }
 
 int Database::addUserFromQT(string id, string username, string plainPassword, string fullName, string role) {
+    sanitizeInput(id);
+    sanitizeInput(fullName);
+    sanitizeInput(role);
     if (id.empty() || !User::isValidUsername(username) || plainPassword.empty() || fullName.empty() ||
         users.search(id) != nullptr) return -1;
     vector<User*> allUsers = users.getAllPointers();
@@ -170,6 +173,13 @@ int Database::addUserFromQT(string id, string username, string plainPassword, st
 int Database::addDoctorWithAccount(string id, string name, string dob, string gender, string phone,
                                    string specialty, int expYears, string username, string plainPassword,
                                    string workDay, string workShift) {
+    sanitizeInput(id);
+    sanitizeInput(name);
+    sanitizeInput(dob);
+    sanitizeInput(gender);
+    sanitizeInput(phone);
+    sanitizeInput(workDay);
+    sanitizeInput(workShift);
     if (id.empty() || name.empty() || dob.empty() || gender.empty() || phone.empty() ||
         !Constants::isMedicalSpecialty(specialty) || expYears < 0 ||
         !User::isValidUsername(username) || plainPassword.empty() ||
@@ -189,6 +199,8 @@ int Database::addDoctorWithAccount(string id, string name, string dob, string ge
 }
 
 int Database::addMedicineFromQT(string prefix, string medicineName, double unitPrice, string dosage, int addQty, string& outId) {
+    sanitizeInput(medicineName);
+    sanitizeInput(dosage);
     if ((prefix != "B1" && prefix != "B2" && prefix != "B3" && prefix != "DV") ||
         medicineName.empty() || dosage.empty() || !std::isfinite(unitPrice) ||
         unitPrice < 0.0 || addQty <= 0) return -2;
@@ -208,6 +220,7 @@ int Database::addMedicineFromQT(string prefix, string medicineName, double unitP
 }
 
 int Database::addServiceFromQT(string prefix, string name, double price, string& outId) {
+    sanitizeInput(name);
     if ((prefix != "S1" && prefix != "S2" && prefix != "S3") ||
         name.empty() || !std::isfinite(price) || price < 0.0) return -2;
     vector<Service*> allSrv = services.getAllPointers();
@@ -242,6 +255,19 @@ void Database::deleteMedicine(string id) {
 void Database::deletePatient(string id) {
     Patient* pat = findPatientById(id);
     if (pat != nullptr) {
+        // Không xóa bệnh nhân đã có lịch hẹn/hóa đơn để tránh bản ghi mồ côi.
+        for (const Appointment& appt : appointments) {
+            if (appt.getPatientId() == id) {
+                cout << "Loi: Benh nhan da co lich hen/benh an, khong the xoa!\n";
+                return;
+            }
+        }
+        for (const Invoice& invoice : invoices) {
+            if (invoice.getPatientId() == id) {
+                cout << "Loi: Benh nhan da co hoa don, khong the xoa!\n";
+                return;
+            }
+        }
         delete pat; 
         patients.remove(id); 
         cout << "=> Da xoa Benh nhan thanh cong!\n";
@@ -439,6 +465,10 @@ void Database::addMedicine() {
         getline(cin, addQtyStr);
         int addQty = 0;
         try { addQty = stoi(addQtyStr); } catch (...) {}
+        if (addQty <= 0) {
+            cout << "Loi: So luong nhap them phai lon hon 0!\n";
+            return;
+        }
 
         existingMed->setStock(existingMed->getStock() + addQty);
         cout << "=> Da cap nhat so luong ton kho thanh cong!\n";
