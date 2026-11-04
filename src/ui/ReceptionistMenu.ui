@@ -74,7 +74,7 @@
          <layout class="QVBoxLayout" name="layoutCheckIn">
           <property name="spacing"><number>12</number></property>
           <item><widget class="QLabel" name="lblCheckInHint"><property name="text"><string>Xác nhận lịch hẹn trong đúng ngày khám. Hóa đơn chỉ lập sau khi hoàn tất quy trình khám và cấp thuốc.</string></property><property name="wordWrap"><bool>true</bool></property><property name="styleSheet"><string>color: #64748b;</string></property></widget></item>
-          <item><widget class="QComboBox" name="cbPendingAppointments"/></item>
+          <item><widget class="SearchableComboBox" name="cbPendingAppointments"/></item>
           <item>
            <layout class="QHBoxLayout" name="layoutCheckInActions">
             <item><widget class="QPushButton" name="btnCheckInAppointment"><property name="text"><string>Xác nhận đến</string></property></widget></item>
@@ -111,4 +111,11 @@
  </widget>
  <resources/>
  <connections/>
+ <customwidgets>
+  <customwidget>
+   <class>SearchableComboBox</class>
+   <extends>QComboBox</extends>
+   <header>ui/SearchableComboBox.h</header>
+  </customwidget>
+ </customwidgets>
 </ui>

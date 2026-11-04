@@ -136,6 +136,7 @@ void DoctorMenu::on_cbMedPrefixFilter_currentTextChanged(const QString &text) {
 
 void DoctorMenu::loadMedicineComboBox(const QString& filterPrefix) {
     ui->cbMedicine->clear();
+    ui->cbMedicine->setPlaceholder("Tìm kiếm hoặc chọn thuốc...");
     vector<Medicine*> meds = db.getMedicines().getAllPointers();
     bool foundAny = false;
 

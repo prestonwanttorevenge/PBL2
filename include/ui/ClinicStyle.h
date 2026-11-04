@@ -39,6 +39,10 @@ inline void applyClinicStyle(QWidget* widget) {
         "QCalendarWidget QToolButton { background: #cceee4; border-radius: 5px; padding: 5px; }"
         "QCalendarWidget QTableView { background: #ffffff; alternate-background-color: #f7f9fc; "
         "selection-background-color: #2563eb; selection-color: #ffffff; }"
+        "QComboBox { combobox-popup: 0; }"
+        "QComboBox QAbstractItemView { background: #ffffff; border: 1px solid #cbd5e1; "
+        "border-radius: 8px; padding: 4px; selection-background-color: #dbeafe; selection-color: #172554; }"
+        "QComboBox QAbstractItemView::item { min-height: 28px; padding: 4px 8px; }"
     ));
 }
 

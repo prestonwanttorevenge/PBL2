@@ -77,6 +77,7 @@ QLineEdit#txtUserId, QLineEdit#txtDocId, QLineEdit#txtMedId, QLineEdit#txtServic
     font-weight: 600;
 }
 
+QComboBox { combobox-popup: 0; }
 QComboBox::drop-down { border: none; width: 20px; }
 QComboBox QAbstractItemView {
     background-color: #FFFFFF;

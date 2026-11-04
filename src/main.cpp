@@ -4,6 +4,7 @@
 #include <QTextStream>
 #include <QDebug>
 #include "ui/Login.h"
+#include "ui/KeyNavigation.h"
 #include "services/Database.h"
 
 // Thư viện phục vụ Benchmark
@@ -116,6 +117,7 @@ void runPerformanceBenchmark() {
 
 int main(int argc, char *argv[]) {
     QApplication a(argc, argv);
+    installGlobalKeyNavigation(&a);
     
     // GỌI CHẠY TEST TẠI ĐÂY
     //runPerformanceBenchmark();
