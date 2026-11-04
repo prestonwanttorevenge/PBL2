@@ -115,6 +115,7 @@ APP0114;BN00093;BS39;RECEP01;Khoa Phụ sản;Thứ 3;Tối;Canceled;27/10/2026
 APP0115;BN00094;BS40;RECEP01;Liên chuyên khoa (Tai - Mũi - Họng, Răng - Hàm - Mặt, Mắt);Thứ 3;Tối;Canceled;27/10/2026
 APP0116;BN00095;BS41;RECEP01;Khoa Khám bệnh;Thứ 5;Sáng;Canceled;29/10/2026
 APP0117;BN00096;BS43;RECEP01;Liên chuyên khoa (Tai - Mũi - Họng, Răng - Hàm - Mặt, Mắt);Thứ 6;Chiều;Canceled;30/10/2026
+APP0117;BN00096;BS43;RECEP01;Liên chuyên khoa (Tai - Mũi - Họng, Răng - Hàm - Mặt, Mắt);Thứ 6;Chiều;Canceled;30/10/2026
 APP0118;BN00097;BS21;RECEP01;Khoa Hồi sức cấp cứu;Thứ 3;Tối;Canceled;27/10/2026
 APP0119;BN00098;BS22;RECEP01;Liên chuyên khoa (Tai - Mũi - Họng, Răng - Hàm - Mặt, Mắt);Thứ 3;Tối;Canceled;27/10/2026
 APP0120;BN00099;BS23;RECEP01;Khoa Hồi sức cấp cứu;Thứ 5;Sáng;Canceled;29/10/2026
@@ -226,7 +227,4 @@ APP0225;BN00205;BS13;RECEP02;Khoa Truyền nhiễm;Thứ 4;Chiều;Billed;28/10/
 APP0226;BN00196;BS15;RECEP02;Khoa Chẩn đoán hình ảnh;Thứ 4;Chiều;Canceled;28/10/2026
 APP0227;BN00206;BS30;RECEP02;Liên chuyên khoa (Tai - Mũi - Họng, Răng - Hàm - Mặt, Mắt);Thứ 4;Sáng;Canceled;28/10/2026
 APP0228;BN00207;BS36;RECEP02;Khoa Phụ sản;Thứ 6;Tối;Completed;30/10/2026
-APP0229;BN00208;BS10;RECEP02;Khoa Hồi sức cấp cứu;Thứ 6;Tối;Canceled;30/10/2026
-APP0230;BN00209;BS14;RECEP02;Khoa Ngoại tổng hợp;Thứ 7;Sáng;Canceled;31/10/2026
-APP0231;BN00208;BS14;RECEP02;Khoa Ngoại tổng hợp;Thứ 7;Sáng;Canceled;31/10/2026
-APP0232;BN00210;BS07;RECEP02;Khoa Nhi;Thứ 7;Sáng;Completed;31/10/2026
+APP0229;BN00208;BS10;RECEP02;Khoa Hồi sức cấp cứu;Thứ 6;Tối;Pending;30/10/2026
