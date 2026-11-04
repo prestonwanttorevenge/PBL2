@@ -344,7 +344,8 @@ void ReceptionistMenu::on_btnSearchPatient_clicked() {
 }
 
 void ReceptionistMenu::loadPendingAppointments() {
-    ui->cbPendingAppointments->clear(); 
+    ui->cbPendingAppointments->clear();
+    ui->cbPendingAppointments->setPlaceholder("Tìm kiếm hoặc chọn lịch hẹn..."); 
     auto& appts = db.getAppointments(); 
     bool hasPending = false;
 
