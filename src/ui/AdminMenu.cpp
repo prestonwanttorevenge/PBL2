@@ -8,12 +8,17 @@
 #include <QRegularExpressionValidator>
 #include <QRegularExpression>
 #include <QPainter>
+#include <QPainterPath>
 #include <QPaintEvent>
+#include <QLinearGradient>
+#include <QFontMetrics>
 #include <QVBoxLayout>
 #include <QHeaderView>
 #include <QSplitter>
 #include <QLocale>
 #include <QDate>
+#include <algorithm>
+#include <cmath>
 #include <string>
 #include <vector>
 
@@ -22,81 +27,330 @@ using std::vector;
 
 class RevenueChart : public QWidget {
 public:
+    static constexpr size_t kMaxRecentInvoices = 8;
+
     explicit RevenueChart(QWidget* parent = nullptr) : QWidget(parent) {
-        setMinimumHeight(110);
-        setMaximumHeight(175);
+        setMinimumSize(330, 280);
     }
 
-    void setData(const vector<double>& values, const vector<QString>& labels) {
-        values_ = values;
-        labels_ = labels;
+    void setData(const vector<double>& recentValues,
+                 const vector<QString>& recentLabels,
+                 const vector<double>& allValues) {
+        values_ = recentValues;
+        labels_ = recentLabels;
+        allValues_ = allValues;
         update();
     }
 
 protected:
     void paintEvent(QPaintEvent*) override {
-        // Vẽ các cột trực tiếp từ dữ liệu hóa đơn gần nhất.
         QPainter painter(this);
         painter.setRenderHint(QPainter::Antialiasing);
         painter.fillRect(rect(), QColor("#ffffff"));
 
-        const QRect plot = rect().adjusted(70, 18, -14, -22);
-        if (values_.empty() || plot.width() <= 0 || plot.height() <= 0) {
+        const QRect content = rect().adjusted(12, 8, -12, -8);
+        if (allValues_.empty() || content.width() <= 0 || content.height() <= 0) {
             painter.setPen(QColor("#64748b"));
-            painter.drawText(rect(), Qt::AlignCenter, QString::fromUtf8("Chưa có hóa đơn để thống kê"));
+            painter.drawText(rect(), Qt::AlignCenter,
+                             QString::fromUtf8("Chưa có hóa đơn để thống kê"));
             return;
         }
 
+        const QLocale vietnamese(QLocale::Vietnamese, QLocale::Vietnam);
+        const int topHeight = std::clamp(static_cast<int>(content.height() * 0.44),
+                                         96, std::max(96, content.height() - 120));
+        const QRect topRect(content.left(), content.top(), content.width(), topHeight - 6);
+        const int dividerY = content.top() + topHeight;
+        const QRect bottomRect(content.left(), dividerY + 6, content.width(),
+                               std::max(0, content.bottom() - (dividerY + 6)));
+
+        drawDonutSection(painter, topRect, vietnamese);
+
+        painter.setPen(QPen(QColor("#e2e8f0"), 1));
+        painter.drawLine(content.left(), dividerY, content.right(), dividerY);
+
+        drawTrendSection(painter, bottomRect, vietnamese);
+    }
+
+private:
+    static constexpr double kTierLowThreshold = 500000.0;
+    static constexpr double kTierHighThreshold = 1000000.0;
+
+    static QString formatShortVnd(double value, const QLocale& locale) {
+        const long long roundedK = std::llround(value / 1000.0);
+        if (value >= kTierHighThreshold || roundedK >= 1000) {
+            return locale.toString(value / 1000000.0, 'f', 1) + QString::fromUtf8(" tr");
+        }
+        if (value >= 1000.0) {
+            return locale.toString(static_cast<double>(roundedK), 'f', 0) + QStringLiteral(" k");
+        }
+        return locale.toString(value, 'f', 0);
+    }
+
+    void drawDonutSection(QPainter& painter, const QRect& rect, const QLocale& locale) const {
+        if (rect.height() < 40) return;
+
+        painter.setFont(QFont(QStringLiteral("Segoe UI"), 9, QFont::DemiBold));
+        painter.setPen(QColor("#1e293b"));
+        painter.drawText(QRect(rect.left(), rect.top(), rect.width(), 20),
+                         Qt::AlignLeft | Qt::AlignVCenter,
+                         QString::fromUtf8("Cơ cấu hóa đơn theo mức thu"));
+
+        const QRect area = rect.adjusted(0, 24, 0, 0);
+        if (area.width() <= 0 || area.height() <= 0) return;
+
+        int counts[3] = {0, 0, 0};
+        double totalSum = 0.0;
+        for (double val : allValues_) {
+            totalSum += val;
+            if (val < kTierLowThreshold) {
+                ++counts[0];
+            } else if (val <= kTierHighThreshold) {
+                ++counts[1];
+            } else {
+                ++counts[2];
+            }
+        }
+        const int totalCount = static_cast<int>(allValues_.size());
+        const double avgAll = totalCount > 0 ? totalSum / totalCount : 0.0;
+
+        const QColor colors[3] = {
+            QColor("#3b82f6"),
+            QColor("#10b981"),
+            QColor("#f59e0b")
+        };
+        const QString tierLabels[3] = {
+            QString::fromUtf8("Dưới 500k"),
+            QString::fromUtf8("500k - 1 triệu"),
+            QString::fromUtf8("Trên 1 triệu")
+        };
+
+        const int ringSize = std::clamp(
+            std::min(area.height() - 6, static_cast<int>(area.width() * 0.38)),
+            76, 164);
+        const int penWidth = std::clamp(ringSize / 7, 10, 20);
+        const int ringLeft = area.left() + 6;
+        const int ringTop = area.top() + (area.height() - ringSize) / 2;
+        const QRectF arcRect(ringLeft + penWidth / 2.0, ringTop + penWidth / 2.0,
+                             ringSize - penWidth, ringSize - penWidth);
+
+        painter.setPen(QPen(QColor("#f1f5f9"), penWidth, Qt::SolidLine, Qt::FlatCap));
+        painter.setBrush(Qt::NoBrush);
+        painter.drawArc(arcRect, 0, 360 * 16);
+
+        int lastNonZero = -1;
+        for (int i = 0; i < 3; ++i) {
+            if (counts[i] > 0) lastNonZero = i;
+        }
+        int startAngle16 = 90 * 16;
+        int remainingSpan16 = 360 * 16;
+        for (int i = 0; i < 3; ++i) {
+            if (counts[i] <= 0) continue;
+            const int span16 = (i == lastNonZero)
+                ? remainingSpan16
+                : static_cast<int>(std::llround(360.0 * 16.0 * counts[i] / totalCount));
+            painter.setPen(QPen(colors[i], penWidth, Qt::SolidLine, Qt::FlatCap));
+            painter.drawArc(arcRect, startAngle16, -span16);
+            startAngle16 -= span16;
+            remainingSpan16 -= span16;
+        }
+
+        const int innerWidth = std::max(10, ringSize - 2 * penWidth - 4);
+        const QRectF centerRect(ringLeft + penWidth + 2, ringTop + penWidth + 2,
+                                innerWidth, innerWidth);
+        const int countFontPt = ringSize >= 120 ? 11 : 8;
+        const int avgFontPt = (innerWidth < 68 || ringSize < 120) ? 7 : 8;
+        const QString avgCenterText = (innerWidth < 68)
+            ? formatShortVnd(avgAll, locale)
+            : (QString::fromUtf8("TB: ") + formatShortVnd(avgAll, locale));
+
+        painter.setFont(QFont(QStringLiteral("Segoe UI"), countFontPt, QFont::Bold));
+        painter.setPen(QColor("#0f172a"));
+        painter.drawText(QRectF(centerRect.left(), centerRect.top(),
+                                centerRect.width(), centerRect.height() * 0.52),
+                         Qt::AlignHCenter | Qt::AlignBottom,
+                         QString::number(totalCount) + QString::fromUtf8(" HĐ"));
+
+        painter.setFont(QFont(QStringLiteral("Segoe UI"), avgFontPt));
+        painter.setPen(QColor("#64748b"));
+        painter.drawText(QRectF(centerRect.left(), centerRect.top() + centerRect.height() * 0.52,
+                                centerRect.width(), centerRect.height() * 0.48),
+                         Qt::AlignHCenter | Qt::AlignTop,
+                         avgCenterText);
+
+        const int legendGap = area.width() < 340 ? 12 : 20;
+        const int legendLeft = ringLeft + ringSize + legendGap;
+        const int legendWidth = area.right() - legendLeft - 4;
+        if (legendWidth < 80) return;
+
+        const int rowHeight = std::clamp(area.height() / 3, 20, 36);
+        const int legendStartY = area.top() + (area.height() - rowHeight * 3) / 2;
+        const int legendFontPt = legendWidth < 210 ? 8 : 9;
+        const int metricWidth = std::min(legendWidth < 210 ? 82 : 108, legendWidth / 2);
+
+        for (int i = 0; i < 3; ++i) {
+            const QRect rowRect(legendLeft, legendStartY + i * rowHeight, legendWidth, rowHeight);
+            const QRect badgeRect(rowRect.left(), rowRect.center().y() - 5, 10, 10);
+            painter.setPen(Qt::NoPen);
+            painter.setBrush(colors[i]);
+            painter.drawRoundedRect(badgeRect, 3, 3);
+
+            const int labelLeft = rowRect.left() + 16;
+            const int labelWidth = std::max(20, rowRect.width() - 16 - metricWidth - 4);
+            painter.setFont(QFont(QStringLiteral("Segoe UI"), legendFontPt, QFont::Medium));
+            painter.setPen(QColor("#334155"));
+            painter.drawText(QRect(labelLeft, rowRect.top(), labelWidth, rowRect.height()),
+                             Qt::AlignLeft | Qt::AlignVCenter, tierLabels[i]);
+
+            const double pct = totalCount > 0 ? (100.0 * counts[i] / totalCount) : 0.0;
+            const QString metric = QString::number(counts[i]) + QString::fromUtf8(" HĐ (")
+                + QString::number(pct, 'f', 0) + QStringLiteral("%)");
+            painter.setFont(QFont(QStringLiteral("Segoe UI"), legendFontPt, QFont::DemiBold));
+            painter.setPen(QColor("#0f172a"));
+            painter.drawText(QRect(rowRect.right() - metricWidth, rowRect.top(),
+                                   metricWidth, rowRect.height()),
+                             Qt::AlignRight | Qt::AlignVCenter, metric);
+        }
+    }
+
+    void drawTrendSection(QPainter& painter, const QRect& rect, const QLocale& locale) const {
+        if (rect.height() < 60 || values_.empty()) return;
+
         double maximum = 0.0;
+        double sumRecent = 0.0;
         for (double value : values_) {
+            sumRecent += value;
             if (value > maximum) maximum = value;
         }
         if (maximum <= 0.0) maximum = 1.0;
-        maximum *= 1.15;
+        maximum *= 1.22;
+        const double avgRecent = sumRecent / static_cast<double>(values_.size());
 
-        const QLocale vietnamese(QLocale::Vietnamese, QLocale::Vietnam);
+        const QRect headerRect(rect.left(), rect.top(), rect.width(), 22);
+        const QFont headerFont(QStringLiteral("Segoe UI"), rect.width() < 340 ? 8 : 9, QFont::DemiBold);
+        const QString trendTitle = rect.width() < 370
+            ? QString::fromUtf8("Xu hướng %1 HĐ gần nhất (VNĐ)").arg(kMaxRecentInvoices)
+            : QString::fromUtf8("Xu hướng %1 hóa đơn gần nhất (VNĐ)").arg(kMaxRecentInvoices);
+        painter.setFont(headerFont);
+        painter.setPen(QColor("#1e293b"));
+        painter.drawText(headerRect, Qt::AlignLeft | Qt::AlignVCenter, trendTitle);
+
+        const QString badgeText = QString::fromUtf8("TB gần nhất: ") + formatShortVnd(avgRecent, locale);
+        const QFont badgeFont(QStringLiteral("Segoe UI"), rect.width() < 340 ? 7 : 8, QFont::DemiBold);
+        painter.setFont(badgeFont);
+        const int titleWidth = QFontMetrics(headerFont).horizontalAdvance(trendTitle);
+        const int badgeTextWidth = QFontMetrics(badgeFont).horizontalAdvance(badgeText);
+        const int sampleEndX = headerRect.right() - badgeTextWidth - 6;
+        const int sampleStartX = headerRect.right() - badgeTextWidth - 24;
+        if (sampleStartX >= headerRect.left() + titleWidth + 8) {
+            painter.setPen(QPen(QColor("#f59e0b"), 1.8, Qt::DashLine));
+            painter.drawLine(sampleStartX, headerRect.center().y(),
+                             sampleEndX, headerRect.center().y());
+        }
+        painter.setPen(QColor("#b45309"));
+        painter.drawText(headerRect, Qt::AlignRight | Qt::AlignVCenter, badgeText);
+
+        const QRect plot = rect.adjusted(54, 30, -14, -24);
+        if (plot.width() <= 28 || plot.height() <= 24) return;
+
         painter.setFont(QFont(QStringLiteral("Segoe UI"), 8));
-        painter.setPen(QColor("#64748b"));
-        painter.drawText(QRect(0, 0, rect().width(), 16), Qt::AlignLeft | Qt::AlignVCenter,
-                         QString::fromUtf8("VNĐ"));
         for (int line = 0; line <= 3; ++line) {
             const int y = plot.bottom() - (plot.height() * line / 3);
             const double amount = maximum * line / 3.0;
             painter.setPen(QColor("#e6edf5"));
             painter.drawLine(plot.left(), y, plot.right(), y);
             painter.setPen(QColor("#64748b"));
-            painter.drawText(QRect(0, y - 8, plot.left() - 8, 16), Qt::AlignRight | Qt::AlignVCenter,
-                             vietnamese.toString(amount, 'f', 0));
+            painter.drawText(QRect(rect.left(), y - 8, plot.left() - rect.left() - 6, 16),
+                             Qt::AlignRight | Qt::AlignVCenter, formatShortVnd(amount, locale));
         }
 
-        const double slotWidth = static_cast<double>(plot.width()) / values_.size();
-        for (size_t index = 0; index < values_.size(); ++index) {
-            const double barHeight = values_[index] / maximum * plot.height();
-            const double barWidth = slotWidth * 0.56;
-            const double x = plot.left() + slotWidth * index + (slotWidth - barWidth) / 2.0;
-            const double y = plot.bottom() - barHeight;
-            const QRectF bar(x, y, barWidth, barHeight);
-            painter.setPen(Qt::NoPen);
-            painter.setBrush(index % 2 == 0 ? QColor("#57b99a") : QColor("#6aa9dd"));
-            painter.drawRoundedRect(bar, 4, 4);
+        const double avgY = plot.bottom() - (avgRecent / maximum) * plot.height();
+        painter.setPen(QPen(QColor("#f59e0b"), 1.3, Qt::DashLine));
+        painter.drawLine(QPointF(plot.left(), avgY), QPointF(plot.right(), avgY));
 
-            const QString valueLabel = values_[index] >= 1000000.0
-                ? vietnamese.toString(values_[index] / 1000000.0, 'f', 1) + QString::fromUtf8(" tr")
-                : vietnamese.toString(values_[index] / 1000.0, 'f', 0) + QStringLiteral(" k");
-            painter.setPen(QColor("#334155"));
-            painter.drawText(QRectF(plot.left() + slotWidth * index, qMax<double>(plot.top(), y - 16),
-                                    slotWidth, 15), Qt::AlignHCenter | Qt::AlignVCenter, valueLabel);
+        vector<QPointF> points;
+        points.reserve(values_.size());
+        const double leftX = plot.left() + 14.0;
+        const double rightX = plot.right() - 14.0;
+        for (size_t i = 0; i < values_.size(); ++i) {
+            const double px = (values_.size() == 1)
+                ? plot.center().x()
+                : leftX + (rightX - leftX) * static_cast<double>(i) / static_cast<double>(values_.size() - 1);
+            const double py = plot.bottom() - (values_[i] / maximum) * plot.height();
+            points.emplace_back(px, py);
+        }
 
-            const QString label = index < labels_.size() ? labels_[index] : QString::number(index + 1);
+        if (points.size() >= 2) {
+            QPainterPath areaPath;
+            areaPath.moveTo(points.front().x(), plot.bottom());
+            for (const QPointF& pt : points) {
+                areaPath.lineTo(pt);
+            }
+            areaPath.lineTo(points.back().x(), plot.bottom());
+            areaPath.closeSubpath();
+
+            QLinearGradient gradient(0, plot.top(), 0, plot.bottom());
+            gradient.setColorAt(0.0, QColor(16, 185, 129, 75));
+            gradient.setColorAt(1.0, QColor(16, 185, 129, 8));
+            painter.fillPath(areaPath, gradient);
+
+            QPainterPath linePath;
+            linePath.moveTo(points.front());
+            for (size_t i = 1; i < points.size(); ++i) {
+                linePath.lineTo(points[i]);
+            }
+            painter.setPen(QPen(QColor("#059669"), 2.4, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+            painter.setBrush(Qt::NoBrush);
+            painter.drawPath(linePath);
+        }
+
+        const double slotWidth = points.size() > 1
+            ? (rightX - leftX) / static_cast<double>(points.size() - 1)
+            : static_cast<double>(plot.width());
+        const double halfBox = std::max(22.0, slotWidth * 0.5);
+        const int pointFontPt = plot.width() < 280 ? 7 : 8;
+        const QFont valFont(QStringLiteral("Segoe UI"), pointFontPt, QFont::DemiBold);
+        const QFontMetrics valFm(valFont);
+        QRectF prevValueRect;
+
+        for (size_t i = 0; i < points.size(); ++i) {
+            painter.setPen(QPen(QColor("#ffffff"), 2.0));
+            painter.setBrush(QColor("#059669"));
+            painter.drawEllipse(points[i], 4.5, 4.5);
+
+            const QString valText = formatShortVnd(values_[i], locale);
+            const double textW = static_cast<double>(valFm.horizontalAdvance(valText)) + 6.0;
+            const double textH = 14.0;
+            QRectF valRect(points[i].x() - textW / 2.0,
+                           std::max<double>(plot.top() + 1.0, points[i].y() - 20.0),
+                           textW, textH);
+            if (prevValueRect.isValid() && valRect.adjusted(-2.0, 0.0, 2.0, 0.0).intersects(prevValueRect)) {
+                const QRectF belowRect(points[i].x() - textW / 2.0, points[i].y() + 6.0, textW, textH);
+                if (belowRect.bottom() <= plot.bottom() - 2.0
+                    && !belowRect.adjusted(-2.0, 0.0, 2.0, 0.0).intersects(prevValueRect)) {
+                    valRect = belowRect;
+                }
+            }
+
+            painter.setFont(valFont);
+            painter.setPen(QColor("#0f172a"));
+            painter.drawText(valRect, Qt::AlignHCenter | Qt::AlignVCenter, valText);
+            prevValueRect = valRect;
+
+            QString xLabel = i < labels_.size() ? labels_[i] : QString::number(i + 1);
+            if (slotWidth < 42.0 && xLabel.startsWith(QStringLiteral("INV"), Qt::CaseInsensitive)) {
+                xLabel = QStringLiteral("#") + xLabel.mid(3);
+            }
+            painter.setFont(QFont(QStringLiteral("Segoe UI"), pointFontPt));
             painter.setPen(QColor("#64748b"));
-            painter.drawText(QRectF(plot.left() + slotWidth * index, plot.bottom() + 2,
-                                    slotWidth, 18), Qt::AlignHCenter | Qt::AlignTop, label);
+            painter.drawText(QRectF(points[i].x() - halfBox, plot.bottom() + 3.0, halfBox * 2.0, 18.0),
+                             Qt::AlignHCenter | Qt::AlignTop, xLabel);
         }
     }
 
-private:
     vector<double> values_;
     vector<QString> labels_;
+    vector<double> allValues_;
 };
 
 AdminMenu::AdminMenu(Database& database, AuthService& authService, QWidget *parent)
@@ -104,16 +358,17 @@ AdminMenu::AdminMenu(Database& database, AuthService& authService, QWidget *pare
 {
     ui->setupUi(this);
     applyClinicStyle(this);
-    setMinimumSize(820, 600);
+    setMinimumSize(960, 640);
     setAttribute(Qt::WA_DeleteOnClose);
     revenueChart = new RevenueChart(ui->revenueChartHost);
     QVBoxLayout* chartLayout = new QVBoxLayout(ui->revenueChartHost);
     chartLayout->setContentsMargins(0, 0, 0, 0);
     chartLayout->addWidget(revenueChart);
+    ui->revenueSplitter->setOrientation(Qt::Horizontal);
     ui->revenueSplitter->setChildrenCollapsible(false);
-    ui->revenueSplitter->setStretchFactor(0, 1);
-    ui->revenueSplitter->setStretchFactor(1, 3);
-    ui->revenueSplitter->setSizes({155, 445});
+    ui->revenueSplitter->setStretchFactor(0, 5);
+    ui->revenueSplitter->setStretchFactor(1, 6);
+    ui->revenueSplitter->setSizes({520, 620});
 
     // --- KIỂM SOÁT ĐẦU VÀO BẰNG REGEX ---
     QRegularExpression rxPhone("^[0-9]{10,11}$");
@@ -555,16 +810,27 @@ void AdminMenu::on_btnViewRevenue_clicked() {
     int totalPatients = db.getPatients().getAllPointers().size();
     ui->lblTotalPatients->setText(QString::number(totalPatients) + " người");
     
+    vector<double> allRevenueValues;
+    const vector<Invoice>& invoices = db.getInvoices();
+    allRevenueValues.reserve(invoices.size());
+    for (const auto& inv : invoices) {
+        allRevenueValues.push_back(inv.getTotalAmount());
+    }
+
     vector<double> revenueValues;
     vector<QString> invoiceLabels;
-    const vector<Invoice>& invoices = db.getInvoices();
-    const size_t firstVisible = invoices.size() > 12 ? invoices.size() - 12 : 0;
+    const size_t firstVisible = invoices.size() > RevenueChart::kMaxRecentInvoices
+        ? invoices.size() - RevenueChart::kMaxRecentInvoices
+        : 0;
     for (size_t index = firstVisible; index < invoices.size(); ++index) {
         revenueValues.push_back(invoices[index].getTotalAmount());
-        invoiceLabels.push_back(QString::number(index + 1));
+        invoiceLabels.push_back(QString::fromStdString(invoices[index].getId()));
     }
-    revenueChart->setData(revenueValues, invoiceLabels);
-    ui->revenueSplitter->setSizes({155, 445});
+    revenueChart->setData(revenueValues, invoiceLabels, allRevenueValues);
+    const QList<int> sizes = ui->revenueSplitter->sizes();
+    if (sizes.size() == 2 && (sizes[0] < 200 || sizes[1] < 200)) {
+        ui->revenueSplitter->setSizes({520, 620});
+    }
 
     // ==========================================
     // 3. LÀM MỚI BẢNG (Nếu có)
@@ -574,6 +840,8 @@ void AdminMenu::on_btnViewRevenue_clicked() {
 void AdminMenu::refreshRevenueTable() {
     ui->tableRevenue->setColumnCount(4);
     ui->tableRevenue->setHorizontalHeaderLabels({"Mã Hóa Đơn", "Mã Bệnh Nhân", "Họ và Tên Bệnh Nhân", "Tổng Thu (VNĐ)"});
+    ui->tableRevenue->verticalHeader()->setVisible(false);
+    ui->tableRevenue->horizontalHeader()->setMinimumSectionSize(75);
     ui->tableRevenue->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
     ui->tableRevenue->horizontalHeader()->setSectionResizeMode(2, QHeaderView::Stretch);
     
