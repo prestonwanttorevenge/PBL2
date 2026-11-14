@@ -1,11 +1,91 @@
 #include "services/Database.h"
 #include "utils/Constants.h"
+#include <cctype>
+#include <climits>
 #include <cmath>
+#include <ctime>
 #include <iostream>
 #include <string>
 #include <vector>
 #include <sstream>
 #include <iomanip>
+
+namespace {
+string trimCopy(const string& value) {
+    size_t start = 0;
+    while (start < value.size() && std::isspace(static_cast<unsigned char>(value[start]))) {
+        ++start;
+    }
+    size_t end = value.size();
+    while (end > start && std::isspace(static_cast<unsigned char>(value[end - 1]))) {
+        --end;
+    }
+    return value.substr(start, end - start);
+}
+
+string toLowerAscii(string value) {
+    for (char& ch : value) {
+        ch = static_cast<char>(std::tolower(static_cast<unsigned char>(ch)));
+    }
+    return value;
+}
+
+bool isValidPhoneDigits(const string& phone) {
+    if (phone.size() < 10 || phone.size() > 11) return false;
+    for (char ch : phone) {
+        if (!std::isdigit(static_cast<unsigned char>(ch))) return false;
+    }
+    return true;
+}
+
+bool isLeapYear(int year) {
+    return (year % 4 == 0 && year % 100 != 0) || (year % 400 == 0);
+}
+
+bool isValidPastOrTodayDate(const string& dob) {
+    if (dob.size() != 10 || dob[2] != '/' || dob[5] != '/') return false;
+    for (int i : {0, 1, 3, 4, 6, 7, 8, 9}) {
+        if (!std::isdigit(static_cast<unsigned char>(dob[i]))) return false;
+    }
+    int day = 0, month = 0, year = 0;
+    try {
+        day = stoi(dob.substr(0, 2));
+        month = stoi(dob.substr(3, 2));
+        year = stoi(dob.substr(6, 4));
+    } catch (...) {
+        return false;
+    }
+    if (year < 1900 || month < 1 || month > 12 || day < 1) return false;
+    static const int daysInMonth[12] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+    int maxDay = daysInMonth[month - 1];
+    if (month == 2 && isLeapYear(year)) maxDay = 29;
+    if (day > maxDay) return false;
+
+    const std::time_t now = std::time(nullptr);
+    const std::tm* localNow = std::localtime(&now);
+    if (localNow == nullptr) return true;
+    const int todayKey = (localNow->tm_year + 1900) * 10000 +
+                         (localNow->tm_mon + 1) * 100 + localNow->tm_mday;
+    const int dateKey = year * 10000 + month * 100 + day;
+    return dateKey <= todayKey;
+}
+
+bool isValidWorkDay(const string& day) {
+    static const char* const kDays[] = {
+        "Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7", "Chủ nhật",
+        "Thu 2", "Thu 3", "Thu 4", "Thu 5", "Thu 6", "Thu 7", "Chu nhat"
+    };
+    for (const char* allowed : kDays) {
+        if (day == allowed) return true;
+    }
+    return false;
+}
+
+bool isValidWorkShift(const string& shift) {
+    return shift == "Sáng" || shift == "Chiều" || shift == "Tối" ||
+           shift == "Sang" || shift == "Chieu" || shift == "Toi";
+}
+}
 
 // ==========================================
 // CÁC HÀM TÌM KIẾM, QUẢN LÝ TÀI KHOẢN VÀ DANH MỤC
@@ -20,11 +100,17 @@ Patient* Database::findPatientById(string id) {
 }
 
 vector<Patient*> Database::searchPatients(string keyword) {
-   vector<Patient*> results;
+    vector<Patient*> results;
+    keyword = trimCopy(keyword);
+    const string lowerKeyword = toLowerAscii(keyword);
     vector<Patient**> allPats = patients.getAllPointers();
     for (size_t i = 0; i < allPats.size(); i++) {
-        Patient* pat = *(allPats[i]); 
-        if (pat->getId() == keyword || pat->getFullName().find(keyword) != string::npos) {
+        Patient* pat = *(allPats[i]);
+        if (pat == nullptr) continue;
+        if (keyword.empty() ||
+            toLowerAscii(pat->getId()).find(lowerKeyword) != string::npos ||
+            toLowerAscii(pat->getFullName()).find(lowerKeyword) != string::npos ||
+            pat->getPhoneNumber().find(keyword) != string::npos) {
             results.push_back(pat);
         }
     }
@@ -155,24 +241,39 @@ User* Database::loginFromQT(string username, string password) {
 }
 
 int Database::addUserFromQT(string id, string username, string plainPassword, string fullName, string role) {
+    id = trimCopy(id);
+    username = trimCopy(username);
+    fullName = trimCopy(fullName);
+    role = trimCopy(role);
     sanitizeInput(id);
     sanitizeInput(fullName);
     sanitizeInput(role);
-    if (id.empty() || !User::isValidUsername(username) || plainPassword.empty() || fullName.empty() ||
-        users.search(id) != nullptr) return -1;
+    if (id.empty() || !User::isValidUsername(username) || trimCopy(plainPassword).empty() ||
+        fullName.empty() || role.empty() || users.search(id) != nullptr) {
+        return -2;
+    }
     vector<User*> allUsers = users.getAllPointers();
     for (size_t i = 0; i < allUsers.size(); i++) {
-        if (allUsers[i]->getUsername() == username) return -1; 
+        if (allUsers[i]->getUsername() == username) return -1;
     }
     User newUser(id, username, "", fullName, role, true);
     newUser.setPassword(plainPassword);
-    users.insert(id, newUser); 
+    users.insert(id, newUser);
     return 1;
 }
 
 int Database::addDoctorWithAccount(string id, string name, string dob, string gender, string phone,
                                    string specialty, int expYears, string username, string plainPassword,
                                    string workDay, string workShift) {
+    id = trimCopy(id);
+    name = trimCopy(name);
+    dob = trimCopy(dob);
+    gender = trimCopy(gender);
+    phone = trimCopy(phone);
+    specialty = trimCopy(specialty);
+    username = trimCopy(username);
+    workDay = trimCopy(workDay);
+    workShift = trimCopy(workShift);
     sanitizeInput(id);
     sanitizeInput(name);
     sanitizeInput(dob);
@@ -180,11 +281,13 @@ int Database::addDoctorWithAccount(string id, string name, string dob, string ge
     sanitizeInput(phone);
     sanitizeInput(workDay);
     sanitizeInput(workShift);
-    if (id.empty() || name.empty() || dob.empty() || gender.empty() || phone.empty() ||
-        !Constants::isMedicalSpecialty(specialty) || expYears < 0 ||
-        !User::isValidUsername(username) || plainPassword.empty() ||
-        workDay.empty() || workShift.empty() || doctors.search(id) != nullptr ||
-        users.search(id) != nullptr) return -1;
+    if (id.empty() || name.empty() || !isValidPastOrTodayDate(dob) || gender.empty() ||
+        !isValidPhoneDigits(phone) || !Constants::isMedicalSpecialty(specialty) || expYears < 0 ||
+        !User::isValidUsername(username) || trimCopy(plainPassword).empty() ||
+        !isValidWorkDay(workDay) || !isValidWorkShift(workShift) ||
+        doctors.search(id) != nullptr || users.search(id) != nullptr) {
+        return -1;
+    }
     vector<User*> allUsers = users.getAllPointers();
     for (User* user : allUsers) {
         if (user->getUsername() == username) return -2;
@@ -199,41 +302,49 @@ int Database::addDoctorWithAccount(string id, string name, string dob, string ge
 }
 
 int Database::addMedicineFromQT(string prefix, string medicineName, double unitPrice, string dosage, int addQty, string& outId) {
+    prefix = trimCopy(prefix);
+    medicineName = trimCopy(medicineName);
+    dosage = trimCopy(dosage);
     sanitizeInput(medicineName);
     sanitizeInput(dosage);
     if ((prefix != "B1" && prefix != "B2" && prefix != "B3" && prefix != "DV") ||
         medicineName.empty() || dosage.empty() || !std::isfinite(unitPrice) ||
-        unitPrice < 0.0 || addQty <= 0) return -2;
+        unitPrice <= 0.0 || addQty <= 0) return -2;
+    const string targetNameLower = toLowerAscii(medicineName);
     vector<Medicine*> allMeds = medicines.getAllPointers();
     for (auto med : allMeds) {
-        if (med->getMedicineName() == medicineName) {
+        if (toLowerAscii(trimCopy(med->getMedicineName())) == targetNameLower) {
             if (med->getMedicineId().rfind(prefix + "_", 0) != 0) return -3;
-            med->setStock(med->getStock() + addQty); 
-            outId = med->getMedicineId(); 
-            return 2; 
+            if (med->getStock() > INT_MAX - addQty) return -2;
+            med->setStock(med->getStock() + addQty);
+            outId = med->getMedicineId();
+            return 2;
         }
     }
     string newId = generateMedicineId(prefix);
     medicines.insert(newId, Medicine(newId, medicineName, unitPrice, dosage, addQty));
-    outId = newId; 
-    return 1; 
+    outId = newId;
+    return 1;
 }
 
 int Database::addServiceFromQT(string prefix, string name, double price, string& outId) {
+    prefix = trimCopy(prefix);
+    name = trimCopy(name);
     sanitizeInput(name);
     if ((prefix != "S1" && prefix != "S2" && prefix != "S3") ||
-        name.empty() || !std::isfinite(price) || price < 0.0) return -2;
+        name.empty() || !std::isfinite(price) || price <= 0.0) return -2;
+    const string targetNameLower = toLowerAscii(name);
     vector<Service*> allSrv = services.getAllPointers();
     for (auto srv : allSrv) {
-        if (srv->getServiceName() == name) {
-            outId = srv->getId(); 
-            return -1; 
+        if (toLowerAscii(trimCopy(srv->getServiceName())) == targetNameLower) {
+            outId = srv->getId();
+            return -1;
         }
     }
     string newId = generateServiceId(prefix);
     services.insert(newId, Service(newId, name, price));
-    outId = newId; 
-    return 1; 
+    outId = newId;
+    return 1;
 }
 
 void Database::deleteDoctor(string id) {

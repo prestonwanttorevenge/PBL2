@@ -110,8 +110,6 @@ QHeaderView::section {
 QTableWidget::item, QTableView::item {
     padding: 6px 10px;
     border-bottom: 1px solid #F1F5F9;
-    background-color: #FFFFFF;
-    color: #0F172A;
 }
 
 QTableWidget::item:selected, QTableView::item:selected {

@@ -31,8 +31,8 @@ void runPerformanceBenchmark() {
     qDebug() << "Bat dau kiem thu hieu nang. Vui long doi...";
     
     // Tên file theo thiết lập lưu trữ hiện tại của đồ án
-    QString realPatientFilePath = "data/patient.csv";
-    QString backupFilePath = "data/patient_backup.csv";
+    QString realPatientFilePath = "data/patients.csv";
+    QString backupFilePath = "data/patients_backup.csv";
 
     // ==========================================
     // BƯỚC 1: SAO LƯU BẢO VỆ DỮ LIỆU THẬT
@@ -122,7 +122,7 @@ int main(int argc, char *argv[]) {
     // GỌI CHẠY TEST TẠI ĐÂY
     //runPerformanceBenchmark();
 
-    a.setQuitOnLastWindowClosed(false);
+    a.setQuitOnLastWindowClosed(true);
     a.setStyle(QStyleFactory::create("Fusion"));
     QFile styleFile("resources/style.qss");
     if (styleFile.open(QFile::ReadOnly | QFile::Text)) {

@@ -131,25 +131,26 @@
         <property name="spacing"><number>12</number></property>
         <item>
          <layout class="QHBoxLayout" name="horizontalLayoutRevStats">
-          <item><widget class="QGroupBox" name="groupRevenueTotal"><property name="minimumHeight"><number>82</number></property><property name="title"><string>Tổng doanh thu</string></property><layout class="QVBoxLayout" name="layoutRevenueTotal"><item><widget class="QLabel" name="lblTotalRevenue"><property name="text"><string>0 VNĐ</string></property><property name="styleSheet"><string>font-size: 18pt; font-weight: 700; color: #047857;</string></property></widget></item></layout></widget></item>
-          <item><widget class="QGroupBox" name="groupPatientCount"><property name="minimumHeight"><number>82</number></property><property name="title"><string>Hồ sơ bệnh nhân</string></property><layout class="QVBoxLayout" name="layoutPatientCount"><item><widget class="QLabel" name="lblTotalPatients"><property name="text"><string>0 người</string></property><property name="styleSheet"><string>font-size: 18pt; font-weight: 700; color: #2563eb;</string></property></widget></item></layout></widget></item>
+          <item><widget class="QGroupBox" name="groupRevenueTotal"><property name="minimumHeight"><number>64</number></property><property name="maximumSize"><size><width>16777215</width><height>76</height></size></property><property name="title"><string>Tổng doanh thu</string></property><layout class="QVBoxLayout" name="layoutRevenueTotal"><item><widget class="QLabel" name="lblTotalRevenue"><property name="text"><string>0 VNĐ</string></property><property name="styleSheet"><string>font-size: 15pt; font-weight: 700; color: #047857;</string></property></widget></item></layout></widget></item>
+          <item><widget class="QGroupBox" name="groupPatientCount"><property name="minimumHeight"><number>64</number></property><property name="maximumSize"><size><width>16777215</width><height>76</height></size></property><property name="title"><string>Hồ sơ bệnh nhân</string></property><layout class="QVBoxLayout" name="layoutPatientCount"><item><widget class="QLabel" name="lblTotalPatients"><property name="text"><string>0 người</string></property><property name="styleSheet"><string>font-size: 15pt; font-weight: 700; color: #2563eb;</string></property></widget></item></layout></widget></item>
          </layout>
         </item>
         <item>
          <widget class="QSplitter" name="revenueSplitter">
           <property name="orientation"><enum>Qt::Vertical</enum></property>
           <widget class="QGroupBox" name="groupRevenueChart">
-           <property name="minimumSize"><size><width>0</width><height>280</height></size></property>
+           <property name="minimumSize"><size><width>0</width><height>145</height></size></property>
+           <property name="maximumSize"><size><width>16777215</width><height>210</height></size></property>
            <property name="title"><string>Giá trị 12 hóa đơn gần nhất</string></property>
            <layout class="QVBoxLayout" name="layoutRevenueChart">
-            <item><widget class="QWidget" name="revenueChartHost" native="true"><property name="minimumSize"><size><width>0</width><height>235</height></size></property></widget></item>
+            <item><widget class="QWidget" name="revenueChartHost" native="true"><property name="minimumSize"><size><width>0</width><height>110</height></size></property></widget></item>
            </layout>
           </widget>
           <widget class="QGroupBox" name="groupInvoiceList">
-           <property name="minimumSize"><size><width>0</width><height>250</height></size></property>
-           <property name="title"><string>Danh sách hóa đơn</string></property>
+           <property name="minimumSize"><size><width>0</width><height>260</height></size></property>
+           <property name="title"><string>Danh sách hóa đơn &amp; bệnh nhân</string></property>
            <layout class="QVBoxLayout" name="layoutInvoiceList">
-            <item><widget class="QTableWidget" name="tableRevenue"><property name="minimumSize"><size><width>0</width><height>205</height></size></property><property name="alternatingRowColors"><bool>true</bool></property><property name="selectionBehavior"><enum>QAbstractItemView::SelectRows</enum></property><property name="editTriggers"><set>QAbstractItemView::NoEditTriggers</set></property></widget></item>
+            <item><widget class="QTableWidget" name="tableRevenue"><property name="minimumSize"><size><width>0</width><height>210</height></size></property><property name="alternatingRowColors"><bool>true</bool></property><property name="selectionBehavior"><enum>QAbstractItemView::SelectRows</enum></property><property name="editTriggers"><set>QAbstractItemView::NoEditTriggers</set></property></widget></item>
            </layout>
           </widget>
          </widget>

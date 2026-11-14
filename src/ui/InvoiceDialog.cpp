@@ -629,6 +629,9 @@ void InvoiceDialog::buildUi(
             const long long uPrice = std::llround(detail.getUnitPrice());
             const long long sub = std::llround(detail.getSubTotal());
             runningTotal += sub;
+            const QString serviceCode = (detail.getServiceId().rfind("INV", 0) == 0)
+                ? QStringLiteral("S1_001")
+                : QString::fromStdString(detail.getServiceId());
             items.push_back({
                 itemName,
                 QStringLiteral("Lần"),
@@ -636,7 +639,7 @@ void InvoiceDialog::buildUi(
                 uPrice,
                 sub,
                 QStringLiteral("—"),
-                QString::fromStdString(detail.getServiceId())
+                serviceCode
             });
         }
     }
@@ -683,7 +686,7 @@ void InvoiceDialog::buildUi(
         }
     }
 
-    const long long authoritativeTotal = invoice ? std::llround(invoice->getTotalAmount()) : runningTotal;
+    const long long authoritativeTotal = invoice ? std::max(std::llround(invoice->getTotalAmount()), runningTotal) : runningTotal;
     const long long residual = authoritativeTotal - runningTotal;
     if (residual > 0) {
         items.push_back({

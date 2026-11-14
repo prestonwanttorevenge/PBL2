@@ -28,6 +28,24 @@ int parseDateKey(const string& date) {
         return 0;
     }
 }
+
+void stripTrailingCR(string& line) {
+    while (!line.empty() && (line.back() == '\r' || line.back() == '\n')) {
+        line.pop_back();
+    }
+}
+
+string trimString(const string& s) {
+    size_t start = 0;
+    while (start < s.size() && std::isspace(static_cast<unsigned char>(s[start]))) {
+        ++start;
+    }
+    size_t end = s.size();
+    while (end > start && std::isspace(static_cast<unsigned char>(s[end - 1]))) {
+        --end;
+    }
+    return s.substr(start, end - start);
+}
 }
 
 Database::Database() {
@@ -55,24 +73,36 @@ void Database::sanitizeInput(string& input) {
 // ==========================================
 
 string Database::generatePatientId() {
-    patientCounter++;
-    stringstream ss;
-    ss << "BN" << setfill('0') << setw(5) << patientCounter;
-    return ss.str();
+    string id;
+    do {
+        patientCounter++;
+        stringstream ss;
+        ss << "BN" << setfill('0') << setw(5) << patientCounter;
+        id = ss.str();
+    } while (patients.search(id) != nullptr);
+    return id;
 }
 
 string Database::generateAppointmentId() {
-    appointmentCounter++;
-    stringstream ss;
-    ss << "APP" << setfill('0') << setw(4) << appointmentCounter;
-    return ss.str();
+    string id;
+    do {
+        appointmentCounter++;
+        stringstream ss;
+        ss << "APP" << setfill('0') << setw(4) << appointmentCounter;
+        id = ss.str();
+    } while (findAppointmentById(id) != nullptr);
+    return id;
 }
 
 string Database::generateMedicalRecordId() {
-    medicalRecordCounter++;
-    stringstream ss;
-    ss << "BA" << setfill('0') << setw(5) << medicalRecordCounter;
-    return ss.str();
+    string id;
+    do {
+        medicalRecordCounter++;
+        stringstream ss;
+        ss << "BA" << setfill('0') << setw(5) << medicalRecordCounter;
+        id = ss.str();
+    } while (findMedicalRecordById(id) != nullptr);
+    return id;
 }
 
 string Database::generateUserId(const string& role) {
@@ -92,24 +122,36 @@ string Database::generateUserId(const string& role) {
 }
 
 string Database::generateDoctorId() {
-    doctorCounter++;
-    stringstream ss;
-    ss << "BS" << setfill('0') << setw(2) << doctorCounter;
-    return ss.str();
+    string id;
+    do {
+        doctorCounter++;
+        stringstream ss;
+        ss << "BS" << setfill('0') << setw(2) << doctorCounter;
+        id = ss.str();
+    } while (doctors.search(id) != nullptr || users.search(id) != nullptr);
+    return id;
 }
 
 string Database::generateMedicineId(const string& prefix) {
-    medicineCounters[prefix]++;
-    stringstream ss;
-    ss << prefix << "_" << setfill('0') << setw(3) << medicineCounters[prefix];
-    return ss.str();
+    string id;
+    do {
+        medicineCounters[prefix]++;
+        stringstream ss;
+        ss << prefix << "_" << setfill('0') << setw(3) << medicineCounters[prefix];
+        id = ss.str();
+    } while (medicines.search(id) != nullptr);
+    return id;
 }
 
 string Database::generateServiceId(const string& prefix) {
-    serviceCounters[prefix]++;
-    stringstream ss;
-    ss << prefix << "_" << setfill('0') << setw(3) << serviceCounters[prefix];
-    return ss.str();
+    string id;
+    do {
+        serviceCounters[prefix]++;
+        stringstream ss;
+        ss << prefix << "_" << setfill('0') << setw(3) << serviceCounters[prefix];
+        id = ss.str();
+    } while (services.search(id) != nullptr);
+    return id;
 }
 
 // ==========================================
@@ -131,7 +173,8 @@ void Database::loadAllData() {
         string line;
         doctors.clear(); 
         while (getline(fDoc, line)) {
-            if (line.empty()) continue;
+            stripTrailingCR(line);
+            if (trimString(line).empty()) continue;
 
             stringstream ss(line);
             string id, name, dob, gender, phone, spec, tempExp;
@@ -163,7 +206,8 @@ void Database::loadAllData() {
         for (Doctor* existingDoctor : doctors.getAllPointers()) existingDoctor->clearSchedule();
         std::string line;
         while (std::getline(fSched, line)) {
-            if (line.empty()) continue;
+            stripTrailingCR(line);
+            if (trimString(line).empty()) continue;
             std::stringstream ss(line);
             std::string docId, day, time;
             std::getline(ss, docId, ';');
@@ -188,7 +232,8 @@ void Database::loadAllData() {
         patients.clear(); 
 
         while (getline(fPat, line)) {
-            if (line.empty()) continue;
+            stripTrailingCR(line);
+            if (trimString(line).empty()) continue;
             stringstream ss(line);
 
             string type, id, name, dob, gender, phone, recordId, BHYTstr;
@@ -229,7 +274,8 @@ void Database::loadAllData() {
         string line;
         invoices.clear();
         while (getline(fInv, line)) {
-            if (line.empty()) continue;
+            stripTrailingCR(line);
+            if (trimString(line).empty()) continue;
             stringstream ss(line);
             string id, patientId, medFeeStr, appointmentId;
 
@@ -250,7 +296,8 @@ void Database::loadAllData() {
     if (fDetail.is_open()) {
         string line;
         while (getline(fDetail, line)) {
-            if (line.empty()) continue;
+            stripTrailingCR(line);
+            if (trimString(line).empty()) continue;
             stringstream ss(line);
             string dId, iId, sId, qtyStr, priceStr;
 
@@ -283,7 +330,8 @@ void Database::loadAllData() {
         string line;
         users.clear();
         while (getline(fUser, line)) {
-            if (line.empty()) continue;
+            stripTrailingCR(line);
+            if (trimString(line).empty()) continue;
 
             stringstream ss(line);
             string id, Username , pass , fullName , role, activestr;
@@ -319,7 +367,8 @@ void Database::loadAllData() {
         string line;
         medicines.clear();
         while (getline(fMed, line)) {
-            if (line.empty()) continue;
+            stripTrailingCR(line);
+            if (trimString(line).empty()) continue;
             stringstream ss(line);
             string id, name, priceStr, dosage, stockStr;
 
@@ -355,7 +404,8 @@ void Database::loadAllData() {
         string line;
         services.clear();
         while (getline(fSrv, line)) {
-            if (line.empty()) continue;
+            stripTrailingCR(line);
+            if (trimString(line).empty()) continue;
             stringstream ss(line);
             string id, name, priceStr;
 
@@ -383,11 +433,12 @@ void Database::loadAllData() {
     }
 
     ifstream fAppt(appointmentFile);
+    appointments.clear();
     if (fAppt.is_open()) {
         string line;
-        appointments.clear();
         while (getline(fAppt, line)) {
-            if (line.empty()) continue;
+            stripTrailingCR(line);
+            if (trimString(line).empty()) continue;
             stringstream ss(line);
             string aId, pId, dId, rId, spec, day, time, status, date;
 
@@ -432,11 +483,12 @@ void Database::loadAllData() {
     }
 
     ifstream fMedRec(medicalRecordFile);
+    medicalRecords.clear();
     if (fMedRec.is_open()) {
         string line;
-        medicalRecords.clear();
         while (getline(fMedRec, line)) {
-            if (line.empty()) continue;
+            stripTrailingCR(line);
+            if (trimString(line).empty()) continue;
             stringstream ss(line);
             string rId, aId, symp, diag, notes, assignedServices;
 
@@ -469,11 +521,28 @@ void Database::loadAllData() {
         fMedRec.close();
     }
 
+    // Tạo bệnh án rỗng cho lịch hẹn còn hiệu lực nhưng bị thiếu bản ghi CSV.
+    for (const Appointment& appt : appointments) {
+        if (appt.getStatus() == "Canceled") continue;
+        bool hasRecord = false;
+        for (const MedicalRecord& rec : medicalRecords) {
+            if (rec.getAppointmentId() == appt.getAppointmentId()) {
+                hasRecord = true;
+                break;
+            }
+        }
+        if (!hasRecord) {
+            medicalRecords.push_back(MedicalRecord(generateMedicalRecordId(),
+                                                   appt.getAppointmentId(), "", "", ""));
+        }
+    }
+
     ifstream fPresc(prescriptionDetailFile);
     if (fPresc.is_open()) {
         string line;
         while (getline(fPresc, line)) {
-            if (line.empty()) continue;
+            stripTrailingCR(line);
+            if (trimString(line).empty()) continue;
             stringstream ss(line);
             string rId, mId, dosage, qtyStr, priceStr, dispensedStr;
 
@@ -503,18 +572,53 @@ void Database::loadAllData() {
         fPresc.close();
     } 
 
+    auto isAppointmentLinkedToInvoice = [&](const string& apptId) -> bool {
+        if (apptId.empty()) return false;
+        for (const Invoice& existingInv : invoices) {
+            if (existingInv.getAppointmentId() == apptId) return true;
+        }
+        return false;
+    };
+    auto hasDiagnosisOrSymptoms = [&](const string& apptId) -> bool {
+        for (const MedicalRecord& rec : medicalRecords) {
+            if (rec.getAppointmentId() == apptId) {
+                return !rec.getDiagnosis().empty() || !rec.getSymptoms().empty();
+            }
+        }
+        return false;
+    };
+
     for (Invoice& invoice : invoices) {
         if (!invoice.getAppointmentId().empty()) {
             Appointment* appt = findAppointmentById(invoice.getAppointmentId());
-            if (appt != nullptr && appt->getStatus() == "Completed") {
+            if (appt != nullptr && appt->getStatus() != "Billed") {
                 appt->setStatus("Billed");
             }
-            continue;
         }
+    }
 
-        // Gắn hóa đơn cũ chưa có appointmentId với lượt hoàn tất gần nhất của bệnh nhân.
+    for (Invoice& invoice : invoices) {
+        if (!invoice.getAppointmentId().empty()) continue;
+
+        // Gắn hóa đơn cũ chưa có appointmentId với lượt hoàn tất (hoặc đã khám/chẩn đoán) chưa xuất hóa đơn.
+        bool matched = false;
         for (auto it = appointments.rbegin(); it != appointments.rend(); ++it) {
-            if (it->getPatientId() == invoice.getPatientId() && it->getStatus() == "Completed") {
+            if (it->getPatientId() == invoice.getPatientId() &&
+                it->getStatus() == "Completed" &&
+                !isAppointmentLinkedToInvoice(it->getAppointmentId())) {
+                invoice.setAppointmentId(it->getAppointmentId());
+                it->setStatus("Billed");
+                matched = true;
+                break;
+            }
+        }
+        if (matched) continue;
+
+        for (auto it = appointments.rbegin(); it != appointments.rend(); ++it) {
+            if (it->getPatientId() == invoice.getPatientId() &&
+                it->getStatus() != "Billed" &&
+                !isAppointmentLinkedToInvoice(it->getAppointmentId()) &&
+                hasDiagnosisOrSymptoms(it->getAppointmentId())) {
                 invoice.setAppointmentId(it->getAppointmentId());
                 it->setStatus("Billed");
                 break;

@@ -6,6 +6,7 @@
 #include <QTableWidgetItem>
 #include <QRegularExpressionValidator>
 #include <QRegularExpression>
+#include <cctype>
 #include <stdexcept>
 
 using namespace std;
@@ -19,6 +20,7 @@ InventoryMenu::InventoryMenu(Database& database, AuthService& authService, QWidg
     ui->setupUi(this);
     applyClinicStyle(this);
     setMinimumSize(820, 600);
+    setAttribute(Qt::WA_DeleteOnClose);
 
     // --- NÂNG CẤP UX: KHÓA CHỈ CHO NHẬP SỐ DƯƠNG VÀO Ô GIÁ TIỀN ---
     QRegularExpression rxPrice("^[0-9]*\\.?[0-9]+$");
@@ -45,20 +47,20 @@ void InventoryMenu::on_txtSearchMed_textChanged(const QString &keyword) {
     vector<Medicine*> medList = db.getMedicines().getAllPointers();
 
     int row = 0;
-    string searchStr = keyword.toStdString();
+    string searchStr = keyword.trimmed().toStdString();
     
     // Biến đổi chuỗi tìm kiếm thành chữ thường để so khớp (Case-insensitive)
-    for (char& c : searchStr) c = tolower(c);
+    for (char& c : searchStr) c = static_cast<char>(std::tolower(static_cast<unsigned char>(c)));
 
     for (auto med : medList) {
         string medName = med->getMedicineName();
         string medId = med->getMedicineId();
         
         string lowerName = medName;
-        for (char& c : lowerName) c = tolower(c);
+        for (char& c : lowerName) c = static_cast<char>(std::tolower(static_cast<unsigned char>(c)));
         
         string lowerId = medId;
-        for (char& c : lowerId) c = tolower(c);
+        for (char& c : lowerId) c = static_cast<char>(std::tolower(static_cast<unsigned char>(c)));
 
         // Lọc kết quả: Nếu tìm thấy mã ID HOẶC Tên thuốc khớp với từ khóa
         if (searchStr.empty() || lowerId.find(searchStr) != string::npos || lowerName.find(searchStr) != string::npos) {
@@ -78,19 +80,7 @@ void InventoryMenu::refreshMedicineTable() {
     ui->tableMedicines->setHorizontalHeaderLabels({"Mã Thuốc", "Tên Thuốc", "Đơn Giá", "Liều Lượng", "Tồn Kho"});
     ui->tableMedicines->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 
-    ui->tableMedicines->setRowCount(0);
-    vector<Medicine*> medList = db.getMedicines().getAllPointers();
-
-    int row = 0;
-    for (auto med : medList) {
-        ui->tableMedicines->insertRow(row);
-        ui->tableMedicines->setItem(row, 0, new QTableWidgetItem(QString::fromStdString(med->getMedicineId())));
-        ui->tableMedicines->setItem(row, 1, new QTableWidgetItem(QString::fromStdString(med->getMedicineName())));
-        ui->tableMedicines->setItem(row, 2, new QTableWidgetItem(QString::number(med->getUnitPrice(), 'f', 0)));
-        ui->tableMedicines->setItem(row, 3, new QTableWidgetItem(QString::fromStdString(med->getDosage())));
-        ui->tableMedicines->setItem(row, 4, new QTableWidgetItem(QString::number(med->getStock())));
-        row++;
-    }
+    on_txtSearchMed_textChanged(ui->txtSearchMed->text());
 }
 
 void InventoryMenu::refreshPrescriptionQueue() {
@@ -172,10 +162,10 @@ void InventoryMenu::on_btnDispensePrescription_clicked() {
 }
 
 void InventoryMenu::on_btnImportMedicine_clicked() {
-    string prefix = ui->cbMedPrefix->currentText().left(2).toStdString();
-    string medName = ui->txtMedName->text().toStdString();
-    string dosage = ui->txtDosage->text().toStdString();
-    string priceStr = ui->txtPrice->text().toStdString();
+    string prefix = ui->cbMedPrefix->currentText().left(2).trimmed().toStdString();
+    string medName = ui->txtMedName->text().trimmed().toStdString();
+    string dosage = ui->txtDosage->text().trimmed().toStdString();
+    string priceStr = ui->txtPrice->text().trimmed().toStdString();
     int qty = ui->spinBoxQty->value();
 
     if (medName.empty() || dosage.empty() || priceStr.empty() || qty <= 0) {
@@ -191,8 +181,12 @@ void InventoryMenu::on_btnImportMedicine_clicked() {
     string finalId = ""; // Biến hứng ID từ Backend trả về
     
     int result = db.addMedicineFromQT(prefix, medName, price, dosage, qty, finalId);
+    if (result == -3) {
+        QMessageBox::warning(this, "Không thể nhập kho", "Thuốc cùng tên đã tồn tại trong một nhóm thuốc khác.");
+        return;
+    }
     if (result < 0) {
-        QMessageBox::warning(this, "Không thể nhập kho", "Dữ liệu thuốc hoặc số lượng nhập không hợp lệ.");
+        QMessageBox::warning(this, "Không thể nhập kho", "Đơn giá và số lượng nhập kho phải lớn hơn 0.");
         return;
     }
     db.saveAllData(); 

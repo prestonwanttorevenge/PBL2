@@ -20,6 +20,7 @@ DoctorMenu::DoctorMenu(Database& database, AuthService& authService, QWidget *pa
     ui->setupUi(this);
     applyClinicStyle(this);
     setMinimumSize(820, 600);
+    setAttribute(Qt::WA_DeleteOnClose);
 
     ui->groupQueue->setMinimumWidth(0);
     ui->tabDoctorTasks->setMinimumWidth(0);
@@ -64,10 +65,14 @@ void DoctorMenu::resizeEvent(QResizeEvent *event) {
 }
 
 void DoctorMenu::on_tableAppointments_itemClicked(QTableWidgetItem *item) {
+    if (item == nullptr) return;
     int row = item->row();
     if (row >= 0) {
-        QString apptId = ui->tableAppointments->item(row, 0)->text();
-        QString patientId = ui->tableAppointments->item(row, 1)->text(); // Cột 1 là Mã Bệnh Nhân
+        QTableWidgetItem *apptItem = ui->tableAppointments->item(row, 0);
+        QTableWidgetItem *patItem = ui->tableAppointments->item(row, 1);
+        if (apptItem == nullptr || patItem == nullptr) return;
+        QString apptId = apptItem->text();
+        QString patientId = patItem->text(); // Cột 1 là Mã Bệnh Nhân
         
         ui->txtAppointmentId->setText(apptId);
         ui->txtPatientId_History->setText(patientId);
@@ -91,7 +96,10 @@ void DoctorMenu::on_tableAppointments_itemClicked(QTableWidgetItem *item) {
 
 void DoctorMenu::on_tableInpatients_itemClicked(QTableWidgetItem *item) {
     if (item == nullptr || item->row() < 0) return;
-    ui->txtPatientId_History->setText(ui->tableInpatients->item(item->row(), 0)->text());
+    QTableWidgetItem *patItem = ui->tableInpatients->item(item->row(), 0);
+    if (patItem != nullptr) {
+        ui->txtPatientId_History->setText(patItem->text());
+    }
 }
 
 void DoctorMenu::loadInpatientDischargeQueue() {
@@ -210,10 +218,10 @@ void DoctorMenu::on_btnViewSchedule_clicked() {
 }
 
 void DoctorMenu::on_btnCreateMedicalRecord_clicked() {
-    string apptId = ui->txtAppointmentId->text().toStdString();
-    string symp = ui->txtSymptoms->text().toStdString();
-    string diag = ui->txtDiagnosis->text().toStdString();
-    string notes = ui->txtNotes->text().toStdString();
+    string apptId = ui->txtAppointmentId->text().trimmed().toStdString();
+    string symp = ui->txtSymptoms->text().trimmed().toStdString();
+    string diag = ui->txtDiagnosis->text().trimmed().toStdString();
+    string notes = ui->txtNotes->text().trimmed().toStdString();
 
     if (apptId.empty() || diag.empty()) {
         QMessageBox::warning(this, "Thiếu thông tin", "Vui lòng click chọn Lịch hẹn trên bảng và nhập Chẩn đoán!");
@@ -233,17 +241,18 @@ void DoctorMenu::on_btnCreateMedicalRecord_clicked() {
         ui->txtNotes->clear();
         loadPatientQueue();
     } else {
-        QMessageBox::critical(this, "Lỗi", "Không tìm thấy Lịch hẹn hoặc Bệnh án bị lỗi hệ thống!");
+        QMessageBox::warning(this, QString::fromUtf8("Chưa thể hoàn tất"),
+                             QString::fromUtf8("Không thể hoàn tất khám: kiểm tra thứ tự hàng đợi, trạng thái lịch hẹn hoặc kết quả Cận lâm sàng đã chỉ định!"));
     }
 }
 
 void DoctorMenu::on_btnPrescribeMedicine_clicked() {
-    string recordId = ui->txtRecordId->text().toStdString();
-    string medId = ui->cbMedicine->currentData().toString().toStdString();
-    string dosage = ui->txtDosage->text().toStdString();
+    string recordId = ui->txtRecordId->text().trimmed().toStdString();
+    string medId = ui->cbMedicine->currentData().toString().trimmed().toStdString();
+    string dosage = ui->txtDosage->text().trimmed().toStdString();
     int qty = ui->spinBoxQuantity->value();
 
-    if (recordId.empty() || medId.empty() || qty <= 0) {
+    if (recordId.empty() || medId.empty() || dosage.empty() || qty <= 0) {
         QMessageBox::warning(this, QString::fromUtf8("Lỗi"), QString::fromUtf8("Vui lòng nhập đủ thông tin và số lượng lớn hơn 0."));
         return;
     }
@@ -298,6 +307,9 @@ void DoctorMenu::on_btnPrescribeMedicine_clicked() {
     } 
     else if (result == -3) {
         QMessageBox::critical(this, QString::fromUtf8("Hết hàng"), QString::fromUtf8("Số lượng thuốc trong kho không đủ để kê đơn này!"));
+    }
+    else if (result == -4) {
+        QMessageBox::warning(this, QString::fromUtf8("Số lượng"), QString::fromUtf8("Số lượng kê đơn phải lớn hơn 0!"));
     }
     else if (result == -5) {
         QMessageBox::warning(this, QString::fromUtf8("Quy trình"), QString::fromUtf8("Hãy hoàn tất khám hoặc cập nhật kết quả CLS trước khi kê đơn."));
@@ -386,11 +398,11 @@ void DoctorMenu::on_btnCancelAppointment_clicked() {
 }
 
 void DoctorMenu::on_btnAssignService_clicked() {
-    string recordId = ui->txtRecordId->text().toStdString();
-    string serviceId = ui->cbService->currentData().toString().toStdString();
+    string recordId = ui->txtRecordId->text().trimmed().toStdString();
+    string serviceId = ui->cbService->currentData().toString().trimmed().toStdString();
 
     if (recordId.empty() || serviceId.empty()) {
-        QMessageBox::warning(this, "Lỗi", "Vui lòng nhập Chẩn đoán và Lưu bệnh án trước!");
+        QMessageBox::warning(this, "Lỗi", "Vui lòng chọn Lịch hẹn trên bảng và chọn Dịch vụ Cận lâm sàng!");
         return;
     }
 
@@ -402,9 +414,9 @@ void DoctorMenu::on_btnAssignService_clicked() {
 
     // Database chỉ ghi nội dung bệnh án sau khi chỉ định hợp lệ.
     int result = db.assignServiceFromQT(recordId, serviceId,
-                                        ui->txtSymptoms->text().toStdString(),
-                                        ui->txtDiagnosis->text().toStdString(),
-                                        ui->txtNotes->text().toStdString());
+                                        ui->txtSymptoms->text().trimmed().toStdString(),
+                                        ui->txtDiagnosis->text().trimmed().toStdString(),
+                                        ui->txtNotes->text().trimmed().toStdString());
 
     if (result == 1) {
         QMessageBox::information(this, "Đã thêm dịch vụ",
@@ -415,14 +427,16 @@ void DoctorMenu::on_btnAssignService_clicked() {
         QMessageBox::warning(this, "Quy trình", "Không thể chỉ định dịch vụ cho lịch đã hủy, đã lập hóa đơn hoặc đã kết thúc.");
     } else if (result == -5) {
         QMessageBox::warning(this, "Thiếu chẩn đoán", "Hãy ghi nhận chẩn đoán sơ bộ trước khi chỉ định cận lâm sàng.");
+    } else {
+        QMessageBox::warning(this, "Lỗi", "Không tìm thấy bệnh án hoặc dịch vụ Cận lâm sàng không hợp lệ!");
     }
 }
 
 void DoctorMenu::on_btnWaitResult_clicked() {
-    string apptId = ui->txtAppointmentId->text().toStdString();
-    string symp = ui->txtSymptoms->text().toStdString();
-    string diag = ui->txtDiagnosis->text().toStdString();
-    string notes = ui->txtNotes->text().toStdString();
+    string apptId = ui->txtAppointmentId->text().trimmed().toStdString();
+    string symp = ui->txtSymptoms->text().trimmed().toStdString();
+    string diag = ui->txtDiagnosis->text().trimmed().toStdString();
+    string notes = ui->txtNotes->text().trimmed().toStdString();
 
     if (apptId.empty() || diag.empty()) {
         QMessageBox::warning(this, "Thiếu thông tin", "Vui lòng click chọn Lịch hẹn và nhập Chẩn đoán sơ bộ!");

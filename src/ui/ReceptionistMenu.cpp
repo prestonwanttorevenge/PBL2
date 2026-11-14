@@ -36,6 +36,8 @@ ReceptionistMenu::ReceptionistMenu(Database& database, AuthService& authService,
     ui->setupUi(this);
     applyClinicStyle(this);
     setMinimumSize(820, 600);
+    setAttribute(Qt::WA_DeleteOnClose);
+    ui->radioNoiTru->setAutoExclusive(false);
     ui->tabReceptionTasks->setMinimumWidth(0);
     ui->tabReceptionTasks->setMaximumWidth(QWIDGETSIZE_MAX);
     ui->groupPatientDirectory->setMinimumWidth(0);
@@ -155,9 +157,11 @@ void ReceptionistMenu::on_cbRoom_currentIndexChanged(const QString &roomText) {
 // CÁC HÀM XỬ LÝ SỰ KIỆN KHÁC
 // ==========================================
 void ReceptionistMenu::on_tablePatients_itemClicked(QTableWidgetItem *item) {
+    if (item == nullptr) return;
     int row = item->row();
-    if (row >= 0) {
-        QString patientId = ui->tablePatients->item(row, 0)->text();
+    QTableWidgetItem *idItem = (row >= 0) ? ui->tablePatients->item(row, 0) : nullptr;
+    if (idItem != nullptr) {
+        QString patientId = idItem->text();
         ui->txtBookPatientId->setText(patientId);
         ui->txtPatientId_Invoice->setText(patientId);
 
@@ -213,7 +217,15 @@ void ReceptionistMenu::on_btnRegisterPatient_clicked() {
         ui->txtPatientPhone->clear();
         ui->txtPatientDob->clear();
         ui->txtBHYT->clear(); 
+        ui->radioNoiTru->setChecked(false);
         refreshPatientTable();
+        loadAvailableRooms();
+        const int lastRow = ui->tablePatients->rowCount() - 1;
+        if (lastRow >= 0) {
+            ui->tablePatients->selectRow(lastRow);
+            on_tablePatients_itemClicked(ui->tablePatients->item(lastRow, 0));
+            ui->tablePatients->scrollToBottom();
+        }
     } else {
         QMessageBox::critical(this, QString::fromUtf8("Lỗi"), QString::fromUtf8("Hệ thống gián đoạn khi khởi tạo Hồ sơ!"));
     }
@@ -247,7 +259,7 @@ void ReceptionistMenu::updateAvailableDoctors() {
 }
 
 void ReceptionistMenu::on_btnBookAppointment_clicked() {
-    string patientId = ui->txtBookPatientId->text().toStdString();
+    string patientId = ui->txtBookPatientId->text().trimmed().toStdString();
     const QDate selectedDate = ui->dateAppointment->date();
     string day = weekdayName(selectedDate.dayOfWeek());
     // Lưu cả thứ làm việc lẫn ngày cụ thể của lịch hẹn.
@@ -277,8 +289,22 @@ void ReceptionistMenu::on_btnBookAppointment_clicked() {
     int result = db.bookAppointmentFromQT(patientId, doctorId, receptionistId, selectedSpecialty, day, time, appointmentDate);
 
     if (result == 1) {
-        db.saveAllData(); 
-        QMessageBox::information(this, QString::fromUtf8("Thành công"), QString::fromUtf8("Chỉ định lịch khám thành công. Mã Lịch Hẹn đã được khởi tạo tự động."));
+        const string newApptId = db.getAppointments().empty()
+            ? ""
+            : db.getAppointments().back().getAppointmentId();
+        if (selectedDate == QDate::currentDate() && !newApptId.empty()) {
+            const auto checkInReply = QMessageBox::question(
+                this,
+                QString::fromUtf8("Đặt lịch thành công"),
+                QString::fromUtf8("Đã tạo lịch hẹn [%1] cho hôm nay.\nBệnh nhân đã có mặt để xác nhận đến khám (check-in) ngay chưa?")
+                    .arg(QString::fromStdString(newApptId)),
+                QMessageBox::Yes | QMessageBox::No);
+            if (checkInReply == QMessageBox::Yes) {
+                db.checkInAppointmentFromQT(newApptId, appointmentDate);
+            }
+        } else {
+            QMessageBox::information(this, QString::fromUtf8("Thành công"), QString::fromUtf8("Chỉ định lịch khám thành công. Mã Lịch Hẹn đã được khởi tạo tự động."));
+        }
         ui->txtBookPatientId->clear();
         loadPendingAppointments(); 
     }
@@ -296,7 +322,7 @@ void ReceptionistMenu::on_btnBookAppointment_clicked() {
 }
 
 void ReceptionistMenu::on_btnCreateInvoice_clicked() {
-    string patientId = ui->txtPatientId_Invoice->text().toStdString();
+    string patientId = ui->txtPatientId_Invoice->text().trimmed().toStdString();
 
     if (patientId.empty()) {
         QMessageBox::warning(this, QString::fromUtf8("Cảnh báo"), QString::fromUtf8("Vui lòng truy xuất Bệnh nhân cần thanh toán."));

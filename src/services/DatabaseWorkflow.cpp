@@ -46,6 +46,16 @@ bool isTodayOrFutureDate(int dateKey) {
                          (localNow->tm_mon + 1) * 100 + localNow->tm_mday;
     return dateKey >= todayKey;
 }
+
+bool isPastOrTodayDate(int dateKey) {
+    if (dateKey < 19000101) return false;
+    const time_t now = time(nullptr);
+    const tm* localNow = localtime(&now);
+    if (localNow == nullptr) return false;
+    const int todayKey = (localNow->tm_year + 1900) * 10000 +
+                         (localNow->tm_mon + 1) * 100 + localNow->tm_mday;
+    return dateKey <= todayKey;
+}
 }
 
 bool Database::addPatientFromGUI(string name, string dob, string gender, string phone,
@@ -55,7 +65,11 @@ bool Database::addPatientFromGUI(string name, string dob, string gender, string 
     sanitizeInput(gender);
     sanitizeInput(BH);
     sanitizeInput(admissionDate);
-    if (name.empty() || dob.empty() || gender.empty() || phone.size() < 10 || phone.size() > 11) {
+    string unusedWeekday;
+    int dobDateKey = 0;
+    if (name.empty() || !getWeekdayFromDate(dob, unusedWeekday, dobDateKey) ||
+        !isPastOrTodayDate(dobDateKey) || gender.empty() ||
+        phone.size() < 10 || phone.size() > 11) {
         return false;
     }
     for (char digit : phone) {
@@ -107,7 +121,7 @@ int Database::bookAppointmentFromQT(string patientId, string doctorId, string re
 
     string newAppId = generateAppointmentId(); 
     appointments.push_back(Appointment(newAppId, patientId, doctorId, receptionistId,
-                                       specialty, day, time,"Pending", appointmentDate));
+                                       specialty, day, time, "Scheduled", appointmentDate));
 
     string newRecordId = generateMedicalRecordId(); 
     medicalRecords.push_back(MedicalRecord(newRecordId, newAppId, "", "", ""));
@@ -141,21 +155,29 @@ string Database::updateMedicalRecordFromQT(string apptId, string symp, string di
         (appt->getStatus() != "Pending" && appt->getStatus() != "Waiting")) return "";
     if (appt->getStatus() == "Pending" && !isNextPendingAppointment(appointments, *appt)) return "";
 
+    MedicalRecord* targetRecord = nullptr;
     for (auto& record : medicalRecords) {
         if (record.getAppointmentId() == apptId) {
-            const bool hasServices = !record.getAssignedServices().empty();
-            if (status == "Waiting" && (appt->getStatus() != "Pending" || !hasServices)) return "";
-            if (status == "Completed" && appt->getStatus() == "Pending" && hasServices) return "";
-            record.setSymptoms(symp);
-            record.setDiagnosis(diag);
-            record.setNotes(notes);
-
-            appt->setStatus(status);
-            saveAllData(); 
-            return record.getRecordId(); 
+            targetRecord = &record;
+            break;
         }
     }
-    return "";
+    if (targetRecord == nullptr) {
+        if (status == "Waiting") return "";
+        medicalRecords.push_back(MedicalRecord(generateMedicalRecordId(), apptId, "", "", ""));
+        targetRecord = &medicalRecords.back();
+    }
+
+    const bool hasServices = !targetRecord->getAssignedServices().empty();
+    if (status == "Waiting" && (appt->getStatus() != "Pending" || !hasServices)) return "";
+    if (status == "Completed" && appt->getStatus() == "Pending" && hasServices) return "";
+    targetRecord->setSymptoms(symp);
+    targetRecord->setDiagnosis(diag);
+    targetRecord->setNotes(notes);
+
+    appt->setStatus(status);
+    saveAllData(); 
+    return targetRecord->getRecordId(); 
 }
 
 // ==========================================
@@ -321,6 +343,7 @@ int Database::createInvoiceFromQT(string patientId, double& outTotalFee) {
     Appointment* targetAppointment = nullptr;
     bool hasAlreadyBilledVisit = false;
     bool hasVisitWaitingForInventory = false;
+    bool hasPendingOrWaitingVisit = false;
     for (auto it = appointments.rbegin(); it != appointments.rend(); ++it) {
         if (it->getPatientId() != patientId) continue;
         if (it->getStatus() == "Billed") {
@@ -331,6 +354,10 @@ int Database::createInvoiceFromQT(string patientId, double& outTotalFee) {
             hasVisitWaitingForInventory = true;
             continue;
         }
+        if (it->getStatus() == "Pending" || it->getStatus() == "Waiting" || it->getStatus() == "Scheduled") {
+            hasPendingOrWaitingVisit = true;
+            continue;
+        }
         if (it->getStatus() == "Completed") {
             targetAppointment = &*it;
             break;
@@ -338,6 +365,7 @@ int Database::createInvoiceFromQT(string patientId, double& outTotalFee) {
     }
     if (targetAppointment == nullptr) {
         if (hasVisitWaitingForInventory) return -5;
+        if (hasPendingOrWaitingVisit) return -3;
         return hasAlreadyBilledVisit ? -4 : -2;
     }
     // Mỗi lượt khám chỉ được gắn với một hóa đơn.
@@ -509,9 +537,6 @@ map<string, vector<string>> Database::getAvailableRoomMap() {
             string r = inpat->getRoomNumber();
             string b = inpat->getBedNumber();
 
-            if (!r.empty() && r != "Chua xep" && r != "Da xuat vien" && !roomBeds.contains(r)) {
-                roomBeds.insert(r, standardBeds);
-            }
             if (!r.empty() && r != "Chua xep" && r != "Da xuat vien") {
                 roomBeds.removeBedFromRoom(r, b); // Trừ đi giường b khỏi phòng r
             }

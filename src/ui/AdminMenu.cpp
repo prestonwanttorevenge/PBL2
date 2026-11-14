@@ -13,6 +13,7 @@
 #include <QHeaderView>
 #include <QSplitter>
 #include <QLocale>
+#include <QDate>
 #include <string>
 #include <vector>
 
@@ -22,7 +23,8 @@ using std::vector;
 class RevenueChart : public QWidget {
 public:
     explicit RevenueChart(QWidget* parent = nullptr) : QWidget(parent) {
-        setMinimumHeight(235);
+        setMinimumHeight(110);
+        setMaximumHeight(175);
     }
 
     void setData(const vector<double>& values, const vector<QString>& labels) {
@@ -38,7 +40,7 @@ protected:
         painter.setRenderHint(QPainter::Antialiasing);
         painter.fillRect(rect(), QColor("#ffffff"));
 
-        const QRect plot = rect().adjusted(76, 26, -18, -38);
+        const QRect plot = rect().adjusted(70, 18, -14, -22);
         if (values_.empty() || plot.width() <= 0 || plot.height() <= 0) {
             painter.setPen(QColor("#64748b"));
             painter.drawText(rect(), Qt::AlignCenter, QString::fromUtf8("Chưa có hóa đơn để thống kê"));
@@ -55,15 +57,15 @@ protected:
         const QLocale vietnamese(QLocale::Vietnamese, QLocale::Vietnam);
         painter.setFont(QFont(QStringLiteral("Segoe UI"), 8));
         painter.setPen(QColor("#64748b"));
-        painter.drawText(QRect(0, 0, rect().width(), 20), Qt::AlignLeft | Qt::AlignVCenter,
+        painter.drawText(QRect(0, 0, rect().width(), 16), Qt::AlignLeft | Qt::AlignVCenter,
                          QString::fromUtf8("VNĐ"));
-        for (int line = 0; line <= 4; ++line) {
-            const int y = plot.bottom() - (plot.height() * line / 4);
-            const double amount = maximum * line / 4.0;
+        for (int line = 0; line <= 3; ++line) {
+            const int y = plot.bottom() - (plot.height() * line / 3);
+            const double amount = maximum * line / 3.0;
             painter.setPen(QColor("#e6edf5"));
             painter.drawLine(plot.left(), y, plot.right(), y);
             painter.setPen(QColor("#64748b"));
-            painter.drawText(QRect(0, y - 9, plot.left() - 10, 18), Qt::AlignRight | Qt::AlignVCenter,
+            painter.drawText(QRect(0, y - 8, plot.left() - 8, 16), Qt::AlignRight | Qt::AlignVCenter,
                              vietnamese.toString(amount, 'f', 0));
         }
 
@@ -82,13 +84,13 @@ protected:
                 ? vietnamese.toString(values_[index] / 1000000.0, 'f', 1) + QString::fromUtf8(" tr")
                 : vietnamese.toString(values_[index] / 1000.0, 'f', 0) + QStringLiteral(" k");
             painter.setPen(QColor("#334155"));
-            painter.drawText(QRectF(plot.left() + slotWidth * index, qMax<double>(plot.top(), y - 21),
-                                    slotWidth, 18), Qt::AlignHCenter | Qt::AlignVCenter, valueLabel);
+            painter.drawText(QRectF(plot.left() + slotWidth * index, qMax<double>(plot.top(), y - 16),
+                                    slotWidth, 15), Qt::AlignHCenter | Qt::AlignVCenter, valueLabel);
 
             const QString label = index < labels_.size() ? labels_[index] : QString::number(index + 1);
             painter.setPen(QColor("#64748b"));
-            painter.drawText(QRectF(plot.left() + slotWidth * index, plot.bottom() + 6,
-                                    slotWidth, 20), Qt::AlignHCenter | Qt::AlignTop, label);
+            painter.drawText(QRectF(plot.left() + slotWidth * index, plot.bottom() + 2,
+                                    slotWidth, 18), Qt::AlignHCenter | Qt::AlignTop, label);
         }
     }
 
@@ -103,17 +105,20 @@ AdminMenu::AdminMenu(Database& database, AuthService& authService, QWidget *pare
     ui->setupUi(this);
     applyClinicStyle(this);
     setMinimumSize(820, 600);
+    setAttribute(Qt::WA_DeleteOnClose);
     revenueChart = new RevenueChart(ui->revenueChartHost);
     QVBoxLayout* chartLayout = new QVBoxLayout(ui->revenueChartHost);
     chartLayout->setContentsMargins(0, 0, 0, 0);
     chartLayout->addWidget(revenueChart);
-    ui->revenueSplitter->setStretchFactor(0, 3);
-    ui->revenueSplitter->setStretchFactor(1, 4);
-    ui->revenueSplitter->setSizes({320, 400});
+    ui->revenueSplitter->setChildrenCollapsible(false);
+    ui->revenueSplitter->setStretchFactor(0, 1);
+    ui->revenueSplitter->setStretchFactor(1, 3);
+    ui->revenueSplitter->setSizes({155, 445});
 
     // --- KIỂM SOÁT ĐẦU VÀO BẰNG REGEX ---
     QRegularExpression rxPhone("^[0-9]{10,11}$");
     ui->txtPhone->setValidator(new QRegularExpressionValidator(rxPhone, this));
+    ui->txtDob->setPlaceholderText("dd/MM/yyyy");
 
     QRegularExpression rxPrice("^[0-9]*\\.?[0-9]+$");
     ui->txtMedPrice->setValidator(new QRegularExpressionValidator(rxPrice, this));
@@ -163,23 +168,31 @@ AdminMenu::~AdminMenu() {
 // CÁC HÀM CLICK-TO-FILL (DÙNG CHO VIỆC XÓA)
 // ==========================================
 void AdminMenu::on_tableUsers_itemClicked(QTableWidgetItem *item) {
+    if (!item) return;
     int row = item->row();
-    if (row >= 0) ui->txtUserId->setText(ui->tableUsers->item(row, 0)->text());
+    QTableWidgetItem *idItem = (row >= 0) ? ui->tableUsers->item(row, 0) : nullptr;
+    if (idItem) ui->txtUserId->setText(idItem->text());
 }
 
 void AdminMenu::on_tableDoctors_itemClicked(QTableWidgetItem *item) {
+    if (!item) return;
     int row = item->row();
-    if (row >= 0) ui->txtDocId->setText(ui->tableDoctors->item(row, 0)->text());
+    QTableWidgetItem *idItem = (row >= 0) ? ui->tableDoctors->item(row, 0) : nullptr;
+    if (idItem) ui->txtDocId->setText(idItem->text());
 }
 
 void AdminMenu::on_tableMedicines_itemClicked(QTableWidgetItem *item) {
+    if (!item) return;
     int row = item->row();
-    if (row >= 0) ui->txtMedId->setText(ui->tableMedicines->item(row, 0)->text());
+    QTableWidgetItem *idItem = (row >= 0) ? ui->tableMedicines->item(row, 0) : nullptr;
+    if (idItem) ui->txtMedId->setText(idItem->text());
 }
 
 void AdminMenu::on_tableServices_itemClicked(QTableWidgetItem *item) {
+    if (!item) return;
     int row = item->row();
-    if (row >= 0) ui->txtServiceId->setText(ui->tableServices->item(row, 0)->text());
+    QTableWidgetItem *idItem = (row >= 0) ? ui->tableServices->item(row, 0) : nullptr;
+    if (idItem) ui->txtServiceId->setText(idItem->text());
 }
 
 
@@ -193,12 +206,12 @@ void AdminMenu::on_btnManageUsers_clicked() {
 }
 
 void AdminMenu::on_btnAddUser_clicked() {
-    string name = ui->txtUserFullName->text().toStdString();
-    string username = ui->txtUsername->text().toStdString();
+    string name = ui->txtUserFullName->text().trimmed().toStdString();
+    string username = ui->txtUsername->text().trimmed().toStdString();
     string password = ui->txtPassword->text().toStdString();
-    string role = ui->cbUserRole->currentText().toStdString();
+    string role = ui->cbUserRole->currentText().trimmed().toStdString();
 
-    if (name.empty() || username.empty() || password.empty()) {
+    if (name.empty() || username.empty() || ui->txtPassword->text().trimmed().isEmpty()) {
         QMessageBox::warning(this, "Lỗi nhập liệu", "Vui lòng nhập đầy đủ thông tin tài khoản!");
         return;
     }
@@ -239,18 +252,30 @@ void AdminMenu::on_btnManageDoctors_clicked() {
 }
 
 void AdminMenu::on_btnAddDoctor_clicked() {
-    string name = ui->txtDocName->text().toStdString();
-    string dob = ui->txtDob->text().toStdString();
-    string gender = ui->cbGender->currentText().toStdString();
-    string phone = ui->txtPhone->text().toStdString();
-    string spec = ui->cbDocSpecialty->currentText().toStdString(); 
+    string name = ui->txtDocName->text().trimmed().toStdString();
+    string dob = ui->txtDob->text().trimmed().toStdString();
+    string gender = ui->cbGender->currentText().trimmed().toStdString();
+    string phone = ui->txtPhone->text().trimmed().toStdString();
+    string spec = ui->cbDocSpecialty->currentText().trimmed().toStdString(); 
     int expYears = ui->spinExpYears->value();
 
-    string username = ui->txtDocUsername->text().toStdString();
+    string username = ui->txtDocUsername->text().trimmed().toStdString();
     string password = ui->txtDocPassword->text().toStdString();
 
-    if (name.empty() || dob.empty() || phone.empty() || spec.empty() || username.empty() || password.empty()) {
+    if (name.empty() || dob.empty() || phone.empty() || spec.empty() || username.empty() ||
+        ui->txtDocPassword->text().trimmed().isEmpty()) {
         QMessageBox::warning(this, "Lỗi nhập liệu", "Vui lòng điền đầy đủ tất cả các trường thông tin Bác sĩ!");
+        return;
+    }
+
+    const QDate parsedDob = QDate::fromString(QString::fromStdString(dob), "dd/MM/yyyy");
+    if (!parsedDob.isValid() || parsedDob > QDate::currentDate()) {
+        QMessageBox::warning(this, "Lỗi nhập liệu", "Ngày sinh không hợp lệ (định dạng dd/MM/yyyy và không vượt quá ngày hiện tại)!");
+        return;
+    }
+
+    if (!ui->txtPhone->hasAcceptableInput()) {
+        QMessageBox::warning(this, "Lỗi nhập liệu", "Số điện thoại phải gồm 10 đến 11 chữ số!");
         return;
     }
 
@@ -298,11 +323,11 @@ void AdminMenu::on_btnManageMedicines_clicked() {
 
 void AdminMenu::on_btnAddMedicine_clicked() {
     // Rút 2 ký tự đầu tiên từ ComboBox (VD: "B1", "B2")
-    string prefix = ui->cbMedPrefix->currentText().left(2).toStdString();
+    string prefix = ui->cbMedPrefix->currentText().left(2).trimmed().toStdString();
     
-    string name = ui->txtMedName->text().toStdString();
-    string dosage = ui->txtDosage->text().toStdString();
-    string priceStr = ui->txtMedPrice->text().toStdString();
+    string name = ui->txtMedName->text().trimmed().toStdString();
+    string dosage = ui->txtDosage->text().trimmed().toStdString();
+    string priceStr = ui->txtMedPrice->text().trimmed().toStdString();
     int qty = ui->spinMedQty->value();
 
     if (name.empty() || dosage.empty() || priceStr.empty()) {
@@ -354,11 +379,11 @@ void AdminMenu::on_btnManageServices_clicked() {
 }
 
 void AdminMenu::on_btnAddService_clicked() {
-    string name = ui->txtServiceName->text().toStdString();
-    string priceStr = ui->txtServicePrice->text().toStdString();
+    string name = ui->txtServiceName->text().trimmed().toStdString();
+    string priceStr = ui->txtServicePrice->text().trimmed().toStdString();
     
     // Rút 2 ký tự đầu tiên từ ComboBox (Ví dụ: "S1", "S2")
-    string prefix = ui->cbServicePrefix->currentText().left(2).toStdString();
+    string prefix = ui->cbServicePrefix->currentText().left(2).trimmed().toStdString();
 
     if (name.empty() || priceStr.empty()) {
         QMessageBox::warning(this, "Lỗi nhập liệu", "Vui lòng nhập đầy đủ thông tin dịch vụ!");
@@ -385,14 +410,14 @@ void AdminMenu::on_btnAddService_clicked() {
         ui->txtServicePrice->clear();
     } else {
         QMessageBox::warning(this, "Thông tin không hợp lệ",
-                             "Kiểm tra lại tên dịch vụ và giá (không được âm).");
+                             "Kiểm tra lại tên dịch vụ và giá dịch vụ (phải lớn hơn 0).");
     }
 }
 // ==========================================
 // CÁC HÀM XÓA (GIỮ NGUYÊN)
 // ==========================================
 void AdminMenu::on_btnDeleteUser_clicked() {
-    string id = ui->txtUserId->text().toStdString();
+    string id = ui->txtUserId->text().trimmed().toStdString();
     if (id.empty()) {
         QMessageBox::warning(this, "Chưa chọn", "Vui lòng click chọn một tài khoản trên bảng để xóa!");
         return;
@@ -400,6 +425,12 @@ void AdminMenu::on_btnDeleteUser_clicked() {
 
     if (id == "U01" || id == "ADMIN" || id == "ADMIN01") {
         QMessageBox::critical(this, "Cảnh báo", "Không thể xóa tài khoản Quản trị viên gốc!");
+        return;
+    }
+
+    if (auth.getCurrentUser() != nullptr && auth.getCurrentUser()->getId() == id) {
+        QMessageBox::warning(this, "Không thể xóa phiên hiện tại",
+                             "Không thể xóa tài khoản đang đăng nhập!");
         return;
     }
     auto reply = QMessageBox::question(this, "Xác nhận xóa",
@@ -437,7 +468,7 @@ void AdminMenu::on_btnToggleUserStatus_clicked() {
 }
 
 void AdminMenu::on_btnDeleteDoctor_clicked() {
-    string id = ui->txtDocId->text().toStdString();
+    string id = ui->txtDocId->text().trimmed().toStdString();
     if (id.empty()) {
         QMessageBox::warning(this, "Chưa chọn", "Vui lòng click chọn một Bác sĩ trên bảng để xóa!");
         return;
@@ -447,13 +478,16 @@ void AdminMenu::on_btnDeleteDoctor_clicked() {
         int result = db.deleteDoctorFromQT(id);
         if (result == 1) {
             db.saveAllData(); refreshDoctorTable(); refreshUserTable(); ui->txtDocId->clear();
-        } 
-        else if (result == -2) QMessageBox::critical(this, "Lỗi Ràng Buộc", "Không thể xóa bác sĩ đã được gắn với lịch hẹn hoặc hồ sơ khám.");
+        } else if (result == -2) {
+            QMessageBox::critical(this, "Lỗi Ràng Buộc", "Không thể xóa bác sĩ đã được gắn với lịch hẹn hoặc hồ sơ khám.");
+        } else {
+            QMessageBox::warning(this, "Không thể xóa", "Không tìm thấy bác sĩ có mã [" + QString::fromStdString(id) + "]!");
+        }
     }
 }
 
 void AdminMenu::on_btnDeleteMedicine_clicked() {
-    string id = ui->txtMedId->text().toStdString();
+    string id = ui->txtMedId->text().trimmed().toStdString();
     if (id.empty()) {
         QMessageBox::warning(this, "Chưa chọn", "Vui lòng click chọn thuốc trên bảng để xóa!"); return;
     }
@@ -462,13 +496,16 @@ void AdminMenu::on_btnDeleteMedicine_clicked() {
         int result = db.deleteMedicineFromQT(id);
         if (result == 1) {
             db.saveAllData(); refreshMedicineTable(); ui->txtMedId->clear();
-        } 
-        else if (result == -2) QMessageBox::critical(this, "Lỗi", "Thuốc đã được kê trong Bệnh án, không thể xóa!");
+        } else if (result == -2) {
+            QMessageBox::critical(this, "Lỗi", "Thuốc đã được kê trong Bệnh án, không thể xóa!");
+        } else {
+            QMessageBox::warning(this, "Không thể xóa", "Không tìm thấy thuốc có mã [" + QString::fromStdString(id) + "]!");
+        }
     }
 }
 
 void AdminMenu::on_btnDeleteService_clicked() {
-    string id = ui->txtServiceId->text().toStdString();
+    string id = ui->txtServiceId->text().trimmed().toStdString();
     if (id.empty()) {
         QMessageBox::warning(this, "Chưa chọn", "Vui lòng chọn dịch vụ trên bảng!"); return;
     }
@@ -476,6 +513,9 @@ void AdminMenu::on_btnDeleteService_clicked() {
     if (reply == QMessageBox::Yes) {
         if (db.deleteServiceFromQT(id)) {
             db.saveAllData(); refreshServiceTable(); ui->txtServiceId->clear();
+        } else {
+            QMessageBox::warning(this, "Không thể xóa",
+                                 "Không tìm thấy dịch vụ có mã [" + QString::fromStdString(id) + "] hoặc dịch vụ đang được sử dụng!");
         }
     }
 }
@@ -524,6 +564,7 @@ void AdminMenu::on_btnViewRevenue_clicked() {
         invoiceLabels.push_back(QString::number(index + 1));
     }
     revenueChart->setData(revenueValues, invoiceLabels);
+    ui->revenueSplitter->setSizes({155, 445});
 
     // ==========================================
     // 3. LÀM MỚI BẢNG (Nếu có)
@@ -531,9 +572,10 @@ void AdminMenu::on_btnViewRevenue_clicked() {
     refreshRevenueTable(); 
 }
 void AdminMenu::refreshRevenueTable() {
-    ui->tableRevenue->setColumnCount(3);
-    ui->tableRevenue->setHorizontalHeaderLabels({"Mã Hóa Đơn", "Mã Bệnh Nhân", "Tổng Thu (VNĐ)"});
-    ui->tableRevenue->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    ui->tableRevenue->setColumnCount(4);
+    ui->tableRevenue->setHorizontalHeaderLabels({"Mã Hóa Đơn", "Mã Bệnh Nhân", "Họ và Tên Bệnh Nhân", "Tổng Thu (VNĐ)"});
+    ui->tableRevenue->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
+    ui->tableRevenue->horizontalHeader()->setSectionResizeMode(2, QHeaderView::Stretch);
     
     ui->tableRevenue->setRowCount(0);
     vector<Invoice> invList = db.getInvoices();
@@ -543,9 +585,17 @@ void AdminMenu::refreshRevenueTable() {
         ui->tableRevenue->insertRow(row);
         ui->tableRevenue->setItem(row, 0, new QTableWidgetItem(QString::fromStdString(inv.getId())));
         ui->tableRevenue->setItem(row, 1, new QTableWidgetItem(QString::fromStdString(inv.getPatientId())));
+
+        Patient* pat = db.findPatientById(inv.getPatientId());
+        QString patientName = (pat != nullptr)
+            ? QString::fromStdString(pat->getFullName())
+            : QString::fromUtf8("Khách vãng lai / Đã xóa");
+        ui->tableRevenue->setItem(row, 2, new QTableWidgetItem(patientName));
         
         QString feeStr = QLocale(QLocale::Vietnamese, QLocale::Vietnam).toString(inv.getTotalAmount(), 'f', 0);
-        ui->tableRevenue->setItem(row, 2, new QTableWidgetItem(feeStr));
+        QTableWidgetItem* feeItem = new QTableWidgetItem(feeStr);
+        feeItem->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);
+        ui->tableRevenue->setItem(row, 3, feeItem);
         row++;
     }
 }
