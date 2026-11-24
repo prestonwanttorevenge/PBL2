@@ -15,10 +15,11 @@
 #include <fstream>
 #include <iomanip>
 #include <sstream>
+#include <filesystem>
 
 // Hàm tự động sinh N dòng bệnh nhân giả mạo vào file
-void generateDummyPatientFile(int N, const QString& filePath) {
-    std::ofstream f(filePath.toStdString()); 
+void generateDummyPatientFile(int N, const std::filesystem::path& filePath) {
+    std::ofstream f(filePath); 
     for (int i = 1; i <= N; ++i) {
         f << "NgoaiTru;BN" << std::setfill('0') << std::setw(5) << i 
           << ";Benh Nhan Test " << i 
@@ -28,91 +29,92 @@ void generateDummyPatientFile(int N, const QString& filePath) {
 }
 
 void runPerformanceBenchmark() {
-    qDebug() << "Bat dau kiem thu hieu nang. Vui long doi...";
-    
-    // Tên file theo thiết lập lưu trữ hiện tại của đồ án
-    QString realPatientFilePath = "data/patients.csv";
-    QString backupFilePath = "data/patients_backup.csv";
+    qDebug() << "Bat dau kiem thu hieu nang trong thu muc tam. Du lieu goc duoc giu nguyen...";
 
-    // ==========================================
-    // BƯỚC 1: SAO LƯU BẢO VỆ DỮ LIỆU THẬT
-    // ==========================================
-    if (QFile::exists(backupFilePath)) {
-        QFile::remove(backupFilePath); // Xóa bản backup cũ nếu bị kẹt từ lần test trước
-    }
-    if (QFile::exists(realPatientFilePath)) {
-        QFile::rename(realPatientFilePath, backupFilePath); // Đổi tên file thật thành file backup
-    }
+    namespace fs = std::filesystem;
+    const fs::path originalCwd = fs::current_path();
+    const fs::path sourceDataDir = originalCwd / "data";
+    const fs::path benchRoot = fs::temp_directory_path() /
+        ("pbl2-bench-" + std::to_string(
+            std::chrono::steady_clock::now().time_since_epoch().count()));
+    const fs::path benchDataDir = benchRoot / "data";
+    const fs::path dummyPatientFilePath = benchDataDir / "patients.csv";
+    const fs::path outCsvPath = originalCwd / "benchmark_results.csv";
 
-    std::vector<int> N_values;
-    int startN = 100;
-    int endN = 10000;
-    int numPoints = 50;
-    
-    // Tính bước nhảy (Step = (10000 - 100) / 49 = 202.04)
-    double step = (double)(endN - startN) / (numPoints - 1);
-    
-    for (int i = 0; i < numPoints; ++i) {
-        N_values.push_back(startN + (int)(i * step));
-    }
-    
-    const int K = 50; // Giữ nguyên số lần lặp K = 50 để lấy trung bình cộng
-    std::ofstream outFile("benchmark_results.csv");
-    outFile << "N,T_Load_ms,T_Save_ms,T_Search_us\n";
+    try {
+        fs::create_directories(benchDataDir);
+        if (fs::exists(sourceDataDir)) {
+            for (const auto& entry : fs::directory_iterator(sourceDataDir)) {
+                if (entry.is_regular_file() && entry.path().filename() != "patients.csv") {
+                    fs::copy_file(entry.path(), benchDataDir / entry.path().filename(),
+                                  fs::copy_options::overwrite_existing);
+                }
+            }
+        }
+        fs::current_path(benchRoot);
 
-    std::random_device rd;
-    std::mt19937 gen(rd());
-
-    for (int N : N_values) {
-        // ==========================================
-        // BƯỚC 2: TẠO FILE DỮ LIỆU ẢO THEO MỐC N
-        // ==========================================
-        generateDummyPatientFile(N, realPatientFilePath);
-
-        long long totalLoadTime = 0, totalSaveTime = 0, totalSearchTime = 0;
-
-        for (int i = 0; i < K; ++i) {
-            Database db; 
-
-            // --- 2.1: ĐO THỜI GIAN LOAD FILE ---
-            auto startLoad = std::chrono::high_resolution_clock::now();
-            db.loadAllData(); // Gọi hàm đọc file thực tế
-            auto endLoad = std::chrono::high_resolution_clock::now();
-            totalLoadTime += std::chrono::duration_cast<std::chrono::milliseconds>(endLoad - startLoad).count();
-
-            // --- 2.2: ĐO THỜI GIAN SEARCH TRÊN CÂY BST ---
-            std::uniform_int_distribution<> dis(1, N);
-            int randomID = dis(gen);
-            std::stringstream ss;
-            ss << "BN" << std::setfill('0') << std::setw(5) << randomID;
-            std::string searchId = ss.str();
-            
-            auto startSearch = std::chrono::high_resolution_clock::now();
-            db.findPatientById(searchId); // Gọi hàm tìm kiếm thực tế
-            auto endSearch = std::chrono::high_resolution_clock::now();
-            totalSearchTime += std::chrono::duration_cast<std::chrono::microseconds>(endSearch - startSearch).count();
-
-            // --- 2.3: ĐO THỜI GIAN SAVE FILE ---
-            auto startSave = std::chrono::high_resolution_clock::now();
-            db.saveAllData(); // Gọi hàm lưu file thực tế
-            auto endSave = std::chrono::high_resolution_clock::now();
-            totalSaveTime += std::chrono::duration_cast<std::chrono::milliseconds>(endSave - startSave).count();
+        std::vector<int> N_values;
+        int startN = 100;
+        int endN = 10000;
+        int numPoints = 50;
+        double step = static_cast<double>(endN - startN) / (numPoints - 1);
+        for (int i = 0; i < numPoints; ++i) {
+            N_values.push_back(startN + static_cast<int>(i * step));
         }
 
-        outFile << N << "," << (double)totalLoadTime/K << "," 
-                << (double)totalSaveTime/K << "," << (double)totalSearchTime/K << "\n";
-        qDebug() << "Da test xong moc N =" << N;
+        const int K = 50;
+        std::ofstream outFile(outCsvPath);
+        outFile << std::fixed << std::setprecision(3);
+        outFile << "N,T_Load_ms,T_Save_ms,T_Search_us\n";
+
+        std::random_device rd;
+        std::mt19937 gen(rd());
+
+        for (int N : N_values) {
+            generateDummyPatientFile(N, dummyPatientFilePath);
+
+            double totalLoadMs = 0.0, totalSaveMs = 0.0, totalSearchUs = 0.0;
+            for (int i = 0; i < K; ++i) {
+                Database db;
+
+                auto startLoad = std::chrono::high_resolution_clock::now();
+                db.loadAllData();
+                auto endLoad = std::chrono::high_resolution_clock::now();
+                totalLoadMs += std::chrono::duration<double, std::milli>(endLoad - startLoad).count();
+
+                std::uniform_int_distribution<> dis(1, N);
+                int randomID = dis(gen);
+                std::stringstream ss;
+                ss << "BN" << std::setfill('0') << std::setw(5) << randomID;
+                std::string searchId = ss.str();
+
+                auto startSearch = std::chrono::high_resolution_clock::now();
+                db.findPatientById(searchId);
+                auto endSearch = std::chrono::high_resolution_clock::now();
+                totalSearchUs += std::chrono::duration<double, std::micro>(endSearch - startSearch).count();
+
+                auto startSave = std::chrono::high_resolution_clock::now();
+                db.saveAllData();
+                auto endSave = std::chrono::high_resolution_clock::now();
+                totalSaveMs += std::chrono::duration<double, std::milli>(endSave - startSave).count();
+            }
+
+            outFile << N << "," << (totalLoadMs / K) << ","
+                    << (totalSaveMs / K) << "," << (totalSearchUs / K) << "\n";
+            qDebug() << "Da test xong moc N =" << N;
+        }
+        outFile.close();
+    } catch (...) {
+        fs::current_path(originalCwd);
+        std::error_code ec;
+        fs::remove_all(benchRoot, ec);
+        throw;
     }
-    
-    outFile.close();
 
-    // ==========================================
-    // BƯỚC 3: KHÔI PHỤC LẠI DỮ LIỆU THẬT
-    // ==========================================
-    QFile::remove(realPatientFilePath); // Xóa bỏ file bệnh nhân ảo 10.000 dòng
-    QFile::rename(backupFilePath, realPatientFilePath); // Trả file 54 bệnh nhân về chỗ cũ
-
-    qDebug() << "Hoan thanh kiem thu! Du lieu 54 benh nhan cua ban da duoc tra lai an toan.";
+    fs::current_path(originalCwd);
+    std::error_code ec;
+    fs::remove_all(benchRoot, ec);
+    qDebug() << "Hoan thanh kiem thu! Thu muc data/ goc duoc bao toan 100%.";
 }
 
 int main(int argc, char *argv[]) {

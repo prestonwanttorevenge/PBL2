@@ -1,6 +1,7 @@
 #include "services/Database.h"
 #include "utils/AppointmentQueue.h"
 #include "utils/Constants.h"
+#include "utils/Helper.h"
 #include <algorithm>
 #include <cstdio>
 #include <ctime>
@@ -24,7 +25,7 @@ bool getWeekdayFromDate(const string& date, string& weekday, int& dateKey) {
 
     static const int daysInMonth[] = {31, 28, 31, 30, 31, 30,
                                       31, 31, 30, 31, 30, 31};
-    const bool isLeapYear = year % 4 == 0 && (year % 100 != 0 || year % 400 == 0);
+    const bool isLeapYear = Helper::isLeapYear(year);
     const int maxDay = daysInMonth[month - 1] + (month == 2 && isLeapYear ? 1 : 0);
     if (day < 1 || day > maxDay) return false;
 
@@ -335,6 +336,24 @@ int Database::abandonUndispensedPrescriptionsFromQT(string apptId) {
     return -1;
 }
 
+double Database::calculateMedicineCoPayFactor(const string& medicineId, bool hasBhyt) {
+    if (!hasBhyt) return 1.0;
+    const string prefix = (medicineId.length() >= 2) ? medicineId.substr(0, 2) : "";
+    if (prefix == "B1") return 0.0;
+    if (prefix == "B2") return 0.5;
+    if (prefix == "B3") return 0.2;
+    return 1.0;
+}
+
+double Database::calculateServiceCoPayFactor(const string& serviceId, bool hasBhyt) {
+    if (!hasBhyt) return 1.0;
+    const string prefix = serviceId.substr(0, serviceId.find('_'));
+    if (prefix == "S1") return 0.0;
+    if (prefix == "S2") return 0.3;
+    if (prefix == "S3") return 0.8;
+    return 1.0;
+}
+
 int Database::createInvoiceFromQT(string patientId, double& outTotalFee) {
     outTotalFee = 0.0;
     Patient* pat = findPatientById(patientId);
@@ -387,24 +406,8 @@ int Database::createInvoiceFromQT(string patientId, double& outTotalFee) {
     for (const auto& rx : record->getPrescriptions()) {
         Medicine* med = findMedicineById(rx.medicineId);
         if (med == nullptr || !rx.dispensed) return -5;
-        {
-            double rawLinePrice = rx.unitPrice * rx.quantity;
-            if (isBHYT) {
-                string mId = med->getMedicineId();
-                string prefix = (mId.length() >= 2) ? mId.substr(0, 2) : "";
-                if (prefix == "B1") {
-                    continue;
-                } else if (prefix == "B2") {
-                    finalMedFee += rawLinePrice * 0.5;
-                } else if (prefix == "B3") {
-                    finalMedFee += rawLinePrice * 0.2;
-                } else {
-                    finalMedFee += rawLinePrice;
-                }
-            } else {
-                finalMedFee += rawLinePrice;
-            }
-        }
+        const double rawLinePrice = rx.unitPrice * rx.quantity;
+        finalMedFee += rawLinePrice * calculateMedicineCoPayFactor(med->getMedicineId(), isBHYT);
     }
 
     int nextInvoiceNumber = 1;
@@ -456,15 +459,7 @@ int Database::createInvoiceFromQT(string patientId, double& outTotalFee) {
         Service* service = services.search(serviceId);
         if (service == nullptr) return -6;
         const double listedPrice = service->getPrice();
-        const string prefix = serviceId.substr(0, serviceId.find('_'));
-        double patientPrice = listedPrice;
-        if (isBHYT && prefix == "S1") {
-            patientPrice = 0.0;
-        } else if (isBHYT && prefix == "S2") {
-            patientPrice = listedPrice * 0.3;
-        } else if (isBHYT && prefix == "S3") {
-            patientPrice = listedPrice * 0.8;
-        }
+        const double patientPrice = listedPrice * calculateServiceCoPayFactor(serviceId, isBHYT);
 
         const string detailId = newInvId + "_D" + to_string(detailNumber++);
         newInv.addDetail(InvoiceDetail(detailId, serviceId, newInvId, 1, patientPrice));

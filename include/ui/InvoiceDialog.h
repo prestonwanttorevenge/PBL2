@@ -29,7 +29,6 @@ public:
 private slots:
     void onPrintInvoice();
     void onExportPdf();
-    void onToggleConversion();
 
 private:
     bool exportSheetToPdf(const QString& filePath);
@@ -43,14 +42,11 @@ private:
     Database& db;
     std::string m_recordId;
     std::string m_invoiceId;
-    bool m_isConvertedView = false;
 
     QWidget* m_invoiceSheet = nullptr;
     QLabel* m_lblTitle = nullptr;
-    QLabel* m_lblConversionNote = nullptr;
     QPushButton* m_btnPrint = nullptr;
     QPushButton* m_btnExportPdf = nullptr;
-    QPushButton* m_btnConvert = nullptr;
     QPushButton* m_btnClose = nullptr;
 };
 

@@ -10,9 +10,14 @@
 
 namespace {
 // Ghi qua file tạm rồi mới thay file thật, tránh mất dữ liệu khi ghi lỗi giữa chừng.
-void commitTempFile(const string& path) {
+bool commitTempFile(const string& path) {
+    const string tempPath = path + ".tmp";
     std::remove(path.c_str());
-    std::rename((path + ".tmp").c_str(), path.c_str());
+    if (std::rename(tempPath.c_str(), path.c_str()) != 0) {
+        std::cerr << "Loi: Khong the thay the tep du lieu [" << path << "] tu tep tam.\n";
+        return false;
+    }
+    return true;
 }
 
 void discardTempFile(const string& path) {
@@ -643,6 +648,7 @@ void Database::saveAllData() {
 
     ofstream fsrv(serviceFile + ".tmp");
     if (fsrv.is_open()) {
+        fsrv << std::fixed << std::setprecision(0);
         vector<Service*> allSrv = services.getAllPointers();
         for (size_t i = 0; i < allSrv.size(); i++) {
             fsrv << allSrv[i]->getId() << ";"
@@ -674,6 +680,7 @@ void Database::saveAllData() {
 
     ofstream fmed(medicineFile + ".tmp");
     if (fmed.is_open()) {
+        fmed << std::fixed << std::setprecision(0);
         vector<Medicine*> allMed = medicines.getAllPointers();
         for (size_t i = 0; i < allMed.size(); i++) {
             fmed << allMed[i]->getMedicineId() << ";"
@@ -691,6 +698,7 @@ void Database::saveAllData() {
     ofstream fPresc(prescriptionDetailFile + ".tmp");
 
     if (fMedRec.is_open() && fPresc.is_open()) {
+        fPresc << std::fixed << std::setprecision(0);
         for (const auto& record : medicalRecords) {
             fMedRec << record.getRecordId() << ";"
                     << record.getAppointmentId() << ";"
@@ -826,6 +834,8 @@ void Database::saveAllData() {
     ofstream fInvDetail(invoiceDetailsFile + ".tmp");
 
     if (fInv.is_open() && fInvDetail.is_open()) {
+        fInv << std::fixed << std::setprecision(0);
+        fInvDetail << std::fixed << std::setprecision(0);
         for (const auto& inv : invoices) {
             fInv << inv.getId() << ";"
                  << inv.getPatientId() << ";"

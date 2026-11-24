@@ -502,7 +502,7 @@ void ReceptionistMenu::on_btnCancelAppointment_clicked() {
             loadPendingAppointments(); 
         } else if (result == -5) {
             QMessageBox::warning(this, QString::fromUtf8("Đang chờ cấp thuốc"),
-                                 QString::fromUtf8("Không thể hủy lượt khám khi đơn thuốc vẫn đang chờ Inventory cấp."));
+                                 QString::fromUtf8("Không thể hủy lượt khám khi đơn thuốc vẫn đang chờ kho dược cấp phát."));
         } 
         else {
             QMessageBox::critical(this, QString::fromUtf8("Lỗi"), QString::fromUtf8("Gián đoạn hệ thống. Không thể hủy lịch hẹn này."));

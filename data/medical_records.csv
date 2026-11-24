@@ -1,4 +1,4 @@
-BA00001;APP0001;nghiện Domixi;nghiện Dopamine;về cai internet 2 tháng;
+BA00001;APP0001;Đau đầu kéo dài, mệt mỏi;Rối loạn tiền đình;Nghỉ ngơi hợp lý và uống thuốc theo đơn;
 BA00002;APP0002;Đau nhức xương khớp;Suy nhược cơ thể;Uống thuốc đúng giờ;
 BA00003;APP0003;Đau đầu, chóng mặt;Cảm cúm;Uống thuốc đúng giờ;
 BA00004;APP0004;Đau bụng vùng thượng vị;Rối loạn tiêu hóa;Uống thuốc đúng giờ;
@@ -18,7 +18,7 @@ BA00017;APP0017;Đau nhức xương khớp;Rối loạn tiêu hóa;Uống thuố
 BA00018;APP0018;Đau nhức xương khớp;Cảm cúm;Uống thuốc đúng giờ;
 BA00019;APP0019;Mệt mỏi, chán ăn;Suy nhược cơ thể;Uống thuốc đúng giờ;
 BA00020;APP0020;Đau đầu, chóng mặt;Viêm dạ dày;Uống thuốc đúng giờ;
-BA00021;APP0021;nghiện đánh điện tử;nghiện dopamine;cai gamez;
+BA00021;APP0021;Mỏi mắt, đau đầu vùng trán;Suy nhược thần kinh nhẹ;Hạn chế dùng thiết bị điện tử, ngủ đủ giấc;
 BA00022;APP0022;Đau đầu, chóng mặt;Viêm họng cấp;Uống thuốc đúng giờ;
 BA00023;APP0023;Mệt mỏi, chán ăn;Cảm cúm;Uống thuốc đúng giờ;
 BA00024;APP0024;Ho khan, sốt nhẹ;Suy nhược cơ thể;Uống thuốc đúng giờ;
@@ -43,9 +43,9 @@ BA00042;APP0042;Đau bụng vùng thượng vị;Viêm họng cấp;Uống thu�
 BA00043;APP0043;Mệt mỏi, chán ăn;Cảm cúm;Uống thuốc đúng giờ;
 BA00044;APP0044;Đau nhức xương khớp;Viêm họng cấp;Uống thuốc đúng giờ;
 BA00045;APP0045;Đau đầu, chóng mặt;Viêm họng cấp;Uống thuốc đúng giờ;
-BA00046;APP0071;Đau nửa đầu;Mất ngủ bình thường;Vì PBL2;
-BA00047;APP0072;Tôi không biết;Không biết;;
-BA00048;APP0073;Tôi không biết;Tôi không biết;;
+BA00046;APP0071;Đau nửa đầu, khó ngủ về đêm;Mất ngủ kéo dài;Tránh cà phê buổi tối, tái khám sau 1 tuần;
+BA00047;APP0072;Đau họng, ho khan nhẹ;Viêm họng cấp;Súc miệng nước muối, uống thuốc đúng giờ;
+BA00048;APP0073;Đau tức vùng thượng vị sau ăn;Viêm dạ dày nhẹ;Ăn đúng bữa, kiêng đồ cay nóng;
 BA00049;APP0074;đau đầu chóng mặt;cảm ho sốt;không;S1_005
 BA00050;APP0075;;;;
 BA00051;APP0076;;;;
@@ -194,9 +194,9 @@ BA00193;APP0218;;;;
 BA00194;APP0219;;;;
 BA00195;APP0220;;;;
 BA00196;APP0221;;;;
-BA00197;APP0222;Suy kiệt vì đọc quá nhiều truyện tranh;Ảo giác Dopamine;;
-BA00198;APP0223;Đau bụng do mang thai 8 tháng ;Sắp đẻ;Tiền sử tiểu đường;S2_006
-BA00199;APP0224;Đau đầu chóng mặt vì PBL2;Đau đầu;;S3_001
+BA00197;APP0222;Đau đầu, hoa mắt, mất ngủ;Rối loạn giấc ngủ và căng thẳng thần kinh;Nghỉ ngơi, uống thuốc đúng liều lượng;
+BA00198;APP0223;Đau tức bụng dưới, thai 32 tuần;Theo dõi thai kỳ có nguy cơ đái tháo đường thai kỳ;Theo dõi đường huyết, tái khám sản khoa;S2_006
+BA00199;APP0224;Đau đầu, chóng mặt khi thay đổi tư thế;Rối loạn tuần hoàn não nhẹ;Uống thuốc theo đơn, tránh thức khuya;S3_001
 BA00200;APP0225;Đau bụng dữ dội;Vỡ ruột thừa;;S2_008
 BA00201;APP0226;;;;
 BA00202;APP0227;;;;

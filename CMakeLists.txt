@@ -26,6 +26,9 @@ add_executable(PBL2_App ${SRC_FILES} ${HEADER_FILES} ${UI_FILES} ${QRC_FILES})
 # Liên kết thư viện
 target_link_libraries(PBL2_App PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)
 target_include_directories(PBL2_App PRIVATE include)
+if(WIN32)
+    target_link_libraries(PBL2_App PRIVATE bcrypt)
+endif()
 
 if(BUILD_TESTING)
     add_executable(PBL2_AlgorithmTests tests/algorithm_smoke.cpp)
@@ -41,7 +44,13 @@ if(BUILD_TESTING)
         ${MODEL_SOURCE_FILES}
     )
     target_include_directories(PBL2_WorkflowTests PRIVATE include)
+    if(WIN32)
+        target_link_libraries(PBL2_WorkflowTests PRIVATE bcrypt)
+    endif()
     add_test(NAME PBL2_WorkflowTests COMMAND PBL2_WorkflowTests)
+
+    add_executable(PBL2_RBTreeBench tests/rbtree_bench.cpp)
+    target_include_directories(PBL2_RBTreeBench PRIVATE include)
 endif()
 
 # Tự động copy thư mục "data" từ thư mục gốc vào thư mục chứa file chạy (.exe) mỗi khi Build

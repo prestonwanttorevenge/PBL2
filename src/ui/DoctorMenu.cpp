@@ -384,7 +384,7 @@ void DoctorMenu::on_btnCancelAppointment_clicked() {
                                  "Không thể hủy lịch khi bệnh nhân đang chờ kết quả cận lâm sàng.");
         } else if (result == -5) {
             const auto abandon = QMessageBox::question(this, "Đang chờ cấp thuốc",
-                "Không thể hủy lượt khám khi đơn thuốc đang chờ Inventory cấp.\n"
+                "Không thể hủy lượt khám khi đơn thuốc đang chờ kho dược cấp phát.\n"
                 "Bệnh nhân không nhận phần thuốc chưa cấp? Bỏ các dòng thuốc chưa cấp và kết thúc lượt khám.",
                 QMessageBox::Yes | QMessageBox::No);
             if (abandon == QMessageBox::Yes &&
@@ -493,7 +493,7 @@ void DoctorMenu::loadPatientQueue() {
             if (appt.getStatus() == "Pending") {
                 statusText = QString::fromUtf8("Chờ Khám");
             } else if (appt.getStatus() == "WaitingInventory") {
-                statusText = QString::fromUtf8("Chờ Inventory cấp thuốc");
+                statusText = QString::fromUtf8("Chờ kho dược cấp thuốc");
             } else {
                 statusText = QString::fromUtf8("Chờ Kết Quả CLS");
             }
@@ -516,7 +516,7 @@ void DoctorMenu::loadPatientQueue() {
                 item1->setForeground(fg);
                 item2->setForeground(fg);
                 item3->setForeground(fg);
-                item0->setToolTip(QString::fromUtf8("Đơn đang chờ Inventory duyệt cấp thuốc."));
+                item0->setToolTip(QString::fromUtf8("Đơn đang chờ kho dược duyệt cấp thuốc."));
                 item1->setToolTip(item0->toolTip());
                 item2->setToolTip(item0->toolTip());
                 item3->setToolTip(item0->toolTip());
@@ -563,7 +563,7 @@ void DoctorMenu::on_btnDischargePatient_clicked() {
             db.saveAllData(); 
             QMessageBox::information(this, QString::fromUtf8("Thành công"), 
                                      waitingInventory
-                                         ? QString::fromUtf8("Đã phê duyệt xuất viện và thu hồi giường.\nHồ sơ vẫn chờ Inventory cấp thuốc.")
+                                         ? QString::fromUtf8("Đã phê duyệt xuất viện và thu hồi giường.\nHồ sơ vẫn chờ kho dược cấp thuốc.")
                                          : QString::fromUtf8("Đã phê duyệt xuất viện và thu hồi giường."));
             
             ui->txtPatientId_History->clear();

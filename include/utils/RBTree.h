@@ -217,6 +217,54 @@ private:
         delete node;
     }
 
+    bool verifySubtree(const Node* node,
+                       const Node* expectedParent,
+                       const Key* minKey,
+                       const Key* maxKey,
+                       std::size_t& visitedCount,
+                       int& outBlackHeight) const {
+        if (node == nil_) {
+            outBlackHeight = 1;
+            return true;
+        }
+        if (node->parent != expectedParent) {
+            return false;
+        }
+        if (minKey != nullptr && !( *minKey < node->key )) {
+            return false;
+        }
+        if (maxKey != nullptr && !( node->key < *maxKey )) {
+            return false;
+        }
+        if (node->isRed && (node->left->isRed || node->right->isRed)) {
+            return false;
+        }
+
+        ++visitedCount;
+        int leftBlackHeight = 0;
+        int rightBlackHeight = 0;
+        if (!verifySubtree(node->left, node, minKey, &node->key, visitedCount, leftBlackHeight)) {
+            return false;
+        }
+        if (!verifySubtree(node->right, node, &node->key, maxKey, visitedCount, rightBlackHeight)) {
+            return false;
+        }
+        if (leftBlackHeight != rightBlackHeight) {
+            return false;
+        }
+        outBlackHeight = leftBlackHeight + (node->isRed ? 0 : 1);
+        return true;
+    }
+
+    int subtreeHeight(const Node* node) const {
+        if (node == nil_) {
+            return 0;
+        }
+        const int leftHeight = subtreeHeight(node->left);
+        const int rightHeight = subtreeHeight(node->right);
+        return 1 + (leftHeight > rightHeight ? leftHeight : rightHeight);
+    }
+
 public:
     RBTree() : nil_(new Node()), root_(nullptr), size_(0) {
         nil_->parent = nil_;
@@ -341,6 +389,28 @@ public:
         result.reserve(size_);
         collectPointers(root_, result);
         return result;
+    }
+
+    bool verifyInvariants() const {
+        if (nil_ == nullptr || nil_->isRed || nil_->left != nil_ || nil_->right != nil_) {
+            return false;
+        }
+        if (root_ == nil_) {
+            return size_ == 0;
+        }
+        if (root_->isRed || root_->parent != nil_) {
+            return false;
+        }
+        std::size_t visitedCount = 0;
+        int blackHeight = 0;
+        if (!verifySubtree(root_, nil_, nullptr, nullptr, visitedCount, blackHeight)) {
+            return false;
+        }
+        return visitedCount == size_;
+    }
+
+    int maxHeight() const {
+        return subtreeHeight(root_);
     }
 };
 

@@ -195,7 +195,9 @@ void InventoryMenu::on_btnImportMedicine_clicked() {
         QMessageBox::information(this, "Thành công", "Đã phân loại và thêm THUỐC MỚI!\nMã ID: " + QString::fromStdString(finalId));
     }
     else if (result == 2) {
-        QMessageBox::information(this, "Thành công", "Thuốc đã tồn tại (" + QString::fromStdString(finalId) + "). Đã CỘNG DỒN vào kho!");
+        QMessageBox::information(this, "Thành công",
+            "Thuốc đã tồn tại (" + QString::fromStdString(finalId) +
+            "). Đã CỘNG DỒN số lượng vào kho (giữ nguyên đơn giá và liều dùng hiện có).");
     }
 
     refreshMedicineTable(); 

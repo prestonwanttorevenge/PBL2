@@ -605,7 +605,9 @@ void AdminMenu::on_btnAddMedicine_clicked() {
         QMessageBox::information(this, "Thành công", "Đã khởi tạo THUỐC MỚI vào kho!\nMã cấp: " + QString::fromStdString(finalId));
     } else if (result == 2) {
         db.saveAllData();
-        QMessageBox::information(this, "Thành công", "Thuốc đã tồn tại (" + QString::fromStdString(finalId) + "). Đã CỘNG DỒN vào kho!");
+        QMessageBox::information(this, "Thành công",
+            "Thuốc đã tồn tại (" + QString::fromStdString(finalId) +
+            "). Đã CỘNG DỒN số lượng vào kho (giữ nguyên đơn giá và liều dùng hiện có).");
     } else if (result == -3) {
         QMessageBox::warning(this, "Không thể nhập kho",
                              "Thuốc cùng tên đã tồn tại trong một nhóm thuốc khác.");

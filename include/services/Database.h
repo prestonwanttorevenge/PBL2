@@ -117,6 +117,8 @@ public:
     int dispensePrescriptionFromQT(string recordId, string medicineId);
     // Bỏ các dòng thuốc chưa cấp (bệnh nhân không nhận) và kết thúc lượt chờ kho.
     int abandonUndispensedPrescriptionsFromQT(string apptId);
+    static double calculateMedicineCoPayFactor(const string& medicineId, bool hasBhyt);
+    static double calculateServiceCoPayFactor(const string& serviceId, bool hasBhyt);
     int createInvoiceFromQT(string patientId, double& outTotalFee);
     vector<MedicalRecord*> getPatientHistory(string patientId);
     int cancelAppointmentFromQT(string apptId);

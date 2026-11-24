@@ -108,7 +108,7 @@ B3_006;Entresto 100mg;52000;1 viên/lần, ngày 2 lần;38
 B3_007;Insulin Glargine (Lantus SoloStar);280000;Tiêm dưới da 1 lần/ngày cố định giờ;31
 B3_008;Insulin Novorapid Flexpen;210000;Tiêm dưới da ngay trước bữa ăn;92
 B3_009;Insulin Mixtard 30 Flexpen;195000;Tiêm dưới da trước bữa ăn 30 phút;138
-B3_010;Liraglutide (Victoza 6mg/ml);1.85e+06;Tiêm dưới da 1 lần/ngày;81
+B3_010;Liraglutide (Victoza 6mg/ml);1850000;Tiêm dưới da 1 lần/ngày;81
 B3_011;Tradjenta 5mg (Linagliptin);32000;1 viên/ngày;94
 B3_012;Janumet 50/1000mg;22000;1 viên/lần, ngày 2 lần;91
 B3_013;Nexium 40mg lọ tiêm truyền;210000;Tiêm tĩnh mạch chậm hoặc truyền;96
@@ -119,29 +119,29 @@ B3_017;Linezolid 600mg viên nén;420000;1 viên/lần, ngày 2 lần;122
 B3_018;Linezolid 600mg/300ml túi truyền;680000;Truyền tĩnh mạch mỗi 12 giờ;92
 B3_019;Colistin 1 MIU lọ tiêm;220000;Truyền tĩnh mạch theo liều tải;129
 B3_020;Tigecycline 50mg lọ tiêm;850000;Truyền tĩnh mạch mỗi 12 giờ;122
-B3_021;Caspofungin 50mg lọ tiêm;1.95e+06;Truyền tĩnh mạch 1 lần/ngày;126
+B3_021;Caspofungin 50mg lọ tiêm;1950000;Truyền tĩnh mạch 1 lần/ngày;126
 B3_022;Voriconazole 200mg viên nén;380000;1 viên/lần, ngày 2 lần trước ăn;64
 B3_023;Enoxaparin 4000IU/0.4ml (Lovenox);145000;Tiêm dưới da 1 lần/ngày;89
 B3_024;Enoxaparin 6000IU/0.6ml;185000;Tiêm dưới da 1 lần/ngày;142
 B3_025;Albumin Human 20% 50ml;850000;Truyền tĩnh mạch chậm;40
-B3_026;Immunglobulin VIG 5g;3.2e+06;Truyền tĩnh mạch theo chỉ định;86
+B3_026;Immunglobulin VIG 5g;3200000;Truyền tĩnh mạch theo chỉ định;86
 B3_027;Somatostatin 3mg lọ tiêm;450000;Truyền tĩnh mạch liên tục;121
 B3_028;Octreotide 0.1mg lọ tiêm;180000;Tiêm dưới da mỗi 8 giờ;83
 B3_029;Tacrolimus 1mg (Prograf);65000;1 viên/lần, ngày 2 lần cách 12h;145
 B3_030;Cyclosporine 50mg (Neoral);58000;1 viên/lần, ngày 2 lần;130
 B3_031;Mycophenolate Mofetil 500mg (Cellcept);42000;2 viên/lần, ngày 2 lần;72
-B3_032;Erlotinib 150mg (Tarceva);1.25e+06;1 viên/ngày trước ăn 1h hoặc sau 2h;21
+B3_032;Erlotinib 150mg (Tarceva);1250000;1 viên/ngày trước ăn 1h hoặc sau 2h;21
 B3_033;Gefitinib 250mg (Iressa);980000;1 viên/ngày;108
-B3_034;Imatinib 400mg (Glivec);1.1e+06;1 viên/ngày trong bữa ăn;68
+B3_034;Imatinib 400mg (Glivec);1100000;1 viên/ngày trong bữa ăn;68
 B3_035;Capecitabine 500mg (Xeloda);48000;2-3 viên/lần, ngày 2 lần sau ăn;69
-B3_036;Lenvatinib 10mg (Lenvima);1.65e+06;1 viên/ngày;117
-B3_037;Osimertinib 80mg (Tagrisso);2.4e+06;1 viên/ngày;143
-B3_038;Pembrolizumab 100mg/4ml (Keytruda);6.2e+07;Truyền tĩnh mạch mỗi 3 tuần;41
-B3_039;Rituximab 500mg/50ml (MabThera);2.85e+07;Truyền tĩnh mạch;118
-B3_040;Trastuzumab 440mg (Herceptin);2.2e+07;Truyền tĩnh mạch mỗi 3 tuần;97
-B3_041;Infliximab 100mg (Remicade);1.45e+07;Truyền tĩnh mạch;82
-B3_042;Adalimumab 40mg/0.8ml (Humira);1.12e+07;Tiêm dưới da mỗi 2 tuần;122
-B3_043;Ustekinumab 45mg (Stelara);4.8e+07;Tiêm dưới da;128
+B3_036;Lenvatinib 10mg (Lenvima);1650000;1 viên/ngày;117
+B3_037;Osimertinib 80mg (Tagrisso);2400000;1 viên/ngày;143
+B3_038;Pembrolizumab 100mg/4ml (Keytruda);62000000;Truyền tĩnh mạch mỗi 3 tuần;41
+B3_039;Rituximab 500mg/50ml (MabThera);28500000;Truyền tĩnh mạch;118
+B3_040;Trastuzumab 440mg (Herceptin);22000000;Truyền tĩnh mạch mỗi 3 tuần;97
+B3_041;Infliximab 100mg (Remicade);14500000;Truyền tĩnh mạch;82
+B3_042;Adalimumab 40mg/0.8ml (Humira);11200000;Tiêm dưới da mỗi 2 tuần;122
+B3_043;Ustekinumab 45mg (Stelara);48000000;Tiêm dưới da;128
 B3_044;Pirfenidone 200mg (Esbriet);120000;1-3 viên/lần, ngày 3 lần cùng thức ăn;99
 B3_045;Nintedanib 150mg (Ofev);450000;1 viên/lần, ngày 2 lần cùng thức ăn;84
 B3_046;Sofosbuvir + Velpatasvir (Epclusa);280000;1 viên/ngày cùng hoặc không cùng thức ăn;122

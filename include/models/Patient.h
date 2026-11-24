@@ -1,6 +1,7 @@
 #ifndef PATIENT_H
 #define PATIENT_H
 #include "Person.h"
+#include <cctype>
 
 class Patient : public Person {
 protected: 
@@ -15,11 +16,26 @@ public:
     Patient(Patient &);
     virtual ~Patient() override{}
     virtual string getType() const = 0;
-    // Chấp nhận các cách ghi phổ biến cho trường hợp không có BHYT.
+    // Chỉ coi là có BHYT khi mã thẻ hợp lệ (không nhận chuỗi rác hoặc từ phủ định).
     bool hasBHYT() const {
-    return !BHYT.empty() && BHYT != "Không" && BHYT != "Khong" &&
-           BHYT != "khong" && BHYT != "No" && BHYT != "no";
-}
+        size_t start = 0;
+        while (start < BHYT.size() && std::isspace(static_cast<unsigned char>(BHYT[start]))) {
+            ++start;
+        }
+        size_t end = BHYT.size();
+        while (end > start && std::isspace(static_cast<unsigned char>(BHYT[end - 1]))) {
+            --end;
+        }
+        const string trimmed = BHYT.substr(start, end - start);
+        if (trimmed.size() < 6) return false;
+        string lower;
+        lower.reserve(trimmed.size());
+        for (unsigned char ch : trimmed) {
+            if (!std::isalnum(ch)) return false;
+            lower.push_back(static_cast<char>(std::tolower(ch)));
+        }
+        return lower != "khong" && lower != "none";
+    }
     string getMedicalRecordId() const;
     string getBHYT() const;
 

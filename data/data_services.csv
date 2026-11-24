@@ -15,9 +15,9 @@ S2_005;Siêu âm Tim Doppler màu;250000
 S2_006;Điện tâm đồ (ECG);100000
 S2_007;Nội soi Tai Mũi Họng;180000
 S2_008;Xét nghiệm Vi sinh / Kháng sinh đồ;200000
-S3_001;Chụp Cắt lớp vi tính (CT Scanner) 128 dãy;1.2e+06
-S3_002;Chụp Cộng hưởng từ (MRI) 1.5 Tesla;2.2e+06
-S3_003;Nội soi dạ dày - đại tràng không đau;1.5e+06
+S3_001;Chụp Cắt lớp vi tính (CT Scanner) 128 dãy;1200000
+S3_002;Chụp Cộng hưởng từ (MRI) 1.5 Tesla;2200000
+S3_003;Nội soi dạ dày - đại tràng không đau;1500000
 S3_004;Chụp X-quang Kỹ thuật số;300000
 SV_001;Khám bệnh theo yêu cầu Chuyên gia / PGS / TS;300000
 SV_002;Chăm sóc và theo dõi y tế đặc biệt;500000

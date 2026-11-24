@@ -147,15 +147,6 @@ QString readVietnameseMoney(long long amount) {
     return result;
 }
 
-QString buildLotCode(const std::string& medId) {
-    std::string cleaned;
-    for (char ch : medId) {
-        if (ch != '_') cleaned += static_cast<char>(std::toupper(static_cast<unsigned char>(ch)));
-    }
-    if (cleaned.empty()) cleaned = "001";
-    return QString::fromStdString("LP-" + cleaned);
-}
-
 QDate parseInvoiceDate(const Appointment* appt) {
     if (appt != nullptr) {
         const QString raw = QString::fromStdString(appt->getAppointmentDate()).trimmed();
@@ -167,7 +158,7 @@ QDate parseInvoiceDate(const Appointment* appt) {
     return QDate::currentDate();
 }
 
-// Khung hóa đơn nền trắng có vẽ watermark BỆNH VIỆN LONG PHÁT và dòng bản quyền dọc mép phải.
+// Khung hóa đơn nền trắng có vẽ watermark PHÒNG KHÁM ĐA KHOA LONG PHÁT và dòng bản quyền dọc mép phải.
 class InvoicePaperWidget : public QWidget {
 public:
     explicit InvoicePaperWidget(QWidget* parent = nullptr) : QWidget(parent) {
@@ -190,7 +181,7 @@ protected:
         painter.save();
         const QPointF center(width() * 0.49, height() * 0.49);
 
-        // Các vạch ngang đỏ nhạt + đường tròn cách điệu giống mẫu bệnh viện
+        // Các vạch ngang đỏ nhạt + đường tròn cách điệu giống mẫu phòng khám
         const QColor stripeRose(218, 155, 160, 62);
         const qreal emblemX = center.x() - 185.0;
         const qreal emblemY = center.y() - 75.0;
@@ -205,14 +196,14 @@ protected:
             painter.fillRect(QRectF(center.x() - 95.0, center.y() + 82.0 + i * 10.0, 145.0, 5.0), stripeRose);
         }
 
-        // Chữ chìm BỆNH VIỆN LONG PHÁT
+        // Chữ chìm PHÒNG KHÁM LONG PHÁT
         const QColor watermarkBlue(95, 138, 182, 54);
         painter.setPen(watermarkBlue);
 
         QFont subFont(QStringLiteral("Times New Roman"), 24, QFont::Bold);
         painter.setFont(subFont);
         painter.drawText(QRectF(center.x() - 150, center.y() - 62, 360, 40),
-                         Qt::AlignCenter, QStringLiteral("BỆNH VIỆN"));
+                         Qt::AlignCenter, QStringLiteral("PHÒNG KHÁM"));
 
         QFont mainFont(QStringLiteral("Times New Roman"), 34, QFont::Bold);
         painter.setFont(mainFont);
@@ -235,75 +226,17 @@ protected:
         painter.setFont(sideFont);
         painter.translate(width() - 8, height() - 20);
         painter.rotate(-90.0);
-        painter.drawText(0, 0, QStringLiteral("Giải pháp: Hệ thống Quản lý Bệnh viện Long Phát - PBL2"));
+        painter.drawText(0, 0, QStringLiteral("Giải pháp: Hệ thống Quản lý Phòng khám Long Phát - PBL2"));
         painter.restore();
     }
-};
-
-// Widget đóng dấu chữ ký số đỏ kèm dấu tick xanh lá giống mẫu hóa đơn điện tử.
-class SignatureStampWidget : public QWidget {
-public:
-    explicit SignatureStampWidget(const QString& signDate, QWidget* parent = nullptr)
-        : QWidget(parent), m_signDate(signDate) {
-        setFixedSize(268, 78);
-    }
-
-protected:
-    void paintEvent(QPaintEvent* event) override {
-        Q_UNUSED(event);
-        QPainter painter(this);
-        painter.setRenderHint(QPainter::Antialiasing, true);
-        painter.setRenderHint(QPainter::TextAntialiasing, true);
-
-        const QRectF boxRect(1.0, 1.0, width() - 2.0, height() - 2.0);
-        painter.fillRect(boxRect, QColor(255, 255, 255, 210));
-        painter.setPen(QPen(QColor(QStringLiteral("#c9302c")), 1.4));
-        painter.drawRect(boxRect);
-
-        // Vẽ dấu tích xanh nghiêng đặc trưng ở góc trái hộp chữ ký
-        painter.save();
-        QPainterPath checkPath;
-        checkPath.moveTo(14.0, 42.0);
-        checkPath.lineTo(27.0, 56.0);
-        checkPath.lineTo(54.0, 22.0);
-        checkPath.lineTo(47.0, 18.0);
-        checkPath.lineTo(26.0, 45.0);
-        checkPath.lineTo(18.0, 36.0);
-        checkPath.closeSubpath();
-        painter.fillPath(checkPath, QColor(118, 168, 52, 225));
-        painter.setPen(QPen(QColor(82, 122, 32, 230), 1.0));
-        painter.drawPath(checkPath);
-        painter.restore();
-
-        // Văn bản chữ ký điện tử
-        painter.setPen(QColor(QStringLiteral("#1f2937")));
-        painter.setFont(QFont(QStringLiteral("Times New Roman"), 9, QFont::Bold));
-        painter.drawText(QRectF(14.0, 6.0, width() - 24.0, 18.0),
-                         Qt::AlignLeft | Qt::AlignVCenter,
-                         QStringLiteral("Signature Valid"));
-
-        painter.setPen(QColor(QStringLiteral("#c9302c")));
-        painter.setFont(QFont(QStringLiteral("Times New Roman"), 9, QFont::Normal));
-        painter.drawText(QRectF(14.0, 28.0, width() - 22.0, 18.0),
-                         Qt::AlignLeft | Qt::AlignVCenter,
-                         QStringLiteral("Ký bởi: BỆNH VIỆN LONG PHÁT"));
-        painter.drawText(QRectF(14.0, 48.0, width() - 22.0, 18.0),
-                         Qt::AlignLeft | Qt::AlignVCenter,
-                         QStringLiteral("Ký ngày: ") + m_signDate);
-    }
-
-private:
-    QString m_signDate;
 };
 
 struct InvoiceLineItem {
     QString description;
-    QString unit;
+    QString category;
     int quantity;
     long long unitPrice;
     long long lineTotal;
-    QString expiryDate;
-    QString lotNumber;
 };
 
 QWidget* makeBoxedField(const QString& text, const QString& extraStyle = QString()) {
@@ -393,7 +326,7 @@ InvoiceDialog::InvoiceDialog(Database& database, const std::string& recordId, QW
       db(database),
       m_recordId(normalizeRecordId(recordId)) {
     setObjectName(QStringLiteral("InvoiceDialog"));
-    setWindowTitle(QStringLiteral("Hóa đơn viện phí - BỆNH VIỆN LONG PHÁT (") + QString::fromStdString(m_recordId) + QStringLiteral(")"));
+    setWindowTitle(QStringLiteral("Hóa đơn viện phí - PHÒNG KHÁM ĐA KHOA LONG PHÁT (") + QString::fromStdString(m_recordId) + QStringLiteral(")"));
     setModal(true);
     resize(980, 720);
     setMinimumSize(860, 620);
@@ -454,23 +387,20 @@ void InvoiceDialog::buildUi(
     sheetLayout->setSpacing(8);
 
     const QDate invDate = parseInvoiceDate(appt);
-    const QString invDateText = invDate.toString(QStringLiteral("dd/MM/yyyy"));
 
     // === 1. PHẦN HEADER (3 CỘT) ===
     auto* headerLayout = new QHBoxLayout();
     headerLayout->setSpacing(10);
 
-    // Trái: Thông tin Bệnh viện Long Phát
+    // Trái: Thông tin cơ sở khám chữa bệnh
     auto* leftCol = new QVBoxLayout();
     leftCol->setSpacing(2);
-    auto* lblHospital = new QLabel(QStringLiteral("BỆNH VIỆN LONG PHÁT"));
-    lblHospital->setStyleSheet(QStringLiteral("font-size: 13pt; font-weight: bold; color: #16365c;"));
-    auto* lblMst = new QLabel(QStringLiteral("Mã số thuế: <b>0401234568</b>"));
+    auto* lblHospital = new QLabel(QStringLiteral("PHÒNG KHÁM ĐA KHOA LONG PHÁT"));
+    lblHospital->setStyleSheet(QStringLiteral("font-size: 12pt; font-weight: bold; color: #16365c;"));
     auto* lblAddress = new QLabel(QStringLiteral("54 Nguyễn Lương Bằng, Quận Liên Chiểu, TP. Đà Nẵng"));
     lblAddress->setWordWrap(true);
     auto* lblPhone = new QLabel(QStringLiteral("Điện thoại: <b>(0236) 3842308</b>"));
     leftCol->addWidget(lblHospital);
-    leftCol->addWidget(lblMst);
     leftCol->addWidget(lblAddress);
     leftCol->addWidget(lblPhone);
     leftCol->addStretch();
@@ -479,16 +409,9 @@ void InvoiceDialog::buildUi(
     auto* centerCol = new QVBoxLayout();
     centerCol->setSpacing(3);
     centerCol->setAlignment(Qt::AlignTop | Qt::AlignHCenter);
-    m_lblTitle = new QLabel(QStringLiteral("HÓA ĐƠN BÁN HÀNG"));
+    m_lblTitle = new QLabel(QStringLiteral("HÓA ĐƠN VIỆN PHÍ"));
     m_lblTitle->setAlignment(Qt::AlignCenter);
     m_lblTitle->setStyleSheet(QStringLiteral("font-size: 16pt; font-weight: bold; color: #16365c;"));
-
-    m_lblConversionNote = new QLabel(
-        QStringLiteral("(Hóa đơn chuyển đổi từ hóa đơn điện tử - Ngày chuyển đổi: %1)")
-            .arg(QDate::currentDate().toString(QStringLiteral("dd/MM/yyyy"))));
-    m_lblConversionNote->setAlignment(Qt::AlignCenter);
-    m_lblConversionNote->setStyleSheet(QStringLiteral("font-size: 9pt; font-style: italic; color: #334155;"));
-    m_lblConversionNote->setVisible(false);
 
     auto* lblDate = new QLabel(
         QStringLiteral("<i>Ngày</i> <b>%1</b> &nbsp; <i>Tháng</i> <b>%2</b> &nbsp; <i>Năm</i> <b>%3</b>")
@@ -499,21 +422,20 @@ void InvoiceDialog::buildUi(
     lblDate->setStyleSheet(QStringLiteral("font-size: 10.5pt; color: #0f172a;"));
 
     centerCol->addWidget(m_lblTitle);
-    centerCol->addWidget(m_lblConversionNote);
     centerCol->addWidget(lblDate);
     centerCol->addStretch();
 
-    // Phải: Mẫu số, Ký hiệu, Số hóa đơn
+    // Phải: Số hóa đơn & Mã bệnh án
     auto* rightCol = new QVBoxLayout();
-    rightCol->setSpacing(3);
+    rightCol->setSpacing(4);
     rightCol->setAlignment(Qt::AlignTop | Qt::AlignRight);
-    auto* lblFormNo = new QLabel(QStringLiteral("Mẫu số: <b>02GTTT0/001</b>"));
-    auto* lblSerial = new QLabel(QStringLiteral("Ký hiệu: <b>LP/26E</b>"));
+    auto* lblRecordCode = new QLabel(
+        QStringLiteral("Mã bệnh án: <b>%1</b>").arg(QString::fromStdString(m_recordId)));
 
     auto* invNumRow = new QHBoxLayout();
     invNumRow->setSpacing(4);
     invNumRow->setContentsMargins(0, 0, 0, 0);
-    auto* lblSo = new QLabel(QStringLiteral("Số:"));
+    auto* lblSo = new QLabel(QStringLiteral("Số hóa đơn:"));
     const QString invoiceIdText = invoice ? QString::fromStdString(invoice->getId()) : QStringLiteral("N/A");
     auto* lblInvBox = makeBoxedField(
         invoiceIdText,
@@ -521,9 +443,8 @@ void InvoiceDialog::buildUi(
     invNumRow->addWidget(lblSo);
     invNumRow->addWidget(lblInvBox);
 
-    rightCol->addWidget(lblFormNo);
-    rightCol->addWidget(lblSerial);
     rightCol->addLayout(invNumRow);
+    rightCol->addWidget(lblRecordCode, 0, Qt::AlignRight);
     rightCol->addStretch();
 
     headerLayout->addLayout(leftCol, 40);
@@ -592,10 +513,10 @@ void InvoiceDialog::buildUi(
     rowDiag->addWidget(makeDottedSpacer(), 1);
     infoLayout->addLayout(rowDiag);
 
-    // Dòng 4: Mã số thuế / BHYT & Điện thoại
+    // Dòng 4: Thẻ BHYT & Điện thoại
     auto* rowTaxPhone = new QHBoxLayout();
     rowTaxPhone->setSpacing(6);
-    rowTaxPhone->addWidget(new QLabel(QStringLiteral("Mã số thuế / Thẻ BHYT :")));
+    rowTaxPhone->addWidget(new QLabel(QStringLiteral("Thẻ BHYT :")));
     auto* lblBhytVal = new QLabel(bhytText);
     lblBhytVal->setStyleSheet(QStringLiteral("font-weight: bold; color: #1e293b;"));
     rowTaxPhone->addWidget(lblBhytVal);
@@ -620,26 +541,18 @@ void InvoiceDialog::buildUi(
     if (invoice != nullptr) {
         for (const InvoiceDetail& detail : invoice->getDetails()) {
             const Service* srv = db.getServices().search(detail.getServiceId());
-            QString itemName;
-            if (srv != nullptr) {
-                itemName = QString::fromStdString(srv->getServiceName());
-            } else {
-                itemName = QStringLiteral("Khám bệnh chuyên khoa & Dịch vụ lâm sàng");
-            }
+            QString itemName = (srv != nullptr)
+                ? QString::fromStdString(srv->getServiceName())
+                : QStringLiteral("Dịch vụ y tế (%1)").arg(QString::fromStdString(detail.getServiceId()));
             const long long uPrice = std::llround(detail.getUnitPrice());
             const long long sub = std::llround(detail.getSubTotal());
             runningTotal += sub;
-            const QString serviceCode = (detail.getServiceId().rfind("INV", 0) == 0)
-                ? QStringLiteral("S1_001")
-                : QString::fromStdString(detail.getServiceId());
             items.push_back({
                 itemName,
-                QStringLiteral("Lần"),
+                QStringLiteral("Dịch vụ"),
                 detail.getQuantity(),
                 uPrice,
-                sub,
-                QStringLiteral("—"),
-                serviceCode
+                sub
             });
         }
     }
@@ -656,19 +569,11 @@ void InvoiceDialog::buildUi(
                 medTitle += QStringLiteral(" (") + QString::fromStdString(rx.dosage) + QStringLiteral(")");
             }
 
-            double effectiveUnitPrice = rx.unitPrice;
-            if (hasBhyt) {
-                const std::string prefix = (rx.medicineId.length() >= 2) ? rx.medicineId.substr(0, 2) : "";
-                if (prefix == "B1") {
-                    effectiveUnitPrice = 0.0;
-                    medTitle += QStringLiteral(" [BHYT 100%]");
-                } else if (prefix == "B2") {
-                    effectiveUnitPrice = rx.unitPrice * 0.5;
-                    medTitle += QStringLiteral(" [BHYT 50%]");
-                } else if (prefix == "B3") {
-                    effectiveUnitPrice = rx.unitPrice * 0.2;
-                    medTitle += QStringLiteral(" [BHYT 80%]");
-                }
+            const double coPayFactor = Database::calculateMedicineCoPayFactor(rx.medicineId, hasBhyt);
+            const double effectiveUnitPrice = rx.unitPrice * coPayFactor;
+            if (hasBhyt && coPayFactor < 1.0) {
+                const int coveredPercent = static_cast<int>(std::llround((1.0 - coPayFactor) * 100.0));
+                medTitle += QStringLiteral(" [BHYT %1%]").arg(coveredPercent);
             }
 
             const long long uPrice = std::llround(effectiveUnitPrice);
@@ -676,29 +581,17 @@ void InvoiceDialog::buildUi(
             runningTotal += lineTotal;
             items.push_back({
                 medTitle,
-                QStringLiteral("Viên"),
+                QStringLiteral("Thuốc"),
                 rx.quantity,
                 uPrice,
-                lineTotal,
-                QStringLiteral("12/28"),
-                buildLotCode(rx.medicineId)
+                lineTotal
             });
         }
     }
 
-    const long long authoritativeTotal = invoice ? std::max(std::llround(invoice->getTotalAmount()), runningTotal) : runningTotal;
-    const long long residual = authoritativeTotal - runningTotal;
-    if (residual > 0) {
-        items.push_back({
-            QStringLiteral("Thuốc, vật tư y tế & chi phí điều trị theo hồ sơ"),
-            QStringLiteral("Gói"),
-            1,
-            residual,
-            residual,
-            QStringLiteral("—"),
-            QStringLiteral("LP-HS")
-        });
-    }
+    const long long storedTotal = invoice ? std::llround(invoice->getTotalAmount()) : runningTotal;
+    const long long displayTotal = invoice ? storedTotal : runningTotal;
+    const bool hasTotalMismatch = (invoice != nullptr && runningTotal != storedTotal);
 
     // === 4. BẢNG KÊ CHI TIẾT (NỀN TRONG SUỐT HIỂN THỊ WATERMARK) ===
     auto* tableFrame = new QWidget(m_invoiceSheet);
@@ -707,9 +600,9 @@ void InvoiceDialog::buildUi(
     grid->setContentsMargins(0, 0, 0, 0);
     grid->setSpacing(0);
 
-    // Tỉ lệ độ rộng các cột chuẩn theo mẫu hóa đơn
-    const int colStretches[8] = {5, 36, 9, 8, 11, 13, 8, 10};
-    for (int c = 0; c < 8; ++c) {
+    // Tỉ lệ độ rộng 6 cột trung thực theo dữ liệu lưu trữ
+    const int colStretches[6] = {6, 46, 12, 10, 13, 13};
+    for (int c = 0; c < 6; ++c) {
         grid->setColumnStretch(c, colStretches[c]);
     }
 
@@ -722,19 +615,17 @@ void InvoiceDialog::buildUi(
         return lbl;
     };
 
-    const QString headers[8] = {
+    const QString headers[6] = {
         QStringLiteral("STT"),
-        QStringLiteral("Tên thuốc - Nội dung"),
-        QStringLiteral("Đơn vị tính"),
+        QStringLiteral("Nội dung (Dịch vụ / Thuốc)"),
+        QStringLiteral("Phân loại"),
         QStringLiteral("Số lượng"),
-        QStringLiteral("Đơn giá"),
-        QStringLiteral("Thành tiền"),
-        QStringLiteral("Hạn SD"),
-        QStringLiteral("Lô Sx")
+        QStringLiteral("Đơn giá (VNĐ)"),
+        QStringLiteral("Thành tiền (VNĐ)")
     };
 
     // Hàng tiêu đề bảng
-    for (int c = 0; c < 8; ++c) {
+    for (int c = 0; c < 6; ++c) {
         QString border = QStringLiteral("border-top: 1px solid #1e293b; border-bottom: 1px solid #1e293b; border-right: 1px solid #1e293b;");
         if (c == 0) border += QStringLiteral("border-left: 1px solid #1e293b;");
         grid->addWidget(makeCell(headers[c], Qt::AlignCenter, border, QStringLiteral("font-weight: bold;")), 0, c);
@@ -748,28 +639,24 @@ void InvoiceDialog::buildUi(
             ? QStringLiteral("border-bottom: 1px dashed #cbd5e1;")
             : QStringLiteral("");
 
-        const QString vals[8] = {
+        const QString vals[6] = {
             QString::number(i + 1),
             item.description,
-            item.unit,
+            item.category,
             QString::number(item.quantity),
             formatVnd(item.unitPrice),
-            formatVnd(item.lineTotal),
-            item.expiryDate,
-            item.lotNumber
+            formatVnd(item.lineTotal)
         };
-        const Qt::Alignment aligns[8] = {
+        const Qt::Alignment aligns[6] = {
             Qt::AlignCenter | Qt::AlignVCenter,
             Qt::AlignLeft | Qt::AlignVCenter,
             Qt::AlignCenter | Qt::AlignVCenter,
             Qt::AlignRight | Qt::AlignVCenter,
             Qt::AlignRight | Qt::AlignVCenter,
-            Qt::AlignRight | Qt::AlignVCenter,
-            Qt::AlignCenter | Qt::AlignVCenter,
-            Qt::AlignCenter | Qt::AlignVCenter
+            Qt::AlignRight | Qt::AlignVCenter
         };
 
-        for (int c = 0; c < 8; ++c) {
+        for (int c = 0; c < 6; ++c) {
             QString border = QStringLiteral("border-right: 1px solid #1e293b;") + rowBottom;
             if (c == 0) border += QStringLiteral("border-left: 1px solid #1e293b;");
             grid->addWidget(makeCell(vals[c], aligns[c], border), currentRow, c);
@@ -777,9 +664,9 @@ void InvoiceDialog::buildUi(
         ++currentRow;
     }
 
-    // Khoảng trống giữ chiều cao giấy hóa đơn (chỉ kẻ sọc đứng giống ảnh mẫu)
+    // Khoảng trống giữ chiều cao giấy hóa đơn
     const int fillerHeight = qMax(36, 136 - static_cast<int>(items.size()) * 26);
-    for (int c = 0; c < 8; ++c) {
+    for (int c = 0; c < 6; ++c) {
         QString border = QStringLiteral("border-right: 1px solid #1e293b; border-bottom: 1px solid #1e293b;");
         if (c == 0) border += QStringLiteral("border-left: 1px solid #1e293b;");
         auto* spacerCell = makeCell(QString(), Qt::AlignCenter, border);
@@ -791,73 +678,81 @@ void InvoiceDialog::buildUi(
     // Dòng cộng tiền hàng hóa, dịch vụ
     grid->addWidget(
         makeCell(
-            QStringLiteral("Cộng tiền hàng hóa, dịch vụ :"),
+            QStringLiteral("Tổng tiền thanh toán (VNĐ) :"),
             Qt::AlignRight | Qt::AlignVCenter,
             QStringLiteral("border-left: 1px solid #1e293b; border-right: 1px solid #1e293b; border-bottom: 1px solid #1e293b;")),
         currentRow, 0, 1, 5);
     grid->addWidget(
         makeCell(
-            formatVnd(authoritativeTotal),
+            formatVnd(displayTotal),
             Qt::AlignRight | Qt::AlignVCenter,
             QStringLiteral("border-right: 1px solid #1e293b; border-bottom: 1px solid #1e293b;"),
             QStringLiteral("font-weight: bold; font-size: 11pt;")),
         currentRow, 5, 1, 1);
-    grid->addWidget(
-        makeCell(QString(), Qt::AlignCenter, QStringLiteral("border-right: 1px solid #1e293b; border-bottom: 1px solid #1e293b;")),
-        currentRow, 6, 1, 1);
-    grid->addWidget(
-        makeCell(QString(), Qt::AlignCenter, QStringLiteral("border-right: 1px solid #1e293b; border-bottom: 1px solid #1e293b;")),
-        currentRow, 7, 1, 1);
     ++currentRow;
 
     // Dòng số tiền viết bằng chữ
-    const QString moneyWords = readVietnameseMoney(authoritativeTotal);
+    const QString moneyWords = readVietnameseMoney(displayTotal);
     auto* lblWords = makeCell(
         QStringLiteral("Số tiền viết bằng chữ : <b><u>%1</u></b>").arg(moneyWords),
         Qt::AlignLeft | Qt::AlignVCenter,
         QStringLiteral("border-left: 1px solid #1e293b; border-right: 1px solid #1e293b; border-bottom: 1px solid #1e293b;"));
-    grid->addWidget(lblWords, currentRow, 0, 1, 8);
+    grid->addWidget(lblWords, currentRow, 0, 1, 6);
 
     sheetLayout->addWidget(tableFrame);
 
-    // === 5. PHẦN CHỮ KÝ & DẤU ĐIỆN TỬ ===
+    if (hasTotalMismatch) {
+        auto* lblMismatch = new QLabel(
+            QStringLiteral("Cảnh báo đối soát: Tổng các dòng chi tiết (%1 VNĐ) chênh lệch với tổng hóa đơn đã lưu (%2 VNĐ).")
+                .arg(formatVnd(runningTotal), formatVnd(storedTotal)));
+        lblMismatch->setWordWrap(true);
+        lblMismatch->setStyleSheet(QStringLiteral("color: #b91c1c; font-weight: bold; background: #fef2f2; border: 1px solid #fca5a5; padding: 6px;"));
+        sheetLayout->addWidget(lblMismatch);
+    }
+
+    // === 5. PHẦN XÁC NHẬN KÝ TÊN ===
     auto* sigLayout = new QHBoxLayout();
-    sigLayout->setContentsMargins(10, 6, 10, 6);
+    sigLayout->setContentsMargins(10, 10, 10, 18);
 
     auto* buyerSigCol = new QVBoxLayout();
     buyerSigCol->setAlignment(Qt::AlignTop | Qt::AlignHCenter);
-    auto* lblBuyerSig = new QLabel(QStringLiteral("Đơn vị mua hàng"));
+    auto* lblBuyerSig = new QLabel(QStringLiteral("<b>Bệnh nhân / Người thanh toán</b>"));
     lblBuyerSig->setAlignment(Qt::AlignCenter);
+    auto* lblBuyerNote = new QLabel(QStringLiteral("<i>(Ký, ghi rõ họ tên)</i>"));
+    lblBuyerNote->setAlignment(Qt::AlignCenter);
     buyerSigCol->addWidget(lblBuyerSig);
-    buyerSigCol->addStretch();
+    buyerSigCol->addWidget(lblBuyerNote);
+    buyerSigCol->addSpacing(34);
 
     auto* sellerSigCol = new QVBoxLayout();
     sellerSigCol->setAlignment(Qt::AlignTop | Qt::AlignHCenter);
-    sellerSigCol->setSpacing(4);
-    auto* lblSellerSig = new QLabel(QStringLiteral("Người bán hàng"));
+    auto* lblSellerSig = new QLabel(QStringLiteral("<b>Nhân viên thu ngân</b>"));
     lblSellerSig->setAlignment(Qt::AlignCenter);
+    auto* lblSellerNote = new QLabel(QStringLiteral("<i>(Ký, ghi rõ họ tên)</i>"));
+    lblSellerNote->setAlignment(Qt::AlignCenter);
     sellerSigCol->addWidget(lblSellerSig);
-    sellerSigCol->addWidget(new SignatureStampWidget(invDateText, m_invoiceSheet), 0, Qt::AlignCenter);
+    sellerSigCol->addWidget(lblSellerNote);
+    sellerSigCol->addSpacing(34);
 
     sigLayout->addLayout(buyerSigCol, 1);
     sigLayout->addLayout(sellerSigCol, 1);
     sheetLayout->addLayout(sigLayout);
 
-    // === 6. CHÂN TRANG TRA CỨU ===
+    // === 6. CHÂN TRANG THAM CHIẾU NỘI BỘ ===
     auto* lookupLayout = new QHBoxLayout();
     lookupLayout->setSpacing(6);
     auto* lblPortal = new QLabel(
-        QStringLiteral("Trang tra cứu: <span style='color:#1d4ed8; text-decoration:underline;'>http://bvlongphat.easyinvoice.vn</span>"));
-    auto* lblLookupCode = new QLabel(QStringLiteral("Mã tra cứu:"));
+        QStringLiteral("Phiếu thanh toán viện phí nội bộ — Hệ thống Quản lý Phòng khám (PBL2)"));
+    lblPortal->setStyleSheet(QStringLiteral("color: #475569; font-style: italic;"));
+    auto* lblLookupCode = new QLabel(QStringLiteral("Mã bệnh án:"));
     auto* lblLookupBox = makeBoxedField(
         QString::fromStdString(m_recordId),
-        QStringLiteral("min-width: 150px; font-weight: bold;"));
+        QStringLiteral("min-width: 120px; font-weight: bold;"));
 
     lookupLayout->addWidget(lblPortal);
-    lookupLayout->addSpacing(14);
+    lookupLayout->addStretch();
     lookupLayout->addWidget(lblLookupCode);
     lookupLayout->addWidget(lblLookupBox);
-    lookupLayout->addStretch();
     sheetLayout->addLayout(lookupLayout);
 
     containerLayout->addWidget(m_invoiceSheet);
@@ -885,14 +780,6 @@ void InvoiceDialog::buildUi(
         "QPushButton:hover { background: #ec971f; }"
     ));
 
-    m_btnConvert = new QPushButton(QStringLiteral("Chuyển đổi"), this);
-    m_btnConvert->setCursor(Qt::PointingHandCursor);
-    m_btnConvert->setStyleSheet(QStringLiteral(
-        "QPushButton { background: #2e6da4; color: #ffffff; border: 1px solid #265a88; "
-        "border-radius: 5px; padding: 8px 16px; font-family: 'Segoe UI'; font-weight: 600; }"
-        "QPushButton:hover { background: #245580; }"
-    ));
-
     m_btnClose = new QPushButton(QStringLiteral("× Close"), this);
     m_btnClose->setCursor(Qt::PointingHandCursor);
     m_btnClose->setStyleSheet(QStringLiteral(
@@ -903,14 +790,12 @@ void InvoiceDialog::buildUi(
 
     actionLayout->addWidget(m_btnPrint);
     actionLayout->addWidget(m_btnExportPdf);
-    actionLayout->addWidget(m_btnConvert);
     actionLayout->addStretch();
     actionLayout->addWidget(m_btnClose);
     rootLayout->addLayout(actionLayout);
 
     connect(m_btnPrint, &QPushButton::clicked, this, &InvoiceDialog::onPrintInvoice);
     connect(m_btnExportPdf, &QPushButton::clicked, this, &InvoiceDialog::onExportPdf);
-    connect(m_btnConvert, &QPushButton::clicked, this, &InvoiceDialog::onToggleConversion);
     connect(m_btnClose, &QPushButton::clicked, this, &QDialog::accept);
 }
 
@@ -921,9 +806,9 @@ bool InvoiceDialog::exportSheetToPdf(const QString& filePath) {
     m_invoiceSheet->adjustSize();
 
     QPdfWriter pdfWriter(filePath);
-    pdfWriter.setTitle(QStringLiteral("Hóa đơn viện phí - BỆNH VIỆN LONG PHÁT (%1)")
+    pdfWriter.setTitle(QStringLiteral("Hóa đơn viện phí - PHÒNG KHÁM ĐA KHOA LONG PHÁT (%1)")
                            .arg(QString::fromStdString(m_recordId)));
-    pdfWriter.setCreator(QStringLiteral("BỆNH VIỆN LONG PHÁT - PBL2"));
+    pdfWriter.setCreator(QStringLiteral("PHÒNG KHÁM ĐA KHOA LONG PHÁT - PBL2"));
     pdfWriter.setResolution(300);
     pdfWriter.setPageLayout(QPageLayout(
         QPageSize(QPageSize::A4),
@@ -998,22 +883,5 @@ void InvoiceDialog::onExportPdf() {
             this,
             QStringLiteral("Lỗi xuất PDF"),
             QStringLiteral("Không thể ghi tệp PDF. Vui lòng kiểm tra quyền truy cập hoặc đóng tệp đang mở."));
-    }
-}
-
-void InvoiceDialog::onToggleConversion() {
-    m_isConvertedView = !m_isConvertedView;
-    if (m_lblTitle != nullptr) {
-        m_lblTitle->setText(m_isConvertedView
-            ? QStringLiteral("HÓA ĐƠN CHUYỂN ĐỔI")
-            : QStringLiteral("HÓA ĐƠN BÁN HÀNG"));
-    }
-    if (m_lblConversionNote != nullptr) {
-        m_lblConversionNote->setVisible(m_isConvertedView);
-    }
-    if (m_btnConvert != nullptr) {
-        m_btnConvert->setText(m_isConvertedView
-            ? QStringLiteral("Xem bản gốc")
-            : QStringLiteral("Chuyển đổi"));
     }
 }

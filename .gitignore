@@ -8,5 +8,8 @@ bin/
 # Thư mục cấu hình của IDE
 .vscode/
 .vs/
+.ua/
+.qtcreator/
 *.user
 build/
+build-release/

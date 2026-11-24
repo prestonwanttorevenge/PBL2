@@ -84,6 +84,8 @@ private:
 public:
     CustomRoomMap() : root(nullptr) {}
     ~CustomRoomMap() { destroyRec(root); }
+    CustomRoomMap(const CustomRoomMap&) = delete;
+    CustomRoomMap& operator=(const CustomRoomMap&) = delete;
 
     void insert(string roomName, vector<string> beds) {
         root = insertRec(root, roomName, beds);

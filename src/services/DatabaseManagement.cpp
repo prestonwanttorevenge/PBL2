@@ -1,5 +1,6 @@
 #include "services/Database.h"
 #include "utils/Constants.h"
+#include "utils/Helper.h"
 #include <cctype>
 #include <climits>
 #include <cmath>
@@ -38,10 +39,6 @@ bool isValidPhoneDigits(const string& phone) {
     return true;
 }
 
-bool isLeapYear(int year) {
-    return (year % 4 == 0 && year % 100 != 0) || (year % 400 == 0);
-}
-
 bool isValidPastOrTodayDate(const string& dob) {
     if (dob.size() != 10 || dob[2] != '/' || dob[5] != '/') return false;
     for (int i : {0, 1, 3, 4, 6, 7, 8, 9}) {
@@ -58,7 +55,7 @@ bool isValidPastOrTodayDate(const string& dob) {
     if (year < 1900 || month < 1 || month > 12 || day < 1) return false;
     static const int daysInMonth[12] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
     int maxDay = daysInMonth[month - 1];
-    if (month == 2 && isLeapYear(year)) maxDay = 29;
+    if (month == 2 && Helper::isLeapYear(year)) maxDay = 29;
     if (day > maxDay) return false;
 
     const std::time_t now = std::time(nullptr);
@@ -70,20 +67,32 @@ bool isValidPastOrTodayDate(const string& dob) {
     return dateKey <= todayKey;
 }
 
-bool isValidWorkDay(const string& day) {
-    static const char* const kDays[] = {
-        "Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7", "Chủ nhật",
-        "Thu 2", "Thu 3", "Thu 4", "Thu 5", "Thu 6", "Thu 7", "Chu nhat"
+string normalizeWorkDay(const string& day) {
+    static const struct { const char* raw; const char* canonical; } kMap[] = {
+        {"Thứ 2", "Thứ 2"}, {"Thu 2", "Thứ 2"},
+        {"Thứ 3", "Thứ 3"}, {"Thu 3", "Thứ 3"},
+        {"Thứ 4", "Thứ 4"}, {"Thu 4", "Thứ 4"},
+        {"Thứ 5", "Thứ 5"}, {"Thu 5", "Thứ 5"},
+        {"Thứ 6", "Thứ 6"}, {"Thu 6", "Thứ 6"},
+        {"Thứ 7", "Thứ 7"}, {"Thu 7", "Thứ 7"},
+        {"Chủ nhật", "Chủ nhật"}, {"Chu nhat", "Chủ nhật"}
     };
-    for (const char* allowed : kDays) {
-        if (day == allowed) return true;
+    for (const auto& entry : kMap) {
+        if (day == entry.raw) return entry.canonical;
     }
-    return false;
+    return "";
 }
 
-bool isValidWorkShift(const string& shift) {
-    return shift == "Sáng" || shift == "Chiều" || shift == "Tối" ||
-           shift == "Sang" || shift == "Chieu" || shift == "Toi";
+string normalizeWorkShift(const string& shift) {
+    static const struct { const char* raw; const char* canonical; } kMap[] = {
+        {"Sáng", "Sáng"}, {"Sang", "Sáng"},
+        {"Chiều", "Chiều"}, {"Chieu", "Chiều"},
+        {"Tối", "Tối"}, {"Toi", "Tối"}
+    };
+    for (const auto& entry : kMap) {
+        if (shift == entry.raw) return entry.canonical;
+    }
+    return "";
 }
 }
 
@@ -272,19 +281,17 @@ int Database::addDoctorWithAccount(string id, string name, string dob, string ge
     phone = trimCopy(phone);
     specialty = trimCopy(specialty);
     username = trimCopy(username);
-    workDay = trimCopy(workDay);
-    workShift = trimCopy(workShift);
+    workDay = normalizeWorkDay(trimCopy(workDay));
+    workShift = normalizeWorkShift(trimCopy(workShift));
     sanitizeInput(id);
     sanitizeInput(name);
     sanitizeInput(dob);
     sanitizeInput(gender);
     sanitizeInput(phone);
-    sanitizeInput(workDay);
-    sanitizeInput(workShift);
     if (id.empty() || name.empty() || !isValidPastOrTodayDate(dob) || gender.empty() ||
         !isValidPhoneDigits(phone) || !Constants::isMedicalSpecialty(specialty) || expYears < 0 ||
         !User::isValidUsername(username) || trimCopy(plainPassword).empty() ||
-        !isValidWorkDay(workDay) || !isValidWorkShift(workShift) ||
+        workDay.empty() || workShift.empty() ||
         doctors.search(id) != nullptr || users.search(id) != nullptr) {
         return -1;
     }
