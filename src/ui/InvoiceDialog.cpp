@@ -158,7 +158,7 @@ QDate parseInvoiceDate(const Appointment* appt) {
     return QDate::currentDate();
 }
 
-// Khung hóa đơn nền trắng có vẽ watermark PHÒNG KHÁM ĐA KHOA LONG PHÁT và dòng bản quyền dọc mép phải.
+// Khung hóa đơn nền trắng có vẽ watermark BỆNH VIỆN LONG PHÁT và dòng bản quyền dọc mép phải.
 class InvoicePaperWidget : public QWidget {
 public:
     explicit InvoicePaperWidget(QWidget* parent = nullptr) : QWidget(parent) {
@@ -181,7 +181,7 @@ protected:
         painter.save();
         const QPointF center(width() * 0.49, height() * 0.49);
 
-        // Các vạch ngang đỏ nhạt + đường tròn cách điệu giống mẫu phòng khám
+        // Các vạch ngang đỏ nhạt + đường tròn cách điệu giống mẫu bệnh viện
         const QColor stripeRose(218, 155, 160, 62);
         const qreal emblemX = center.x() - 185.0;
         const qreal emblemY = center.y() - 75.0;
@@ -196,14 +196,14 @@ protected:
             painter.fillRect(QRectF(center.x() - 95.0, center.y() + 82.0 + i * 10.0, 145.0, 5.0), stripeRose);
         }
 
-        // Chữ chìm PHÒNG KHÁM LONG PHÁT
+        // Chữ chìm BỆNH VIỆN LONG PHÁT
         const QColor watermarkBlue(95, 138, 182, 54);
         painter.setPen(watermarkBlue);
 
         QFont subFont(QStringLiteral("Times New Roman"), 24, QFont::Bold);
         painter.setFont(subFont);
         painter.drawText(QRectF(center.x() - 150, center.y() - 62, 360, 40),
-                         Qt::AlignCenter, QStringLiteral("PHÒNG KHÁM"));
+                         Qt::AlignCenter, QStringLiteral("BỆNH VIỆN"));
 
         QFont mainFont(QStringLiteral("Times New Roman"), 34, QFont::Bold);
         painter.setFont(mainFont);
@@ -226,7 +226,7 @@ protected:
         painter.setFont(sideFont);
         painter.translate(width() - 8, height() - 20);
         painter.rotate(-90.0);
-        painter.drawText(0, 0, QStringLiteral("Giải pháp: Hệ thống Quản lý Phòng khám Long Phát - PBL2"));
+        painter.drawText(0, 0, QStringLiteral("Giải pháp: Hệ thống Quản lý Bệnh viện Long Phát - PBL2"));
         painter.restore();
     }
 };
@@ -326,7 +326,7 @@ InvoiceDialog::InvoiceDialog(Database& database, const std::string& recordId, QW
       db(database),
       m_recordId(normalizeRecordId(recordId)) {
     setObjectName(QStringLiteral("InvoiceDialog"));
-    setWindowTitle(QStringLiteral("Hóa đơn viện phí - PHÒNG KHÁM ĐA KHOA LONG PHÁT (") + QString::fromStdString(m_recordId) + QStringLiteral(")"));
+    setWindowTitle(QStringLiteral("Hóa đơn viện phí - BỆNH VIỆN LONG PHÁT (") + QString::fromStdString(m_recordId) + QStringLiteral(")"));
     setModal(true);
     resize(980, 720);
     setMinimumSize(860, 620);
@@ -395,8 +395,8 @@ void InvoiceDialog::buildUi(
     // Trái: Thông tin cơ sở khám chữa bệnh
     auto* leftCol = new QVBoxLayout();
     leftCol->setSpacing(2);
-    auto* lblHospital = new QLabel(QStringLiteral("PHÒNG KHÁM ĐA KHOA LONG PHÁT"));
-    lblHospital->setStyleSheet(QStringLiteral("font-size: 12pt; font-weight: bold; color: #16365c;"));
+    auto* lblHospital = new QLabel(QStringLiteral("BỆNH VIỆN LONG PHÁT"));
+    lblHospital->setStyleSheet(QStringLiteral("font-size: 13pt; font-weight: bold; color: #16365c;"));
     auto* lblAddress = new QLabel(QStringLiteral("54 Nguyễn Lương Bằng, Quận Liên Chiểu, TP. Đà Nẵng"));
     lblAddress->setWordWrap(true);
     auto* lblPhone = new QLabel(QStringLiteral("Điện thoại: <b>(0236) 3842308</b>"));
@@ -742,7 +742,7 @@ void InvoiceDialog::buildUi(
     auto* lookupLayout = new QHBoxLayout();
     lookupLayout->setSpacing(6);
     auto* lblPortal = new QLabel(
-        QStringLiteral("Phiếu thanh toán viện phí nội bộ — Hệ thống Quản lý Phòng khám (PBL2)"));
+        QStringLiteral("Phiếu thanh toán viện phí nội bộ — Hệ thống Quản lý Bệnh viện Long Phát (PBL2)"));
     lblPortal->setStyleSheet(QStringLiteral("color: #475569; font-style: italic;"));
     auto* lblLookupCode = new QLabel(QStringLiteral("Mã bệnh án:"));
     auto* lblLookupBox = makeBoxedField(
@@ -772,7 +772,7 @@ void InvoiceDialog::buildUi(
         "QPushButton:hover { background: #2b9eb8; }"
     ));
 
-    m_btnExportPdf = new QPushButton(QStringLiteral("Tải PDF & đính kèm"), this);
+    m_btnExportPdf = new QPushButton(QStringLiteral("Tải PDF && đính kèm"), this);
     m_btnExportPdf->setCursor(Qt::PointingHandCursor);
     m_btnExportPdf->setStyleSheet(QStringLiteral(
         "QPushButton { background: #f0ad4e; color: #ffffff; border: 1px solid #eea236; "
@@ -806,9 +806,9 @@ bool InvoiceDialog::exportSheetToPdf(const QString& filePath) {
     m_invoiceSheet->adjustSize();
 
     QPdfWriter pdfWriter(filePath);
-    pdfWriter.setTitle(QStringLiteral("Hóa đơn viện phí - PHÒNG KHÁM ĐA KHOA LONG PHÁT (%1)")
+    pdfWriter.setTitle(QStringLiteral("Hóa đơn viện phí - BỆNH VIỆN LONG PHÁT (%1)")
                            .arg(QString::fromStdString(m_recordId)));
-    pdfWriter.setCreator(QStringLiteral("PHÒNG KHÁM ĐA KHOA LONG PHÁT - PBL2"));
+    pdfWriter.setCreator(QStringLiteral("BỆNH VIỆN LONG PHÁT - PBL2"));
     pdfWriter.setResolution(300);
     pdfWriter.setPageLayout(QPageLayout(
         QPageSize(QPageSize::A4),

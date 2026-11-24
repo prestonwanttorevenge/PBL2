@@ -1,6 +1,6 @@
-# Clinic Management System (PBL2)
+# Hospital Patient Management System — Bệnh viện Long Phát (PBL2)
 
-Hệ thống quản lý phòng khám được xây dựng bằng ngôn ngữ **C++17** kết hợp giao diện đồ họa **Qt Widgets**, theo hướng **Lập trình hướng đối tượng (OOP)** và lưu trữ dữ liệu qua tệp **CSV** phân tách bằng dấu chấm phẩy (`;`).
+Hệ thống quản lý bệnh nhân của bệnh viện (mô phỏng quy trình vận hành tại Bệnh viện Long Phát) được xây dựng bằng ngôn ngữ **C++17** kết hợp giao diện đồ họa **Qt Widgets**, theo hướng **Lập trình hướng đối tượng (OOP)** và lưu trữ dữ liệu qua tệp **CSV** phân tách bằng dấu chấm phẩy (`;`).
 
 ## Tính năng chính
 - **Quản lý tài khoản & Phân quyền (RBAC)**: Đăng nhập với 4 vai trò (`Admin`, `Doctor`, `Receptionist`, `Inventory`), mật khẩu băm Bcrypt sinh muối bằng `BCryptGenRandom` trên Windows.

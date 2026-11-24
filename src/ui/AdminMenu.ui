@@ -140,14 +140,14 @@
           <property name="orientation"><enum>Qt::Horizontal</enum></property>
           <widget class="QGroupBox" name="groupRevenueChart">
            <property name="minimumSize"><size><width>360</width><height>320</height></size></property>
-           <property name="title"><string>Phân tích &amp; xu hướng doanh thu</string></property>
+           <property name="title"><string>Phân tích &amp;&amp; xu hướng doanh thu</string></property>
            <layout class="QVBoxLayout" name="layoutRevenueChart">
             <item><widget class="QWidget" name="revenueChartHost" native="true"><property name="minimumSize"><size><width>330</width><height>280</height></size></property></widget></item>
            </layout>
           </widget>
           <widget class="QGroupBox" name="groupInvoiceList">
            <property name="minimumSize"><size><width>420</width><height>320</height></size></property>
-           <property name="title"><string>Danh sách hóa đơn &amp; bệnh nhân</string></property>
+           <property name="title"><string>Danh sách hóa đơn &amp;&amp; bệnh nhân</string></property>
            <layout class="QVBoxLayout" name="layoutInvoiceList">
             <item><widget class="QTableWidget" name="tableRevenue"><property name="minimumSize"><size><width>390</width><height>280</height></size></property><property name="alternatingRowColors"><bool>true</bool></property><property name="selectionBehavior"><enum>QAbstractItemView::SelectRows</enum></property><property name="editTriggers"><set>QAbstractItemView::NoEditTriggers</set></property></widget></item>
            </layout>
